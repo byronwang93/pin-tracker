@@ -4,7 +4,6 @@ import { SignedInContext } from "../App";
 import { auth, provider } from "../firebase/config";
 import { signInWithPopup } from "firebase/auth";
 import { addUser } from "../firebase/helpers";
-import { FaGoogle } from "react-icons/fa";
 
 const NotLoggedIn = () => {
   const { setValue } = useContext(SignedInContext);
