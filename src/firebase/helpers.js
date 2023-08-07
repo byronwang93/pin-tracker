@@ -30,6 +30,7 @@ export const addUser = async (uid, name, email, photoURL) => {
       photoURL: photoURL,
       bowls: [],
       average: null,
+      highestGame: null,
     };
 
     const userRef = doc(db, "users", uid);
