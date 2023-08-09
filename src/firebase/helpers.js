@@ -51,7 +51,20 @@ export const editBowl = () => {};
 
 export const deleteBowl = () => {};
 
-export const addBowl = () => {};
+export const addBowl = async (uid, data) => {
+  const bowlData = data;
+  const userData = await getUserData(uid);
+  const { bowls } = userData;
+  const updatedBowls = [...bowls, bowlData];
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { bowls: updatedBowls }, { merge: true });
+    console.log("doc update success!");
+  } catch (error) {
+    console.error("error updating document: ", error);
+  }
+};
 
 // stats functions
 export const gamesBowled = async (uid) => {
