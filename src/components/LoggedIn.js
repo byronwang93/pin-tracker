@@ -1,14 +1,8 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Img,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Avatar, Box, Button, Text, useDisclosure } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
 import { getUserData } from "../firebase/helpers";
+import AddBowlModal from "./AddBowlModal";
 import Header from "./Header";
 
 const LoggedIn = () => {
@@ -56,6 +50,21 @@ const LoggedIn = () => {
         <Text>Welcome {user?.firstName}</Text>
       </Box>
       <Button onClick={logout}>Log Out</Button>
+      <Button
+        onClick={onOpen}
+        bgColor="#FFF3D2"
+        border="2px solid #FDD468"
+        _hover={{
+          bgColor: "#E6DBBF",
+        }}
+      >
+        {" "}
+        <Text fontSize="20px" color="black" pr="6px">
+          +
+        </Text>{" "}
+        Upload Bowl
+      </Button>
+      <AddBowlModal isOpen={isOpen} onClose={onClose} />
     </Box>
   );
 };
