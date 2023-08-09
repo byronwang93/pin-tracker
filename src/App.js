@@ -12,6 +12,7 @@ function App() {
     <ChakraProvider>
       <SignedInContext.Provider value={{ value, setValue }}>
         <VStack
+          backgroundColor="#161919"
           display="flex"
           w="100%"
           minHeight="100vh"
