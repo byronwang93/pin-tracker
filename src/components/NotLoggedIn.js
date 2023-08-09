@@ -46,12 +46,8 @@ const NotLoggedIn = () => {
         _focus={{ boxShadow: "none" }}
         outline="none"
       >
-        <Img bgColor="inherit" src={"./../google-logo-again.png"} boxSize={5} />
-        <Text
-          bgColor="inherit"
-          pl="8px"
-          fontSize={{ base: "sm", sm: "sm", md: "md", lg: "lg" }}
-        >
+        <Img src={"./../google-logo-again.png"} boxSize={5} />
+        <Text pl="8px" fontSize={{ base: "sm", sm: "sm", md: "md", lg: "lg" }}>
           Continue with Google
         </Text>
       </Button>
