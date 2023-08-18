@@ -7,7 +7,7 @@ import NotLoggedIn from "./NotLoggedIn";
 const HomePage = () => {
   const { value } = useContext(SignedInContext);
 
-  return <Box>{value ? <LoggedIn /> : <NotLoggedIn />}</Box>;
+  return <Box width="100%">{value ? <LoggedIn /> : <NotLoggedIn />}</Box>;
 };
 
 export default HomePage;
