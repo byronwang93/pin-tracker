@@ -1,9 +1,19 @@
-import { Avatar, Box, Button, Text, useDisclosure } from "@chakra-ui/react";
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  HStack,
+  Img,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
-import { getUserData } from "../firebase/helpers";
+import { getHighestGameHand, getUserData } from "../firebase/helpers";
 import AddBowlModal from "./AddBowlModal";
-import Header from "./Header";
+import Stats from "./Stats";
+import Leaderboard from "./Leaderboard";
 
 const LoggedIn = () => {
   const { value, setValue } = useContext(SignedInContext);
@@ -12,9 +22,9 @@ const LoggedIn = () => {
   const [user, setUser] = useState(null);
   const [loadingCheck, setLoadingCheck] = useState(false);
 
+  const [toggle, setToggle] = useState(0);
+
   useEffect(() => {
-    console.log(value, " is VALUE FIRST");
-    console.log(loadingCheck, " is loadingCheck");
     const getUserDetails = async () => {
       const data = await getUserData(value);
       return data;
@@ -31,11 +41,6 @@ const LoggedIn = () => {
     console.log("user is fetched");
   }, [value, loadingCheck]);
 
-  useEffect(() => {
-    console.log(user, " is the user");
-    console.log(user?.photoURL, " is url");
-  }, [user]);
-
   const logout = () => {
     console.log("logging out!");
     localStorage.clear();
@@ -43,29 +48,100 @@ const LoggedIn = () => {
   };
 
   return (
-    <Box width="100%">
-      <Header />
-      <Box display="flex" flexDirection="row">
-        <Avatar boxSize="50px" src={user?.photoURL} alt="profile" />
-        <Text>Welcome {user?.firstName}</Text>
+    <Flex
+      justify="space-between"
+      alignItems="center"
+      flexDirection="column"
+      width="100%"
+    >
+      <HStack justify="space-between" className="header" width="100%">
+        <Box w="30%">
+          <Img src={"./../pin-tracker.png"} width="230px" alt="logo" />
+        </Box>
+        <Flex justifyContent="space-around" flexDirection="row" w="30%">
+          <Text
+            fontSize="25px"
+            _hover={{ cursor: "pointer" }}
+            color={toggle === 0 ? "#FDD468" : "white"}
+            onClick={() => {
+              setToggle(0);
+            }}
+            mr="10px"
+          >
+            Stats
+          </Text>
+          <Text
+            fontSize="25px"
+            _hover={{ cursor: "pointer" }}
+            color={toggle === 0 ? "white" : "#FDD468"}
+            onClick={() => {
+              setToggle(1);
+            }}
+          >
+            Leaderboard
+          </Text>
+        </Flex>
+        <Box pr="40px" w="30%" textAlign="end">
+          <Button
+            w="120px"
+            bgColor="#FFF3D2"
+            border="2px solid #FDD468"
+            _hover={{
+              bgColor: "#E6DBBF",
+            }}
+            fontSize="17px"
+            onClick={logout}
+          >
+            Log Out
+          </Button>
+          <Button
+            onClick={() => {
+              getHighestGameHand(value, 1);
+            }}
+          >
+            Test 1
+          </Button>
+          <Button
+            onClick={() => {
+              getHighestGameHand(value, 2);
+            }}
+          >
+            Test 2
+          </Button>
+        </Box>
+      </HStack>
+
+      <Box textAlign="center" pb="30px">
+        <Box
+          display="flex"
+          justifyContent="center"
+          flexDirection="row"
+          alignItems="center"
+          mb="30px"
+        >
+          <Avatar boxSize="90px" src={user?.photoURL} alt="profile" />
+          <Text pl="20px" fontSize="30px">
+            Welcome {user?.firstName}
+          </Text>
+        </Box>
+        <Button
+          onClick={onOpen}
+          bgColor="#FFF3D2"
+          border="2px solid #FDD468"
+          _hover={{
+            bgColor: "#E6DBBF",
+          }}
+        >
+          {" "}
+          <Text fontSize="20px" color="black" pr="6px">
+            +
+          </Text>{" "}
+          Upload Bowl
+        </Button>
+        <AddBowlModal isOpen={isOpen} onClose={onClose} />
       </Box>
-      <Button onClick={logout}>Log Out</Button>
-      <Button
-        onClick={onOpen}
-        bgColor="#FFF3D2"
-        border="2px solid #FDD468"
-        _hover={{
-          bgColor: "#E6DBBF",
-        }}
-      >
-        {" "}
-        <Text fontSize="20px" color="black" pr="6px">
-          +
-        </Text>{" "}
-        Upload Bowl
-      </Button>
-      <AddBowlModal isOpen={isOpen} onClose={onClose} />
-    </Box>
+      {toggle === 0 ? <Stats /> : <Leaderboard />}
+    </Flex>
   );
 };
 
