@@ -55,7 +55,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
     const uniqueId = v4();
     const data = {
       id: uniqueId,
-      score: score,
+      score: Number(score),
       date: date,
       throwStyle: throwStyle,
       description: description,
