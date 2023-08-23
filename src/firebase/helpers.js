@@ -74,7 +74,32 @@ export const gamesBowled = async (uid) => {
 
 export const getHighestGame = async (uid) => {
   const user = await getUserData(uid);
-  return user?.highestGame;
+
+  const bowls = user?.bowls;
+  let max = null;
+  for (let i = 0; i < bowls.length; i++) {
+    const bowl = bowls[i];
+    if (max === null || bowl.score > max) {
+      max = bowl.score;
+    }
+  }
+  return max;
+};
+
+export const getHighestGameHand = async (uid, hand) => {
+  const user = await getUserData(uid);
+
+  const bowls = user?.bowls;
+  let max = null;
+  for (let i = 0; i < bowls.length; i++) {
+    const bowl = bowls[i];
+    if (bowl.throwStyle === hand) {
+      if (max === null || bowl.score > max) {
+        max = bowl.score;
+      }
+    }
+  }
+  return max;
 };
 
 export const allTimeAverage = async (uid) => {
