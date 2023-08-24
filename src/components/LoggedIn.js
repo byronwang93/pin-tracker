@@ -94,20 +94,6 @@ const LoggedIn = () => {
           >
             Log Out
           </Button>
-          <Button
-            onClick={() => {
-              getHighestGameHand(value, 1);
-            }}
-          >
-            Test 1
-          </Button>
-          <Button
-            onClick={() => {
-              getHighestGameHand(value, 2);
-            }}
-          >
-            Test 2
-          </Button>
         </Box>
       </HStack>
 
