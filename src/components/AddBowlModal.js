@@ -57,6 +57,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
       id: uniqueId,
       score: Number(score),
       date: date,
+      comparableDate: new Date(date),
       throwStyle: throwStyle,
       description: description,
     };
