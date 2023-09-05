@@ -1,18 +1,13 @@
 import { Box, Text } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
 import {
   LineChart,
-  //   Line,
   CartesianGrid,
   XAxis,
   YAxis,
   Label,
-  ResponsiveContainer,
   Tooltip,
-  Legend,
   Line,
-  Scatter,
 } from "recharts";
 import { SignedInContext } from "../App";
 import { sortBowlsDate } from "../firebase/helpers";
