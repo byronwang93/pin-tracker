@@ -146,13 +146,14 @@ export const allTimeAverageHand = async (uid, hand) => {
 
   if (length === 0) return 0;
   let result = res / length;
-  console.log(+result.toFixed(2), " is result");
   return +result.toFixed(2);
 };
 
 export const last10GamesAverage = async (uid) => {
   const sorted = await sortBowlsScore(uid);
-
+  if (sorted.length === 0) {
+    return 0;
+  }
   let res = 0;
   if (sorted.length < 10) {
     for (let i = 0; i < sorted.length; i++) {
@@ -173,11 +174,11 @@ export const last10GamesAverage = async (uid) => {
 export const last10GamesHandAverage = async (uid, hand) => {
   const sorted = await sortBowlsDate(uid);
 
+  if (sorted.length === 0) return 0;
   let res = 0;
   let counter = 0;
   let i = 0;
   while (counter < 10 && i < sorted.length) {
-    console.log();
     if (hand === sorted[i].throwStyle) {
       res += sorted[i].score;
       counter++;
@@ -199,24 +200,28 @@ export const sortBowlsScore = async (uid) => {
   const user = await getUserData(uid);
   const bowls = user?.bowls;
 
-  const sorted = bowls
-    .sort((a, b) => {
-      return a.score - b.score;
-    })
-    .reverse();
+  if (bowls) {
+    const sorted = bowls
+      .sort((a, b) => {
+        return a.score - b.score;
+      })
+      .reverse();
 
-  return sorted;
+    return sorted;
+  } else return [];
 };
 
 export const sortBowlsDate = async (uid) => {
   const user = await getUserData(uid);
   const bowls = user?.bowls;
 
-  const sorted = bowls
-    .sort((a, b) => {
-      return a.comparableDate - b.comparableDate;
-    })
-    .reverse();
+  if (bowls) {
+    const sorted = bowls
+      .sort((a, b) => {
+        return a.comparableDate - b.comparableDate;
+      })
+      .reverse();
 
-  return sorted;
+    return sorted;
+  } else return [];
 };
