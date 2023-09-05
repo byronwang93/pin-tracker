@@ -56,13 +56,12 @@ const Charts = () => {
       setNewData(newBowls);
     };
     setData();
-    console.log(data, " is the data");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   return (
     <Box position="relative" right="10px" pt="40px" pb="40px" w="100%">
-      <Text pos="relative" right="180px" pb="20px" fontSize="40px">
+      <Text pos="relative" right="225px" pb="20px" fontSize="40px">
         Charts
       </Text>
       <LineChart
