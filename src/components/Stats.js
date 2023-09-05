@@ -1,6 +1,7 @@
 import { Box, useBreakpointValue } from "@chakra-ui/react";
 import React from "react";
 import Charts from "./Charts";
+import Entries from "./Entries";
 import FirstStatsBox from "./FirstStatsBox";
 import SecondStatsBox from "./SecondStatsBox";
 
@@ -12,6 +13,7 @@ const Stats = () => {
       <FirstStatsBox />
       <SecondStatsBox />
       {isDesktop && <Charts />}
+      <Entries />
     </Box>
   );
 };
