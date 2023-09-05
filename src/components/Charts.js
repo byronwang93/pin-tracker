@@ -61,9 +61,12 @@ const Charts = () => {
   }, [value]);
 
   return (
-    <Box pt="40px" pb="40px">
+    <Box position="relative" right="10px" pt="40px" pb="40px" w="100%">
+      <Text pos="relative" right="180px" pb="20px" fontSize="40px">
+        Charts
+      </Text>
       <LineChart
-        width={600}
+        width={650}
         height={300}
         data={data}
         padding={{ top: 5, right: 30, left: 20, bottom: 20 }}
