@@ -72,9 +72,11 @@ const Charts = () => {
         margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
       >
         <Line
+          strokeWidth="2px"
           type="monotone"
           dataKey="value"
-          stroke="#8884d8"
+          // stroke="#8884d8"
+          stroke="#FDD468"
           activeDot={{ r: 4 }}
         />
         <CartesianGrid stroke="#ccc" />
