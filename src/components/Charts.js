@@ -76,7 +76,7 @@ const Charts = () => {
           type="monotone"
           dataKey="value"
           // stroke="#8884d8"
-          stroke="#FDD468"
+          stroke="#FFE9B0"
           activeDot={{ r: 4 }}
         />
         <CartesianGrid stroke="#ccc" />
