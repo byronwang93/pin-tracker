@@ -75,7 +75,7 @@ const Entries = () => {
         </Text>
       </HStack>
       <VStack maxHeight="450px" alignItems="baseline" overflowY="auto">
-        {bowls.map(({ score, throwStyle, date }, index) => {
+        {bowls.map((bowl, index) => {
           return (
             <HStack
               p="12px"
@@ -84,18 +84,33 @@ const Entries = () => {
               bgColor={index % 2 === 0 && "#3C3D36"}
             >
               <Text w="90px" fontSize="20px">
-                {score}
+                {bowl.score}
               </Text>
               <Text w="120px" fontSize="20px">
-                {throwStyle}
+                {bowl.throwStyle}
               </Text>
               <Text w="150px" mr="80px" fontSize="20px">
-                {date}
+                {bowl.date}
               </Text>
               <HStack spacing="10px">
-                <Img boxSize={5} src={"./../view-more-icon.svg"} alt="logo" />
-                <Img boxSize={5} src={"./../edit-icon.svg"} alt="logo" />
-                <Img boxSize={5} src={"./../trash-icon.svg"} alt="logo" />
+                <Img
+                  _hover={{ cursor: "pointer", boxSize: 6 }}
+                  boxSize={5}
+                  src={"./../view-more-icon.svg"}
+                  alt="logo"
+                />
+                <Img
+                  _hover={{ cursor: "pointer", boxSize: 6 }}
+                  boxSize={5}
+                  src={"./../edit-icon.svg"}
+                  alt="logo"
+                />
+                <Img
+                  _hover={{ cursor: "pointer", boxSize: 6 }}
+                  boxSize={5}
+                  src={"./../trash-icon.svg"}
+                  alt="logo"
+                />
               </HStack>
             </HStack>
           );
