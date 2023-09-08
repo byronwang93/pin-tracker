@@ -88,6 +88,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
         comparableDate: new Date(date),
         throwStyle: throwStyle,
         description: description,
+        media: null,
       };
     }
     await addBowl(value, data);
