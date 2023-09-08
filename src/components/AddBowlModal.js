@@ -20,6 +20,8 @@ import React, { useContext, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { addBowl } from "../firebase/helpers";
 import { v4 } from "uuid";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { storage } from "../firebase/config";
 
 const AddBowlModal = ({ isOpen, onClose }) => {
   const { value } = useContext(SignedInContext);
@@ -30,6 +32,9 @@ const AddBowlModal = ({ isOpen, onClose }) => {
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(null);
 
+  const [file, setFile] = useState(null);
+  const [downloadURL, setDownloadURL] = useState(null);
+
   const [uploadedImage, setUploadedImage] = useState(null);
   const inputRef = useRef(null);
 
@@ -39,6 +44,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
     if (file) {
       const imgUrl = URL.createObjectURL(file);
       setUploadedImage(imgUrl);
+      setFile(file);
     }
   };
 
@@ -53,15 +59,39 @@ const AddBowlModal = ({ isOpen, onClose }) => {
 
   const saveBowl = async () => {
     const uniqueId = v4();
-    const data = {
-      id: uniqueId,
-      score: Number(score),
-      date: date,
-      comparableDate: new Date(date),
-      throwStyle: throwStyle,
-      description: description,
-    };
+
+    const imageRef = ref(storage, `images/${file.name + uniqueId}`);
+    uploadBytes(imageRef, file)
+      .then((snapshot) => {
+        return getDownloadURL(snapshot.ref);
+      })
+      .then((downloadURL) => {
+        setDownloadURL(downloadURL);
+      });
+
+    let data = {};
+    if (downloadURL) {
+      data = {
+        id: uniqueId,
+        score: Number(score),
+        date: date,
+        comparableDate: new Date(date),
+        throwStyle: throwStyle,
+        description: description,
+        media: downloadURL,
+      };
+    } else {
+      data = {
+        id: uniqueId,
+        score: Number(score),
+        date: date,
+        comparableDate: new Date(date),
+        throwStyle: throwStyle,
+        description: description,
+      };
+    }
     await addBowl(value, data);
+
     setScore(null);
     setDescription("");
     setThrowStyle(1);
