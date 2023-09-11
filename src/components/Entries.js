@@ -1,25 +1,46 @@
-import { Box, HStack, Img, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  Img,
+  Text,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
-import { sortBowlsDate, sortBowlsScore } from "../firebase/helpers";
+import { deleteBowl, sortBowlsDate, sortBowlsScore } from "../firebase/helpers";
+import EditBowlModal from "./EditBowlModal";
+import ViewBowlModal from "./ViewBowlModal";
 
 const Entries = () => {
   const { value } = useContext(SignedInContext);
   const [toggle, setToggle] = useState(0);
   const [bowls, setBowls] = useState([]);
 
+  const {
+    isOpen: viewIsOpen,
+    onOpen: viewOnOpen,
+    onClose: viewOnClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: editIsOpen,
+    onOpen: editOnOpen,
+    onClose: editOnClose,
+  } = useDisclosure();
+
+  const getBowls = async () => {
+    let temp = [];
+    if (toggle === 0) {
+      temp = await sortBowlsDate(value);
+    } else {
+      temp = await sortBowlsScore(value);
+    }
+
+    setBowls(temp);
+  };
+
   useEffect(() => {
-    const getBowls = async () => {
-      let temp = [];
-      if (toggle === 0) {
-        temp = await sortBowlsDate(value);
-      } else {
-        temp = await sortBowlsScore(value);
-      }
-
-      setBowls(temp);
-    };
-
     getBowls();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggle]);
@@ -78,6 +99,7 @@ const Entries = () => {
         {bowls.map((bowl, index) => {
           return (
             <HStack
+              key={index}
               p="12px"
               borderRadius="7px"
               w="100%"
@@ -94,18 +116,35 @@ const Entries = () => {
               </Text>
               <HStack spacing="10px">
                 <Img
+                  onClick={() => {
+                    viewOnOpen();
+                    console.log(bowl.id, " is the id");
+                  }}
                   _hover={{ cursor: "pointer", boxSize: 6 }}
                   boxSize={5}
                   src={"./../view-more-icon.svg"}
                   alt="logo"
                 />
+                <ViewBowlModal isOpen={viewIsOpen} onClose={viewOnClose} />
                 <Img
+                  onClick={() => {
+                    editOnOpen();
+                  }}
                   _hover={{ cursor: "pointer", boxSize: 6 }}
                   boxSize={5}
                   src={"./../edit-icon.svg"}
                   alt="logo"
                 />
+                <EditBowlModal isOpen={editIsOpen} onClose={editOnClose} />
                 <Img
+                  onClick={async () => {
+                    try {
+                      await deleteBowl(bowl.id, value);
+                      await getBowls();
+                    } catch (e) {
+                      console.log(e, " is the error");
+                    }
+                  }}
                   _hover={{ cursor: "pointer", boxSize: 6 }}
                   boxSize={5}
                   src={"./../trash-icon.svg"}
