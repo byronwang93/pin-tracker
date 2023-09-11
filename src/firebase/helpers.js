@@ -47,9 +47,45 @@ export const addUser = async (uid, name, email, photoURL) => {
 };
 
 // bowling functions
-export const editBowl = () => {};
+export const editBowl = async (id, uid, newData) => {
+  const userData = await getUserData(uid);
+  const { bowls } = userData;
 
-export const deleteBowl = () => {};
+  const updatedBowls = bowls.map((bowl) => {
+    if (bowl.id === id) {
+      return newData;
+    } else {
+      return bowl;
+    }
+  });
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { bowls: updatedBowls }, { merge: true });
+    console.log(
+      "bowl edited! with the edited data being: ",
+      newData,
+      " the id is: ",
+      id
+    );
+  } catch (error) {
+    console.log("error editing this bowl w/ error of: ", error);
+  }
+};
+
+export const deleteBowl = async (id, uid) => {
+  const userData = await getUserData(uid);
+  const { bowls } = userData;
+  const updatedBowls = bowls.filter((bowl) => bowl.id !== id);
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { bowls: updatedBowls }, { merge: true });
+    console.log("bowl is deleted of id: ", id);
+  } catch (e) {
+    console.log("error deleting bowl w/ id of ", id, " and error of: ", e);
+  }
+};
 
 export const addBowl = async (uid, data) => {
   const bowlData = data;
