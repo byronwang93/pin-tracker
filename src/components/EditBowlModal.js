@@ -16,19 +16,45 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { addBowl } from "../firebase/helpers";
 import { v4 } from "uuid";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "../firebase/config";
 
-const EditBowlModal = ({ isOpen, onClose }) => {
+const EditBowlModal = ({ bowl, isOpen, onClose }) => {
   const { value } = useContext(SignedInContext);
   const toast = useToast();
 
-  const [score, setScore] = useState(null);
-  const [throwStyle, setThrowStyle] = useState(1);
+  const {
+    score: oldScore,
+    throwStyle: oldThrowStyle,
+    date: oldDate,
+    description: oldDescription,
+    media,
+  } = bowl;
+
+  const [score, setScore] = useState(oldScore);
+
+  useEffect(() => {
+    console.log(
+      "these are the props: ",
+      oldScore,
+      typeof oldScore,
+      oldThrowStyle,
+      oldDate,
+      oldDescription,
+      media
+    );
+    console.log(bowl, " is the entire bowl we given into edit");
+  }, []);
+
+  useEffect(() => {
+    console.log(score, " is the SCORE");
+  }, [score]);
+
+  const [throwStyle, setThrowStyle] = useState(null);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(null);
 
@@ -37,6 +63,13 @@ const EditBowlModal = ({ isOpen, onClose }) => {
 
   const [uploadedImage, setUploadedImage] = useState(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    setScore(oldScore);
+    setThrowStyle(oldThrowStyle);
+    setDate(oldDate);
+    setDescription(oldDescription);
+  }, []);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
