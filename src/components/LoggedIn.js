@@ -32,7 +32,6 @@ const LoggedIn = () => {
 
     const fetchUser = async () => {
       const object = await getUserDetails();
-      console.log(object, " is OBJECT");
       setUser(object);
       setLoadingCheck(true);
     };
