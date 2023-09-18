@@ -29,37 +29,41 @@ const AddBowlModal = ({ isOpen, onClose }) => {
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(null);
 
+  const [buttonClicked, setButtonClicked] = useState(false);
+
   const styles = [
     { title: "One-handed", hand: 1 },
     { title: "Two-handed", hand: 2 },
   ];
 
   const saveBowl = async () => {
-    const uniqueId = v4();
+    if (!buttonClicked) {
+      setButtonClicked(true);
+      const uniqueId = v4();
 
-    let data = {
-      id: uniqueId,
-      score: Number(score),
-      date: date,
-      comparableDate: new Date(date),
-      throwStyle: throwStyle,
-      description: description,
-    };
+      let data = {
+        id: uniqueId,
+        score: Number(score),
+        date: date,
+        comparableDate: new Date(date),
+        throwStyle: throwStyle,
+        description: description,
+      };
 
-    // console.log(data, " is the data we give");
-    await addBowl(value, data);
+      await addBowl(value, data);
 
-    setScore(null);
-    setDescription("");
-    setThrowStyle(1);
-    setDate(null);
-    onClose();
-    toast({
-      description: "Bowl Saved!",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
+      setScore(null);
+      setDescription("");
+      setThrowStyle(1);
+      setDate(null);
+      onClose();
+      toast({
+        description: "Bowl Saved!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
@@ -152,7 +156,12 @@ const AddBowlModal = ({ isOpen, onClose }) => {
 
             <ModalFooter width="100%">
               <Button
-                isDisabled={score === null || date === null || score > 300}
+                isDisabled={
+                  score === null ||
+                  date === null ||
+                  score > 300 ||
+                  buttonClicked
+                }
                 bgColor="#84876F"
                 color="white"
                 width="inherit"
