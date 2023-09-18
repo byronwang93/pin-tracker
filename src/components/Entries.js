@@ -2,6 +2,7 @@ import {
   Box,
   HStack,
   Img,
+  Spinner,
   Text,
   useDisclosure,
   VStack,
@@ -17,6 +18,10 @@ const Entries = () => {
   const [toggle, setToggle] = useState(0);
   const [bowls, setBowls] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState({});
+
   const {
     isOpen: viewIsOpen,
     onOpen: viewOnOpen,
@@ -28,6 +33,21 @@ const Entries = () => {
     onOpen: editOnOpen,
     onClose: editOnClose,
   } = useDisclosure();
+
+  // opens the modal that we want on edit
+  const openModal = (id) => {
+    setModalOpen((prevModalOpen) => ({
+      ...prevModalOpen,
+      [id]: true,
+    }));
+  };
+
+  const closeModal = (id) => {
+    setModalOpen((prevModalOpen) => ({
+      ...prevModalOpen,
+      [id]: false,
+    }));
+  };
 
   const getBowls = async () => {
     let temp = [];
@@ -41,13 +61,37 @@ const Entries = () => {
   };
 
   useEffect(() => {
-    getBowls();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setLoading(true);
+
+    const fetchData = async () => {
+      try {
+        let temp = [];
+        if (toggle === 0) {
+          temp = await sortBowlsDate(value);
+        } else {
+          temp = await sortBowlsScore(value);
+        }
+
+        setBowls(temp);
+      } catch (e) {
+        console.log(e, " is the error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [toggle]);
 
   useEffect(() => {
     console.log(bowls, " is the bowls");
+    setModalOpen({});
   }, [bowls]);
+
+  // useEffect(() => {
+  //   getBowls();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [toggle]);
 
   const toggles = [
     { text: "Date", setting: 0 },
@@ -77,6 +121,7 @@ const Entries = () => {
               outline={toggle === setting && "2px solid"}
               onClick={() => {
                 setToggle(setting);
+                console.log(modalOpen, " is the modalOpen");
               }}
             >
               <Text fontSize="18px">{text}</Text>
@@ -96,64 +141,81 @@ const Entries = () => {
         </Text>
       </HStack>
       <VStack maxHeight="450px" alignItems="baseline" overflowY="auto">
-        {bowls.map((bowl, index) => {
-          return (
-            <HStack
-              key={index}
-              p="12px"
-              borderRadius="7px"
-              w="100%"
-              bgColor={index % 2 === 0 && "#3C3D36"}
-            >
-              <Text w="90px" fontSize="20px">
-                {bowl.score}
-              </Text>
-              <Text w="120px" fontSize="20px">
-                {bowl.throwStyle}
-              </Text>
-              <Text w="150px" mr="80px" fontSize="20px">
-                {bowl.date}
-              </Text>
-              <HStack spacing="10px">
-                <Img
-                  onClick={() => {
-                    viewOnOpen();
-                    console.log(bowl.id, " is the id");
-                  }}
-                  _hover={{ cursor: "pointer", boxSize: 6 }}
-                  boxSize={5}
-                  src={"./../view-more-icon.svg"}
-                  alt="logo"
-                />
-                <ViewBowlModal isOpen={viewIsOpen} onClose={viewOnClose} />
-                <Img
-                  onClick={() => {
-                    editOnOpen();
-                  }}
-                  _hover={{ cursor: "pointer", boxSize: 6 }}
-                  boxSize={5}
-                  src={"./../edit-icon.svg"}
-                  alt="logo"
-                />
-                <EditBowlModal isOpen={editIsOpen} onClose={editOnClose} />
-                <Img
-                  onClick={async () => {
-                    try {
-                      await deleteBowl(bowl.id, value);
-                      await getBowls();
-                    } catch (e) {
-                      console.log(e, " is the error");
-                    }
-                  }}
-                  _hover={{ cursor: "pointer", boxSize: 6 }}
-                  boxSize={5}
-                  src={"./../trash-icon.svg"}
-                  alt="logo"
-                />
+        {loading ? (
+          <Spinner size="xl" />
+        ) : (
+          bowls.map((bowl, index) => {
+            const handleDeleteClick = async () => {
+              try {
+                await deleteBowl(bowl.id, value);
+                await getBowls();
+              } catch (e) {
+                console.log(e, " is the error");
+              }
+            };
+
+            return (
+              <HStack
+                key={index}
+                p="12px"
+                borderRadius="7px"
+                w="100%"
+                bgColor={index % 2 === 0 && "#3C3D36"}
+              >
+                <Text w="90px" fontSize="20px">
+                  {bowl.score}
+                </Text>
+                <Text w="120px" fontSize="20px">
+                  {bowl.throwStyle}
+                </Text>
+                <Text w="150px" mr="80px" fontSize="20px">
+                  {bowl.date}
+                </Text>
+                <HStack spacing="10px">
+                  <Img
+                    // onClick={handleViewClick}
+                    _hover={{ cursor: "pointer", boxSize: 6 }}
+                    boxSize={5}
+                    src={"./../view-more-icon.svg"}
+                    alt="logo"
+                  />
+                  <Img
+                    // onClick={handleEditClick}
+                    onClick={() => {
+                      console.log(bowl.id, " is the id");
+                      openModal(bowl.id);
+                    }}
+                    _hover={{ cursor: "pointer", boxSize: 6 }}
+                    boxSize={5}
+                    src={"./../edit-icon.svg"}
+                    alt="logo"
+                  />
+                  <EditBowlModal
+                    bowl={bowl}
+                    isOpen={modalOpen[bowl.id] || false}
+                    onClose={() => {
+                      closeModal(bowl.id);
+
+                      const afterBowls = async () => {
+                        await getBowls();
+                      };
+
+                      afterBowls();
+                    }}
+                  />
+                  <Img
+                    onClick={handleDeleteClick}
+                    _hover={{ cursor: "pointer", boxSize: 6 }}
+                    boxSize={5}
+                    src={"./../trash-icon.svg"}
+                    alt="logo"
+                  />
+                </HStack>
               </HStack>
-            </HStack>
-          );
-        })}
+            );
+          })
+        )}
+        <ViewBowlModal isOpen={viewIsOpen} onClose={viewOnClose} />
       </VStack>
     </Box>
   );
