@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   HStack,
-  Img,
   Input,
   Modal,
   ModalBody,
@@ -16,12 +15,9 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
-import { addBowl } from "../firebase/helpers";
-import { v4 } from "uuid";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { storage } from "../firebase/config";
+import { editBowl } from "../firebase/helpers";
 
 const EditBowlModal = ({ bowl, isOpen, onClose }) => {
   const { value } = useContext(SignedInContext);
@@ -32,37 +28,14 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
     throwStyle: oldThrowStyle,
     date: oldDate,
     description: oldDescription,
-    media,
+    id,
   } = bowl;
 
   const [score, setScore] = useState(oldScore);
 
-  useEffect(() => {
-    console.log(
-      "these are the props: ",
-      oldScore,
-      typeof oldScore,
-      oldThrowStyle,
-      oldDate,
-      oldDescription,
-      media
-    );
-    console.log(bowl, " is the entire bowl we given into edit");
-  }, []);
-
-  useEffect(() => {
-    console.log(score, " is the SCORE");
-  }, [score]);
-
   const [throwStyle, setThrowStyle] = useState(null);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(null);
-
-  const [file, setFile] = useState(null);
-  const [downloadURL, setDownloadURL] = useState(null);
-
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const inputRef = useRef(null);
 
   useEffect(() => {
     setScore(oldScore);
@@ -71,66 +44,23 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
     setDescription(oldDescription);
   }, []);
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-
-    if (file) {
-      const imgUrl = URL.createObjectURL(file);
-      setUploadedImage(imgUrl);
-      setFile(file);
-    }
-  };
-
-  const handleImageClick = () => {
-    inputRef.current.click();
-  };
-
   const styles = [
     { title: "One-handed", hand: 1 },
     { title: "Two-handed", hand: 2 },
   ];
 
   const saveBowl = async () => {
-    const uniqueId = v4();
+    let data = {
+      id: id,
+      score: Number(score),
+      date: date,
+      comparableDate: new Date(date),
+      throwStyle: throwStyle,
+      description: description,
+    };
 
-    const imageRef = ref(storage, `images/${file.name + uniqueId}`);
-    uploadBytes(imageRef, file)
-      .then((snapshot) => {
-        return getDownloadURL(snapshot.ref);
-      })
-      .then((downloadURL) => {
-        setDownloadURL(downloadURL);
-      });
+    await editBowl(id, value, data);
 
-    let data = {};
-    if (downloadURL) {
-      data = {
-        id: uniqueId,
-        score: Number(score),
-        date: date,
-        comparableDate: new Date(date),
-        throwStyle: throwStyle,
-        description: description,
-        media: downloadURL,
-      };
-    } else {
-      data = {
-        id: uniqueId,
-        score: Number(score),
-        date: date,
-        comparableDate: new Date(date),
-        throwStyle: throwStyle,
-        description: description,
-        media: null,
-      };
-    }
-    await addBowl(value, data);
-
-    setScore(null);
-    setDescription("");
-    setThrowStyle(1);
-    setUploadedImage(null);
-    setDate(null);
     onClose();
     toast({
       description: "Bowl Saved!",
@@ -145,11 +75,10 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
       <Modal
         isOpen={isOpen}
         onClose={() => {
-          setScore(null);
-          setDescription("");
-          setThrowStyle(1);
-          setUploadedImage(null);
-          setDate(null);
+          setScore(oldScore);
+          setThrowStyle(oldThrowStyle);
+          setDate(oldDate);
+          setDescription(oldDescription);
           onClose();
         }}
         width="100%"
@@ -170,6 +99,11 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
                     placeholder="Score"
                     onChange={(event) => setScore(event.target.value)}
                   />
+                  {score > 300 && (
+                    <Text color="red.400">
+                      Score must be less than 300 you cheater &gt;:(
+                    </Text>
+                  )}
                 </Box>
 
                 <Box>
@@ -221,68 +155,12 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
                     width="inherit"
                   />
                 </Box>
-
-                <VStack
-                  mt="20px"
-                  align="center"
-                  justify="center"
-                  w="250px" // Set the desired width here
-                  h="130px" // Set the desired height here
-                  cursor="pointer"
-                  position="relative"
-                  overflow="hidden"
-                  onClick={handleImageClick}
-                >
-                  {uploadedImage && (
-                    <Box>
-                      <Img
-                        src={uploadedImage}
-                        alt="upload"
-                        w="100%"
-                        h="100%"
-                        objectFit="cover"
-                      />
-                    </Box>
-                  )}
-                  {!uploadedImage && (
-                    <>
-                      <VStack
-                        bgColor="#84876F"
-                        p="25px"
-                        borderRadius="8px"
-                        cursor="pointer"
-                        w="100%"
-                        h="100%"
-                        position="absolute"
-                        top="0"
-                        left="0"
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        <Text fontSize="40px" fontWeight="extrabold">
-                          +
-                        </Text>
-                        <Text fontSize="20px">Upload a photo</Text>
-                      </VStack>
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    id="imageInput"
-                    ref={inputRef}
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    onChange={handleImageUpload}
-                  />
-                </VStack>
               </VStack>
             </ModalBody>
 
             <ModalFooter width="100%">
               <Button
-                isDisabled={score === null || date === null}
+                isDisabled={score === null || date === null || score > 300}
                 bgColor="#84876F"
                 color="white"
                 width="inherit"
