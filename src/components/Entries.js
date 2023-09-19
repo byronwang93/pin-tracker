@@ -20,7 +20,8 @@ const Entries = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const [modalOpen, setModalOpen] = useState({});
+  const [editModalOpen, setEditModalOpen] = useState({});
+  const [viewModalOpen, setViewModalOpen] = useState({});
 
   const {
     isOpen: viewIsOpen,
@@ -28,22 +29,31 @@ const Entries = () => {
     onClose: viewOnClose,
   } = useDisclosure();
 
-  const {
-    isOpen: editIsOpen,
-    onOpen: editOnOpen,
-    onClose: editOnClose,
-  } = useDisclosure();
-
-  // opens the modal that we want on edit
-  const openModal = (id) => {
-    setModalOpen((prevModalOpen) => ({
+  // opens the modal that we want on view
+  const openViewModal = (id) => {
+    setViewModalOpen((prevModalOpen) => ({
       ...prevModalOpen,
       [id]: true,
     }));
   };
 
-  const closeModal = (id) => {
-    setModalOpen((prevModalOpen) => ({
+  const closeViewModal = (id) => {
+    setViewModalOpen((prevModalOpen) => ({
+      ...prevModalOpen,
+      [id]: false,
+    }));
+  };
+
+  // opens the modal that we want on edit
+  const openEditModal = (id) => {
+    setEditModalOpen((prevModalOpen) => ({
+      ...prevModalOpen,
+      [id]: true,
+    }));
+  };
+
+  const closeEditModal = (id) => {
+    setEditModalOpen((prevModalOpen) => ({
       ...prevModalOpen,
       [id]: false,
     }));
@@ -83,16 +93,6 @@ const Entries = () => {
     fetchData();
   }, [toggle]);
 
-  useEffect(() => {
-    console.log(bowls, " is the bowls");
-    setModalOpen({});
-  }, [bowls]);
-
-  // useEffect(() => {
-  //   getBowls();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [toggle]);
-
   const toggles = [
     { text: "Date", setting: 0 },
     { text: "Score", setting: 1 },
@@ -121,7 +121,6 @@ const Entries = () => {
               outline={toggle === setting && "2px solid"}
               onClick={() => {
                 setToggle(setting);
-                console.log(modalOpen, " is the modalOpen");
               }}
             >
               <Text fontSize="18px">{text}</Text>
@@ -168,22 +167,38 @@ const Entries = () => {
                 <Text w="120px" fontSize="20px">
                   {bowl.throwStyle}
                 </Text>
-                <Text w="150px" mr="80px" fontSize="20px">
+                <Text
+                  w="150px"
+                  mr={bowl.description ? "80px" : "110px"}
+                  fontSize="20px"
+                >
                   {bowl.date}
                 </Text>
                 <HStack spacing="10px">
-                  <Img
-                    // onClick={handleViewClick}
-                    _hover={{ cursor: "pointer", boxSize: 6 }}
-                    boxSize={5}
-                    src={"./../view-more-icon.svg"}
-                    alt="logo"
+                  {bowl.description && (
+                    <Img
+                      onClick={() => {
+                        openViewModal(bowl.id);
+                      }}
+                      _hover={{ cursor: "pointer", boxSize: 6 }}
+                      boxSize={5}
+                      src={"./../view-more-icon.svg"}
+                      alt="logo"
+                    />
+                  )}
+                  <ViewBowlModal
+                    score={bowl.score}
+                    date={bowl.date}
+                    description={bowl.description}
+                    isOpen={viewModalOpen[bowl.id] || false}
+                    onClose={() => {
+                      closeViewModal(bowl.id);
+                    }}
                   />
                   <Img
-                    // onClick={handleEditClick}
                     onClick={() => {
                       console.log(bowl.id, " is the id");
-                      openModal(bowl.id);
+                      openEditModal(bowl.id);
                     }}
                     _hover={{ cursor: "pointer", boxSize: 6 }}
                     boxSize={5}
@@ -192,9 +207,9 @@ const Entries = () => {
                   />
                   <EditBowlModal
                     bowl={bowl}
-                    isOpen={modalOpen[bowl.id] || false}
+                    isOpen={editModalOpen[bowl.id] || false}
                     onClose={() => {
-                      closeModal(bowl.id);
+                      closeEditModal(bowl.id);
 
                       const afterBowls = async () => {
                         await getBowls();
