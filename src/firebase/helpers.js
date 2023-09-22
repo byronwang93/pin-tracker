@@ -263,3 +263,116 @@ export const sortBowlsDate = async (uid) => {
     return sorted;
   } else return [];
 };
+
+export const getHighestGameDataLeaderboard = async (uid) => {
+  const user = await getUserData(uid);
+
+  const bowls = user?.bowls;
+  let data = {};
+  let max = null;
+  let hand = null;
+  let date = null;
+  for (let i = 0; i < bowls.length; i++) {
+    const bowl = bowls[i];
+    if (max === null || bowl.score > max) {
+      max = bowl.score;
+      hand = bowl.throwStyle;
+      date = bowl.date;
+    }
+  }
+  data = {
+    max,
+    hand,
+    date,
+    name: user.name,
+  };
+
+  return data;
+};
+
+export const getAverageDataLeaderboard = async (uid) => {
+  const user = await getUserData(uid);
+  const bowls = user?.bowls;
+
+  if (bowls === null) {
+    return null;
+  }
+
+  if (bowls.length === 0) {
+    return {
+      name: user.name,
+      average: null,
+      gamesBowled: null,
+    };
+  }
+
+  let res = 0;
+  for (let i = 0; i < bowls.length; i++) {
+    res += bowls[i].score;
+  }
+
+  let length = await gamesBowled(uid);
+  let result = res / length;
+
+  let data = {
+    name: user.name,
+    average: +result.toFixed(2),
+    gamesBowled: length,
+  };
+
+  return data;
+  // 888.88 = 0px (6)
+  // 888.8 = 8px (5)
+  // 888 = 25px (3)
+};
+
+// global users
+export const globalGetHighestGameLeaderboard = async () => {
+  const querySnapshot = await getDocs(collection(db, "users"));
+
+  const users = [];
+  const usersData = [];
+
+  querySnapshot.forEach((doc) => {
+    const user = doc._document.data.value.mapValue.fields;
+    users.push(user);
+  });
+
+  for (let i = 0; i < users.length; i++) {
+    const { uid } = users[i];
+    const data = await getHighestGameDataLeaderboard(uid.stringValue);
+
+    usersData.push(data);
+  }
+
+  usersData.sort((a, b) => {
+    return b.max - a.max;
+  });
+
+  return usersData;
+};
+
+export const globalGetHighestAverageLeaderboard = async () => {
+  const querySnapshot = await getDocs(collection(db, "users"));
+
+  const users = [];
+  const usersData = [];
+
+  querySnapshot.forEach((doc) => {
+    const user = doc._document.data.value.mapValue.fields;
+    users.push(user);
+  });
+
+  for (let i = 0; i < users.length; i++) {
+    const { uid } = users[i];
+    const data = await getAverageDataLeaderboard(uid.stringValue);
+
+    usersData.push(data);
+  }
+
+  usersData.sort((a, b) => {
+    return b.average - a.average;
+  });
+
+  return usersData;
+};
