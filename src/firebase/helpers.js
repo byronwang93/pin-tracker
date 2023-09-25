@@ -349,7 +349,9 @@ export const globalGetHighestGameLeaderboard = async () => {
     return b.max - a.max;
   });
 
-  return usersData;
+  const filteredData = usersData.filter((bowl) => bowl.max !== null);
+
+  return filteredData;
 };
 
 export const globalGetHighestAverageLeaderboard = async () => {
@@ -374,5 +376,11 @@ export const globalGetHighestAverageLeaderboard = async () => {
     return b.average - a.average;
   });
 
-  return usersData;
+  const filteredData = usersData.filter((bowl) => {
+    return bowl.average !== null;
+  });
+
+  console.log(filteredData, " FILTERED");
+
+  return filteredData;
 };

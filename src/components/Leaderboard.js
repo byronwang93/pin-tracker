@@ -23,10 +23,6 @@ const Leaderboard = () => {
     console.log(avgs, " is avgs");
   }, []);
 
-  const handleClick = async () => {
-    await globalGetHighestGameLeaderboard();
-  };
-
   return (
     <Box>
       {/* first table */}
@@ -34,11 +30,14 @@ const Leaderboard = () => {
         <Text fontSize="40px" textAlign="left">
           Single Game
         </Text>
-        <HStack pb="18px">
-          <Text fontSize="20px" w="126px" color="#A0A0A0">
+        <HStack ml="10px" pt="10px" pb="15px">
+          <Text ml="31px" fontSize="20px" w="126px" color="#A0A0A0">
+            name
+          </Text>
+          <Text fontSize="20px" pl="36px" pr="43px" color="#A0A0A0">
             score
           </Text>
-          <Text fontSize="20px" pl="26px" pr="46px" color="#A0A0A0">
+          <Text fontSize="20px" pr="62px" color="#A0A0A0">
             hand
           </Text>
           <Text fontSize="20px" color="#A0A0A0">
@@ -50,22 +49,23 @@ const Leaderboard = () => {
             return (
               <HStack
                 key={index}
-                p="12px"
+                pt="25px"
+                pb="25px"
+                pl="10px"
                 borderRadius="7px"
                 w="100%"
                 bgColor={index % 2 === 0 && "#3C3D36"}
               >
-                <Text w="290px" fontSize="20px">
+                <Text textAlign="center" w="290px" fontSize="20px">
                   {game.name}
                 </Text>
-                <Text w="120px" fontSize="20px">
+                <Text textAlign="center" w="120px" fontSize="20px">
                   {game.max}
                 </Text>
-                <Text w="150px" mr="110px" fontSize="20px">
+                <Text textAlign="center" w="150px" fontSize="20px">
                   {game.hand}
                 </Text>
-
-                <Text w="150px" mr="110px" fontSize="20px">
+                <Text textAlign="center" w="350px" fontSize="20px">
                   {game.date}
                 </Text>
               </HStack>
@@ -75,19 +75,19 @@ const Leaderboard = () => {
       </Box>
 
       {/* second table */}
-      <Box w="590px" mb="50px">
+      <Box w="490px" mb="50px">
         <Text fontSize="40px" textAlign="left">
           Average Score
         </Text>
-        <HStack pb="18px">
-          <Text fontSize="20px" w="126px" color="#A0A0A0">
+        <HStack ml="10px" pt="10px" pb="15px">
+          <Text pl="35px" fontSize="20px" w="126px" color="#A0A0A0">
+            name
+          </Text>
+          <Text fontSize="20px" pl="60px" pr="46px" color="#A0A0A0">
             score
           </Text>
-          <Text fontSize="20px" pl="26px" pr="46px" color="#A0A0A0">
-            hand
-          </Text>
-          <Text fontSize="20px" color="#A0A0A0">
-            date
+          <Text pl="23px" fontSize="20px" color="#A0A0A0">
+            games bowled
           </Text>
         </HStack>
         <VStack maxHeight="450px" alignItems="baseline" overflowY="auto">
@@ -95,18 +95,24 @@ const Leaderboard = () => {
             return (
               <HStack
                 key={index}
-                p="12px"
+                pt="25px"
+                pb="25px"
+                pl="10px"
                 borderRadius="7px"
                 w="100%"
                 bgColor={index % 2 === 0 && "#3C3D36"}
               >
-                <Text w="290px" fontSize="20px">
+                <Text pl="40px" w="190px" fontSize="20px">
                   {avg.name}
                 </Text>
                 <Text w="120px" fontSize="20px">
                   {avg.average}
                 </Text>
-                <Text w="150px" mr="110px" fontSize="20px">
+                <Text
+                  // textAlign="center"
+                  w="150px"
+                  fontSize="20px"
+                >
                   {avg.gamesBowled}
                 </Text>
               </HStack>
