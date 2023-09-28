@@ -4,7 +4,7 @@ import React from "react";
 const Header = () => {
   return (
     <HStack width="100%">
-      <Img src={"./../pin-tracker.png"} width="300px" alt="logo" />
+      <Img src="/pin-tracker.png" width="300px" alt="logo" />
     </HStack>
   );
 };

@@ -182,7 +182,7 @@ const Entries = () => {
                       }}
                       _hover={{ cursor: "pointer", boxSize: 6 }}
                       boxSize={5}
-                      src={"./../view-more-icon.svg"}
+                      src="/view-more-icon.svg"
                       alt="logo"
                     />
                   )}
@@ -202,7 +202,7 @@ const Entries = () => {
                     }}
                     _hover={{ cursor: "pointer", boxSize: 6 }}
                     boxSize={5}
-                    src={"./../edit-icon.svg"}
+                    src="/edit-icon.svg"
                     alt="logo"
                   />
                   <EditBowlModal
@@ -222,7 +222,7 @@ const Entries = () => {
                     onClick={handleDeleteClick}
                     _hover={{ cursor: "pointer", boxSize: 6 }}
                     boxSize={5}
-                    src={"./../trash-icon.svg"}
+                    src="/trash-icon.svg"
                     alt="logo"
                   />
                 </HStack>
