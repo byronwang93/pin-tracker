@@ -1,0 +1,1 @@
+run "npm run build" and then "npm run deploy" to deploy to github pages
