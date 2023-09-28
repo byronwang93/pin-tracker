@@ -55,7 +55,7 @@ const LoggedIn = () => {
     >
       <HStack justify="space-between" className="header" width="100%">
         <Box w="30%">
-          <Img src="/pin-tracker.png" width="230px" alt="logo" />
+          <Img src="./pin-tracker.png" width="230px" alt="logo" />
         </Box>
         <Flex justifyContent="space-around" flexDirection="row" w="30%">
           <Text
