@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/pin-tracker/static/css/main.482e6e7e.css",
-    "main.js": "/pin-tracker/static/js/main.7ae0ad8d.js",
-    "index.html": "/pin-tracker/index.html",
-    "main.482e6e7e.css.map": "/pin-tracker/static/css/main.482e6e7e.css.map",
-    "main.7ae0ad8d.js.map": "/pin-tracker/static/js/main.7ae0ad8d.js.map"
+    "main.css": "./static/css/main.482e6e7e.css",
+    "main.js": "./static/js/main.faf80ef5.js",
+    "index.html": "./index.html",
+    "main.482e6e7e.css.map": "./static/css/main.482e6e7e.css.map",
+    "main.faf80ef5.js.map": "./static/js/main.faf80ef5.js.map"
   },
   "entrypoints": [
     "static/css/main.482e6e7e.css",
-    "static/js/main.7ae0ad8d.js"
+    "static/js/main.faf80ef5.js"
   ]
 }
