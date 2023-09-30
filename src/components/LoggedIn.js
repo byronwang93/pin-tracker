@@ -57,7 +57,12 @@ const LoggedIn = () => {
         <Box w="30%">
           <Img src="./pin-tracker.png" width="230px" alt="logo" />
         </Box>
-        <Flex justifyContent="space-around" flexDirection="row" w="30%">
+        <Flex
+          justifyContent="space-around"
+          flexDirection={{ base: "column", md: "row" }}
+          alignItems="center"
+          w="30%"
+        >
           <Text
             fontSize="25px"
             _hover={{ cursor: "pointer" }}
