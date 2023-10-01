@@ -10,13 +10,13 @@ import {
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
-import { getHighestGameHand, getUserData } from "../firebase/helpers";
+import { getUserData } from "../firebase/helpers";
 import AddBowlModal from "./AddBowlModal";
 import Stats from "./Stats";
 import Leaderboard from "./Leaderboard";
 
 const LoggedIn = () => {
-  const { value, setValue } = useContext(SignedInContext);
+  const { value } = useContext(SignedInContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [user, setUser] = useState(null);
