@@ -40,8 +40,8 @@ const FirstStatsBox = () => {
         ml={{ base: "55px", md: "20px" }}
         alignSelf="baseline"
         textAlign="left"
-        pr="10px"
-        mr="25px"
+        pr={{ base: "0px", md: "10px" }}
+        mr={{ base: "0px", md: "25px" }}
         pl={{ base: "0px", md: "20px" }}
         alignItems="baseline"
         maxW="150px"

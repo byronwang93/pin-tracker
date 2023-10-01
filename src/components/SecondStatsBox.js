@@ -158,6 +158,7 @@ const SecondStatsBox = () => {
           display="flex"
           flexDirection="column"
           textAlign="left"
+          bgColor="pink"
         >
           <Text fontSize="18px" color="#A0A0A0">
             Last 10 Games
@@ -172,6 +173,7 @@ const SecondStatsBox = () => {
           maxW="150px"
           display="flex"
           flexDirection="column"
+          bgColor="pink"
         >
           <Text fontSize="18px" color="#A0A0A0">
             Last 10 Games (one-handed)
