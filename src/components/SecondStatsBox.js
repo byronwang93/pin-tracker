@@ -41,10 +41,12 @@ const SecondStatsBox = () => {
     };
 
     setData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Box
+      mb="30px"
       alignItems={{ base: "center", md: "flex-start" }}
       display="flex"
       flexDirection="column"
@@ -56,13 +58,7 @@ const SecondStatsBox = () => {
       backgroundColor="#3C3D36"
       borderRadius="10px"
     >
-      <Text
-        left={{ base: "0px", md: "72px" }}
-        pb="5px"
-        pos="relative"
-        fontSize="30px"
-        color="#A0A0A0"
-      >
+      <Text alignSelf="center" pb="5px" fontSize="30px" color="#A0A0A0">
         Averages
       </Text>
 
@@ -73,28 +69,16 @@ const SecondStatsBox = () => {
         flexDirection={{ base: "column", md: "row" }}
         maxW="570px"
         pt="15px"
-        pb="5px"
-        ml={{ md: "47px" }}
+        pb="15px"
         justifyContent="center"
+        backgroundColor="#3C3D36"
         borderRadius="10px"
+        pl={{ base: "40px", md: "0px" }}
       >
         <Box
-          ml={{ base: "55px", md: "0px" }}
           alignSelf="baseline"
-          pr="10px"
-          mr={
-            average !== null && average.toString().length === 6
-              ? "0px"
-              : average !== null && average.toString().length === 5
-              ? "8px"
-              : "25px"
-          }
-          pl={{ base: "0px", md: "0px" }}
-          alignItems="baseline"
           textAlign="left"
-          maxW="150px"
-          pos="relative"
-          right={{ md: "56px" }}
+          width="150px"
           display="flex"
           flexDirection="column"
         >
@@ -108,7 +92,7 @@ const SecondStatsBox = () => {
         <Box
           alignSelf="baseline"
           textAlign="left"
-          maxW="150px"
+          width="150px"
           display="flex"
           flexDirection="column"
         >
@@ -121,7 +105,7 @@ const SecondStatsBox = () => {
         </Box>
         <Box
           alignSelf="baseline"
-          maxW="150px"
+          w="150px"
           textAlign="left"
           display="flex"
           flexDirection="column"
@@ -146,19 +130,14 @@ const SecondStatsBox = () => {
         justifyContent="center"
         backgroundColor="#3C3D36"
         borderRadius="10px"
+        pl={{ base: "40px", md: "0px" }}
       >
         <Box
-          ml={{ base: "55px", md: "20px" }}
           alignSelf="baseline"
-          pr="10px"
-          mr="25px"
-          pl={{ base: "0px", md: "20px" }}
-          alignItems="baseline"
-          maxW="150px"
+          textAlign="left"
+          width="150px"
           display="flex"
           flexDirection="column"
-          textAlign="left"
-          bgColor="pink"
         >
           <Text fontSize="18px" color="#A0A0A0">
             Last 10 Games
@@ -173,7 +152,6 @@ const SecondStatsBox = () => {
           maxW="150px"
           display="flex"
           flexDirection="column"
-          bgColor="pink"
         >
           <Text fontSize="18px" color="#A0A0A0">
             Last 10 Games (one-handed)
