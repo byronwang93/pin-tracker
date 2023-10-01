@@ -63,6 +63,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
         duration: 3000,
         isClosable: true,
       });
+      setButtonClicked(false);
     }
   };
 
@@ -158,6 +159,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
               <Button
                 isDisabled={
                   score === null ||
+                  score === "" ||
                   date === null ||
                   score > 300 ||
                   buttonClicked

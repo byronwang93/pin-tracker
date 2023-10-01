@@ -1,14 +1,22 @@
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Box,
+  Button,
   HStack,
   Img,
   Spinner,
   Text,
   useBreakpointValue,
   useDisclosure,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { deleteBowl, sortBowlsDate, sortBowlsScore } from "../firebase/helpers";
 import EditBowlModal from "./EditBowlModal";
@@ -23,6 +31,7 @@ const Entries = () => {
 
   const [editModalOpen, setEditModalOpen] = useState({});
   const [viewModalOpen, setViewModalOpen] = useState({});
+  const [deleteModalOpen, setDeleteModalOpen] = useState({});
   const isDesktop = useBreakpointValue({ base: false, md: true });
 
   const {
@@ -30,6 +39,12 @@ const Entries = () => {
     onOpen: viewOnOpen,
     onClose: viewOnClose,
   } = useDisclosure();
+
+  const { onClose: alertOnClose } = useDisclosure();
+
+  const cancelRef = useRef();
+
+  const toast = useToast();
 
   // opens the modal that we want on view
   const openViewModal = (id) => {
@@ -56,6 +71,21 @@ const Entries = () => {
 
   const closeEditModal = (id) => {
     setEditModalOpen((prevModalOpen) => ({
+      ...prevModalOpen,
+      [id]: false,
+    }));
+  };
+
+  // delete confirmation modal
+  const openDeleteModal = (id) => {
+    setDeleteModalOpen((prevModalOpen) => ({
+      ...prevModalOpen,
+      [id]: true,
+    }));
+  };
+
+  const closeDeleteModal = (id) => {
+    setDeleteModalOpen((prevModalOpen) => ({
       ...prevModalOpen,
       [id]: false,
     }));
@@ -153,9 +183,17 @@ const Entries = () => {
               try {
                 await deleteBowl(bowl.id, value);
                 await getBowls();
+                alertOnClose();
               } catch (e) {
                 console.log(e, " is the error");
               }
+
+              toast({
+                description: "Bowl Deleted!",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+              });
             };
 
             return (
@@ -234,12 +272,56 @@ const Entries = () => {
                     }}
                   />
                   <Img
-                    onClick={handleDeleteClick}
+                    onClick={() => {
+                      openDeleteModal(bowl.id);
+                    }}
                     _hover={{ cursor: "pointer", boxSize: 6 }}
                     boxSize={5}
                     src="./trash-icon.svg"
                     alt="logo"
                   />
+                  <AlertDialog
+                    isOpen={deleteModalOpen[bowl.id] || false}
+                    leastDestructiveRef={cancelRef}
+                    onClose={() => {
+                      closeDeleteModal(bowl.id);
+                    }}
+                  >
+                    <AlertDialogOverlay>
+                      <AlertDialogContent bgColor="#3C3D36">
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                          Delete Bowl
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>
+                          Are you sure? You can't undo this action afterwards.
+                        </AlertDialogBody>
+
+                        <AlertDialogFooter>
+                          <Button
+                            bgColor="#84876F"
+                            _hover={{
+                              bgColor: "#606351",
+                            }}
+                            color="white"
+                            ref={cancelRef}
+                            onClick={() => {
+                              closeDeleteModal(bowl.id);
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            colorScheme="red"
+                            onClick={handleDeleteClick}
+                            ml={3}
+                          >
+                            Delete
+                          </Button>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialogOverlay>
+                  </AlertDialog>
                 </HStack>
               </HStack>
             );
