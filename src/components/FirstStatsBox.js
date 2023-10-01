@@ -39,6 +39,7 @@ const FirstStatsBox = () => {
       <Box
         ml={{ base: "55px", md: "20px" }}
         alignSelf="baseline"
+        textAlign="left"
         pr="10px"
         mr="25px"
         pl={{ base: "0px", md: "20px" }}

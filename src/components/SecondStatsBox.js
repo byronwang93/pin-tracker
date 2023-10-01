@@ -91,6 +91,7 @@ const SecondStatsBox = () => {
           }
           pl={{ base: "0px", md: "0px" }}
           alignItems="baseline"
+          textAlign="left"
           maxW="150px"
           pos="relative"
           right={{ md: "56px" }}
@@ -156,6 +157,7 @@ const SecondStatsBox = () => {
           maxW="150px"
           display="flex"
           flexDirection="column"
+          textAlign="left"
         >
           <Text fontSize="18px" color="#A0A0A0">
             Last 10 Games
