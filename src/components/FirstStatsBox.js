@@ -20,6 +20,7 @@ const FirstStatsBox = () => {
     };
 
     setData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -38,17 +39,6 @@ const FirstStatsBox = () => {
       borderRadius="10px"
     >
       <Box
-        // ml={{ base: "55px", md: "20px" }}
-        // alignSelf="baseline"
-        // textAlign="left"
-        // pr={{ base: "0px", md: "10px" }}
-        // mr={{ base: "0px", md: "25px" }}
-        // pl={{ base: "0px", md: "20px" }}
-        // alignItems="baseline"
-        // maxW="150px"
-        // display="flex"
-        // flexDirection="column"
-        // mr="45px"
         alignSelf="baseline"
         textAlign="left"
         width="150px"
