@@ -4,6 +4,7 @@ import {
   Img,
   Spinner,
   Text,
+  useBreakpointValue,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
@@ -22,6 +23,7 @@ const Entries = () => {
 
   const [editModalOpen, setEditModalOpen] = useState({});
   const [viewModalOpen, setViewModalOpen] = useState({});
+  const isDesktop = useBreakpointValue({ base: false, md: true });
 
   const {
     isOpen: viewIsOpen,
@@ -100,7 +102,7 @@ const Entries = () => {
   ];
 
   return (
-    <Box w="590px" mb="50px">
+    <Box w={isDesktop ? "590px" : "335px"} mb="50px">
       <Text fontSize="40px" textAlign="left">
         Entries
       </Text>
@@ -129,13 +131,15 @@ const Entries = () => {
           );
         })}
       </HStack>
-      <HStack pb="18px">
-        <Text fontSize="20px" w="126px" color="#A0A0A0">
+      <HStack pb="18px" textAlign="left" pl={isDesktop ? "32px" : "25px"}>
+        <Text fontSize="20px" w={isDesktop ? "108px" : "60px"} color="#A0A0A0">
           score
         </Text>
-        <Text fontSize="20px" pl="26px" pr="46px" color="#A0A0A0">
-          hand
-        </Text>
+        {isDesktop && (
+          <Text fontSize="20px" w="117px" color="#A0A0A0">
+            hand
+          </Text>
+        )}
         <Text fontSize="20px" color="#A0A0A0">
           date
         </Text>
@@ -158,24 +162,34 @@ const Entries = () => {
               <HStack
                 key={index}
                 p="12px"
+                pl={isDesktop ? "35px" : "25px"}
                 borderRadius="7px"
                 w="100%"
                 bgColor={index % 2 === 0 && "#3C3D36"}
+                textAlign="left"
               >
-                <Text w="90px" fontSize="20px">
+                <Text w={isDesktop ? "114px" : "60px"} fontSize="20px">
                   {bowl.score}
                 </Text>
-                <Text w="120px" fontSize="20px">
-                  {bowl.throwStyle}
-                </Text>
+                {isDesktop && (
+                  <Text w="120px" fontSize="20px">
+                    {bowl.throwStyle}
+                  </Text>
+                )}
                 <Text
-                  w="150px"
-                  mr={bowl.description ? "80px" : "110px"}
+                  w={isDesktop ? "130px" : "110px"}
+                  mr={
+                    bowl.description && isDesktop
+                      ? "80px"
+                      : isDesktop
+                      ? "110px"
+                      : "15px"
+                  }
                   fontSize="20px"
                 >
                   {bowl.date}
                 </Text>
-                <HStack spacing="10px">
+                <HStack spacing="10px" pr="15px">
                   {bowl.description && (
                     <Img
                       onClick={() => {

@@ -13,7 +13,7 @@ const Stats = () => {
       <FirstStatsBox />
       <SecondStatsBox />
       {isDesktop && <Charts />}
-      {isDesktop && <Entries />}
+      <Entries />
     </Box>
   );
 };
