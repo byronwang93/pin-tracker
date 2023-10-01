@@ -42,14 +42,14 @@ const Leaderboard = () => {
           <Text
             ml="20px"
             fontSize="20px"
-            w={isDesktop ? "142px" : "145px"}
+            w={isDesktop ? "142px" : "123px"}
             color="#A0A0A0"
           >
             name
           </Text>
           <Text
             fontSize="20px"
-            w={isDesktop ? "142px" : "80px"}
+            w={isDesktop ? "142px" : "68px"}
             color="#A0A0A0"
           >
             score
@@ -100,7 +100,7 @@ const Leaderboard = () => {
                 )}
                 <Text
                   textAlign="left"
-                  w={isDesktop ? "350px" : "160px"}
+                  w={isDesktop ? "350px" : "170px"}
                   fontSize="20px"
                 >
                   {game.date}
