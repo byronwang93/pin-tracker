@@ -1,4 +1,10 @@
-import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  Text,
+  useBreakpointValue,
+  VStack,
+} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import {
   globalGetHighestAverageLeaderboard,
@@ -6,6 +12,8 @@ import {
 } from "../firebase/helpers";
 
 const Leaderboard = () => {
+  const isDesktop = useBreakpointValue({ base: false, md: true });
+
   const [games, setGames] = useState([]);
   const [avgs, setAvgs] = useState([]);
 
@@ -24,23 +32,38 @@ const Leaderboard = () => {
   }, []);
 
   return (
-    <Box>
+    <Box textAlign="-webkit-center">
       {/* first table */}
-      <Box w="590px" mb="50px">
+      <Box textAlign="left" w={isDesktop ? "590px" : "350px"} mb="50px">
         <Text fontSize="40px" textAlign="left">
           Single Game
         </Text>
         <HStack ml="10px" pt="10px" pb="15px">
-          <Text ml="31px" fontSize="20px" w="126px" color="#A0A0A0">
+          <Text
+            ml="20px"
+            fontSize="20px"
+            w={isDesktop ? "142px" : "145px"}
+            color="#A0A0A0"
+          >
             name
           </Text>
-          <Text fontSize="20px" pl="36px" pr="43px" color="#A0A0A0">
+          <Text
+            fontSize="20px"
+            w={isDesktop ? "142px" : "80px"}
+            color="#A0A0A0"
+          >
             score
           </Text>
-          <Text fontSize="20px" pr="62px" color="#A0A0A0">
-            hand
-          </Text>
-          <Text fontSize="20px" color="#A0A0A0">
+          {isDesktop && (
+            <Text fontSize="20px" pr="30px" color="#A0A0A0">
+              hand
+            </Text>
+          )}
+          <Text
+            w={isDesktop ? "142px" : "100px"}
+            fontSize="20px"
+            color="#A0A0A0"
+          >
             date
           </Text>
         </HStack>
@@ -51,21 +74,35 @@ const Leaderboard = () => {
                 key={index}
                 pt="25px"
                 pb="25px"
-                pl="10px"
+                pl="30px"
                 borderRadius="7px"
                 w="100%"
                 bgColor={index % 2 === 0 && "#3C3D36"}
               >
-                <Text textAlign="center" w="290px" fontSize="20px">
+                <Text
+                  textAlign="left"
+                  w={isDesktop ? "290px" : "190px"}
+                  fontSize="20px"
+                >
                   {game.name}
                 </Text>
-                <Text textAlign="center" w="120px" fontSize="20px">
+                <Text
+                  textAlign="left"
+                  w={isDesktop ? "290px" : "100px"}
+                  fontSize="20px"
+                >
                   {game.max}
                 </Text>
-                <Text textAlign="center" w="150px" fontSize="20px">
-                  {game.hand}
-                </Text>
-                <Text textAlign="center" w="350px" fontSize="20px">
+                {isDesktop && (
+                  <Text textAlign="left" w="150px" fontSize="20px">
+                    {game.hand}
+                  </Text>
+                )}
+                <Text
+                  textAlign="left"
+                  w={isDesktop ? "350px" : "160px"}
+                  fontSize="20px"
+                >
                   {game.date}
                 </Text>
               </HStack>
@@ -75,18 +112,28 @@ const Leaderboard = () => {
       </Box>
 
       {/* second table */}
-      <Box w="490px" mb="50px">
-        <Text fontSize="40px" textAlign="left">
-          Average Score
-        </Text>
-        <HStack ml="10px" pt="10px" pb="15px">
-          <Text pl="35px" fontSize="20px" w="126px" color="#A0A0A0">
+      <Box w={isDesktop ? "490px" : "335px"} mb="50px" textAlign="left">
+        <Text fontSize="40px">Average Score</Text>
+        <HStack pl="30px" pt="10px" pb="15px">
+          <Text
+            fontSize="20px"
+            w={isDesktop ? "142px" : "145px"}
+            color="#A0A0A0"
+          >
             name
           </Text>
-          <Text fontSize="20px" pl="60px" pr="46px" color="#A0A0A0">
+          <Text
+            fontSize="20px"
+            color="#A0A0A0"
+            w={isDesktop ? "142px" : "145px"}
+          >
             score
           </Text>
-          <Text pl="23px" fontSize="20px" color="#A0A0A0">
+          <Text
+            w={isDesktop ? "142px" : "145px"}
+            fontSize="20px"
+            color="#A0A0A0"
+          >
             games bowled
           </Text>
         </HStack>
@@ -97,22 +144,18 @@ const Leaderboard = () => {
                 key={index}
                 pt="25px"
                 pb="25px"
-                pl="10px"
+                pl="30px"
                 borderRadius="7px"
                 w="100%"
                 bgColor={index % 2 === 0 && "#3C3D36"}
               >
-                <Text pl="40px" w="190px" fontSize="20px">
+                <Text w={isDesktop ? "142px" : "145px"} fontSize="20px">
                   {avg.name}
                 </Text>
-                <Text w="120px" fontSize="20px">
+                <Text w={isDesktop ? "142px" : "145px"} fontSize="20px">
                   {avg.average}
                 </Text>
-                <Text
-                  // textAlign="center"
-                  w="150px"
-                  fontSize="20px"
-                >
+                <Text w={isDesktop ? "142px" : "145px"} fontSize="20px">
                   {avg.gamesBowled}
                 </Text>
               </HStack>
