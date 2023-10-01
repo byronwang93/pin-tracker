@@ -91,6 +91,7 @@ const Entries = () => {
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggle]);
 
   const toggles = [
