@@ -25,6 +25,7 @@ const FirstStatsBox = () => {
   return (
     <Box
       mb="30px"
+      pl={{ base: "42px", md: "0px" }}
       alignItems={{ base: "center", md: "flex-start" }}
       display="flex"
       flexDirection={{ base: "column", md: "row" }}
@@ -37,14 +38,21 @@ const FirstStatsBox = () => {
       borderRadius="10px"
     >
       <Box
-        ml={{ base: "55px", md: "20px" }}
+        // ml={{ base: "55px", md: "20px" }}
+        // alignSelf="baseline"
+        // textAlign="left"
+        // pr={{ base: "0px", md: "10px" }}
+        // mr={{ base: "0px", md: "25px" }}
+        // pl={{ base: "0px", md: "20px" }}
+        // alignItems="baseline"
+        // maxW="150px"
+        // display="flex"
+        // flexDirection="column"
+        // mr="45px"
+        bgColor="purple.200"
         alignSelf="baseline"
         textAlign="left"
-        pr={{ base: "0px", md: "10px" }}
-        mr={{ base: "0px", md: "25px" }}
-        pl={{ base: "0px", md: "20px" }}
-        alignItems="baseline"
-        maxW="150px"
+        width="150px"
         display="flex"
         flexDirection="column"
       >
@@ -56,6 +64,7 @@ const FirstStatsBox = () => {
         </Text>
       </Box>
       <Box
+        bgColor="purple.200"
         alignSelf="baseline"
         textAlign="left"
         maxW="150px"
@@ -70,6 +79,7 @@ const FirstStatsBox = () => {
         </Text>
       </Box>
       <Box
+        bgColor="purple.200"
         alignSelf="baseline"
         maxW="150px"
         textAlign="left"
