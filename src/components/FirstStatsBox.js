@@ -25,7 +25,7 @@ const FirstStatsBox = () => {
   return (
     <Box
       mb="30px"
-      pl={{ base: "42px", md: "0px" }}
+      pl={{ base: "40px", md: "0px" }}
       alignItems={{ base: "center", md: "flex-start" }}
       display="flex"
       flexDirection={{ base: "column", md: "row" }}
@@ -49,7 +49,6 @@ const FirstStatsBox = () => {
         // display="flex"
         // flexDirection="column"
         // mr="45px"
-        bgColor="purple.200"
         alignSelf="baseline"
         textAlign="left"
         width="150px"
@@ -64,7 +63,6 @@ const FirstStatsBox = () => {
         </Text>
       </Box>
       <Box
-        bgColor="purple.200"
         alignSelf="baseline"
         textAlign="left"
         maxW="150px"
@@ -79,7 +77,6 @@ const FirstStatsBox = () => {
         </Text>
       </Box>
       <Box
-        bgColor="purple.200"
         alignSelf="baseline"
         maxW="150px"
         textAlign="left"
