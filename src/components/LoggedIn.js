@@ -64,7 +64,7 @@ const LoggedIn = () => {
           w="30%"
         >
           <Text
-            fontSize="25px"
+            fontSize={{ base: "20px", sm: "25px" }}
             _hover={{ cursor: "pointer" }}
             color={toggle === 0 ? "#FDD468" : "white"}
             onClick={() => {
@@ -75,7 +75,7 @@ const LoggedIn = () => {
             Stats
           </Text>
           <Text
-            fontSize="25px"
+            fontSize={{ base: "20px", sm: "25px" }}
             _hover={{ cursor: "pointer" }}
             color={toggle === 0 ? "white" : "#FDD468"}
             onClick={() => {
@@ -87,7 +87,7 @@ const LoggedIn = () => {
         </Flex>
         <Box pr="40px" w="30%" textAlign="end">
           <Button
-            w="120px"
+            w={{ base: "100px", sm: "120px" }}
             bgColor="#FFF3D2"
             border="2px solid #FDD468"
             _hover={{
@@ -105,7 +105,7 @@ const LoggedIn = () => {
         <Box
           display="flex"
           justifyContent="center"
-          flexDirection="row"
+          flexDirection={{ base: "column", md: "row" }}
           alignItems="center"
           mb="30px"
         >

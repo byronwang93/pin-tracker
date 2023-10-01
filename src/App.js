@@ -1,7 +1,6 @@
 import { Box, ChakraProvider, VStack } from "@chakra-ui/react";
 import React, { useState } from "react";
 import "./App.css";
-import Footer from "./components/Footer";
 import HomePage from "./components/HomePage";
 
 export const SignedInContext = React.createContext();
