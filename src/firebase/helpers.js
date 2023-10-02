@@ -188,7 +188,7 @@ export const allTimeAverageHand = async (uid, hand) => {
 };
 
 export const last10GamesAverage = async (uid) => {
-  const sorted = await sortBowlsScore(uid);
+  const sorted = await sortBowlsDate(uid);
   if (sorted.length === 0) {
     return 0;
   }
