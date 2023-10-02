@@ -28,14 +28,15 @@ const NotLoggedIn = () => {
   return (
     <Box textAlign="-webkit-center" pb="70px">
       <Img
-        maxWidth="1300px"
+        pl="2%"
+        maxWidth="750px"
         minWidth={{ base: "360px", sm: "500px", md: "600px" }}
         boxSize="60%"
-        src="./register-page.png"
+        src="./register-page.gif"
         alt="logo"
       />
       <Button
-        mt="30px"
+        mt="20px"
         size={{ base: "sm", sm: "sm", md: "md", lg: "lg" }}
         onClick={handleClick}
         bg="transparent"
