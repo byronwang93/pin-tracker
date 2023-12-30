@@ -1,4 +1,4 @@
-import { Box, ChakraProvider, VStack } from "@chakra-ui/react";
+import { ChakraProvider, VStack } from "@chakra-ui/react";
 import React, { useState } from "react";
 import "./App.css";
 import BackgroundAnimation from "./components/BackgroundAnimation";
@@ -12,8 +12,6 @@ function App() {
     <ChakraProvider>
       <SignedInContext.Provider value={{ value, setValue }}>
         <VStack
-          // className="background"
-          // backgroundColor="#161919"
           display="flex"
           w="100%"
           minHeight="100vh"
@@ -21,9 +19,6 @@ function App() {
         >
           <HomePage />
           <BackgroundAnimation />
-          {/* <Box pt="40px" position="relative" left="0" bottom="20px" right="0">
-            <Footer />
-          </Box> */}
         </VStack>
       </SignedInContext.Provider>
     </ChakraProvider>
