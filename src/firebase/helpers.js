@@ -105,15 +105,16 @@ export const addBowl = async (uid, data) => {
 };
 
 // stats functions
-export const gamesBowled = async (uid) => {
+export const gamesBowled = async (uid, year) => {
   const user = await getUserData(uid);
-  return user?.bowls.length;
+  const bowls = await getYearBowls(user?.bowls, year);
+  return bowls.length;
 };
 
-export const getHighestGame = async (uid) => {
+export const getHighestGame = async (uid, year) => {
   const user = await getUserData(uid);
 
-  const bowls = user?.bowls;
+  const bowls = await getYearBowls(user?.bowls, year);
   let max = null;
   for (let i = 0; i < bowls.length; i++) {
     const bowl = bowls[i];
@@ -124,10 +125,10 @@ export const getHighestGame = async (uid) => {
   return max;
 };
 
-export const getHighestGameHand = async (uid, hand) => {
+export const getHighestGameHand = async (uid, hand, year) => {
   const user = await getUserData(uid);
 
-  const bowls = user?.bowls;
+  const bowls = await getYearBowls(user?.bowls, year);
   let max = null;
   for (let i = 0; i < bowls.length; i++) {
     const bowl = bowls[i];
@@ -140,9 +141,9 @@ export const getHighestGameHand = async (uid, hand) => {
   return max;
 };
 
-export const allTimeAverage = async (uid) => {
+export const allTimeAverage = async (uid, year) => {
   const user = await getUserData(uid);
-  const bowls = user?.bowls;
+  const bowls = await getYearBowls(user?.bowls, year);
 
   if (bowls === null) {
     return null;
@@ -157,7 +158,7 @@ export const allTimeAverage = async (uid) => {
     res += bowls[i].score;
   }
 
-  let length = await gamesBowled(uid);
+  let length = await gamesBowled(uid, year);
   let result = res / length;
   return +result.toFixed(2);
   // 888.88 = 0px (6)
@@ -165,9 +166,9 @@ export const allTimeAverage = async (uid) => {
   // 888 = 25px (3)
 };
 
-export const allTimeAverageHand = async (uid, hand) => {
+export const allTimeAverageHand = async (uid, hand, year) => {
   const user = await getUserData(uid);
-  const bowls = user?.bowls;
+  const bowls = await getYearBowls(user?.bowls, year);
 
   if (bowls === null) {
     return null;
@@ -187,8 +188,8 @@ export const allTimeAverageHand = async (uid, hand) => {
   return +result.toFixed(2);
 };
 
-export const last10GamesAverage = async (uid) => {
-  const sorted = await sortBowlsDate(uid);
+export const last10GamesAverage = async (uid, year) => {
+  const sorted = await sortBowlsDate(uid, year);
   if (sorted.length === 0) {
     return 0;
   }
@@ -209,8 +210,8 @@ export const last10GamesAverage = async (uid) => {
   return res;
 };
 
-export const last10GamesHandAverage = async (uid, hand) => {
-  const sorted = await sortBowlsDate(uid);
+export const last10GamesHandAverage = async (uid, hand, year) => {
+  const sorted = await sortBowlsDate(uid, year);
 
   if (sorted.length === 0) return 0;
   let res = 0;
@@ -234,9 +235,9 @@ export const last10GamesHandAverage = async (uid, hand) => {
 };
 
 // ranking functions
-export const sortBowlsScore = async (uid) => {
+export const sortBowlsScore = async (uid, year) => {
   const user = await getUserData(uid);
-  const bowls = user?.bowls;
+  const bowls = await getYearBowls(user?.bowls, year);
 
   if (bowls) {
     const sorted = bowls
@@ -249,9 +250,9 @@ export const sortBowlsScore = async (uid) => {
   } else return [];
 };
 
-export const sortBowlsDate = async (uid) => {
+export const sortBowlsDate = async (uid, year) => {
   const user = await getUserData(uid);
-  const bowls = user?.bowls;
+  const bowls = await getYearBowls(user?.bowls, year);
 
   if (bowls) {
     const sorted = bowls
@@ -264,10 +265,10 @@ export const sortBowlsDate = async (uid) => {
   } else return [];
 };
 
-export const getHighestGameDataLeaderboard = async (uid) => {
+export const getHighestGameDataLeaderboard = async (uid, year) => {
   const user = await getUserData(uid);
 
-  const bowls = user?.bowls;
+  const bowls = await getYearBowls(user?.bowls, year);
   let data = {};
   let max = null;
   let hand = null;
@@ -290,9 +291,9 @@ export const getHighestGameDataLeaderboard = async (uid) => {
   return data;
 };
 
-export const getAverageDataLeaderboard = async (uid) => {
+export const getAverageDataLeaderboard = async (uid, year) => {
   const user = await getUserData(uid);
-  const bowls = user?.bowls;
+  const bowls = await getYearBowls(user?.bowls, year);
 
   if (bowls === null) {
     return null;
@@ -311,7 +312,7 @@ export const getAverageDataLeaderboard = async (uid) => {
     res += bowls[i].score;
   }
 
-  let length = await gamesBowled(uid);
+  let length = await gamesBowled(uid, year);
   let result = res / length;
 
   let data = {
@@ -327,7 +328,7 @@ export const getAverageDataLeaderboard = async (uid) => {
 };
 
 // global users
-export const globalGetHighestGameLeaderboard = async () => {
+export const globalGetHighestGameLeaderboard = async (year) => {
   const querySnapshot = await getDocs(collection(db, "users"));
 
   const users = [];
@@ -340,7 +341,7 @@ export const globalGetHighestGameLeaderboard = async () => {
 
   for (let i = 0; i < users.length; i++) {
     const { uid } = users[i];
-    const data = await getHighestGameDataLeaderboard(uid.stringValue);
+    const data = await getHighestGameDataLeaderboard(uid.stringValue, year);
 
     usersData.push(data);
   }
@@ -354,7 +355,7 @@ export const globalGetHighestGameLeaderboard = async () => {
   return filteredData;
 };
 
-export const globalGetHighestAverageLeaderboard = async () => {
+export const globalGetHighestAverageLeaderboard = async (year) => {
   const querySnapshot = await getDocs(collection(db, "users"));
 
   const users = [];
@@ -367,7 +368,7 @@ export const globalGetHighestAverageLeaderboard = async () => {
 
   for (let i = 0; i < users.length; i++) {
     const { uid } = users[i];
-    const data = await getAverageDataLeaderboard(uid.stringValue);
+    const data = await getAverageDataLeaderboard(uid.stringValue, year);
 
     usersData.push(data);
   }
@@ -383,4 +384,29 @@ export const globalGetHighestAverageLeaderboard = async () => {
   console.log(filteredData, " FILTERED");
 
   return filteredData;
+};
+
+// year functions
+export const getYearBowls = async (bowls, year) => {
+  if (year === "all-time") return bowls;
+  const filteredBowls = bowls.filter(
+    (bowl) => bowl?.date.split("-")[0] === year
+  );
+  return filteredBowls;
+};
+
+export const getYearValues = async (uid) => {
+  const user = await getUserData(uid);
+  const bowls = user?.bowls;
+  console.log(bowls, " is the bowls");
+  const years = ["all-time"];
+
+  for (let i = bowls.length - 1; i > 0; i--) {
+    const curr = bowls[i];
+    const date = curr?.date.split("-")[0];
+    if (!years.includes(date)) years.push(date);
+  }
+  console.log(years, " is years");
+
+  return years;
 };
