@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
 import { gamesBowled, getHighestGameHand } from "../firebase/helpers";
 
-const FirstStatsBox = () => {
+const FirstStatsBox = ({ year }) => {
   const { value } = useContext(SignedInContext);
   const [totalGames, setTotalGames] = useState(0);
   const [highestOne, setHighestOne] = useState(null);
@@ -11,17 +11,17 @@ const FirstStatsBox = () => {
 
   useEffect(() => {
     const setData = async () => {
-      const games = await gamesBowled(value);
+      const games = await gamesBowled(value, year);
       setTotalGames(games);
-      const highOne = await getHighestGameHand(value, 1);
+      const highOne = await getHighestGameHand(value, 1, year);
       setHighestOne(highOne);
-      const highTwo = await getHighestGameHand(value, 2);
+      const highTwo = await getHighestGameHand(value, 2, year);
       setHighestTwo(highTwo);
     };
 
     setData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [year]);
 
   return (
     <Box

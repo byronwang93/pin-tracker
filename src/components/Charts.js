@@ -33,13 +33,13 @@ function CustomToolTip({ active, payload }) {
   return null;
 }
 
-const Charts = () => {
+const Charts = ({ year }) => {
   const { value } = useContext(SignedInContext);
   const [data, setNewData] = useState([]);
 
   useEffect(() => {
     const setData = async () => {
-      const bowls = await sortBowlsDate(value);
+      const bowls = await sortBowlsDate(value, year);
       const newBowls = [];
 
       for (let i = bowls.length - 1; i >= 0; i--) {
@@ -57,7 +57,7 @@ const Charts = () => {
     };
     setData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  }, [value, year]);
 
   return (
     <Box position="relative" right="10px" pt="40px" pb="40px" w="100%">

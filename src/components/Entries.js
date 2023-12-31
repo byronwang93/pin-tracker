@@ -22,7 +22,7 @@ import { deleteBowl, sortBowlsDate, sortBowlsScore } from "../firebase/helpers";
 import EditBowlModal from "./EditBowlModal";
 import ViewBowlModal from "./ViewBowlModal";
 
-const Entries = () => {
+const Entries = ({ year }) => {
   const { value } = useContext(SignedInContext);
   const [toggle, setToggle] = useState(0);
   const [bowls, setBowls] = useState([]);
@@ -94,9 +94,9 @@ const Entries = () => {
   const getBowls = async () => {
     let temp = [];
     if (toggle === 0) {
-      temp = await sortBowlsDate(value);
+      temp = await sortBowlsDate(value, year);
     } else {
-      temp = await sortBowlsScore(value);
+      temp = await sortBowlsScore(value, year);
     }
 
     setBowls(temp);
@@ -109,9 +109,9 @@ const Entries = () => {
       try {
         let temp = [];
         if (toggle === 0) {
-          temp = await sortBowlsDate(value);
+          temp = await sortBowlsDate(value, year);
         } else {
-          temp = await sortBowlsScore(value);
+          temp = await sortBowlsScore(value, year);
         }
 
         setBowls(temp);
@@ -124,7 +124,7 @@ const Entries = () => {
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toggle]);
+  }, [toggle, year]);
 
   const toggles = [
     { text: "Date", setting: 0 },
