@@ -398,7 +398,6 @@ export const getYearBowls = async (bowls, year) => {
 export const getYearValues = async (uid) => {
   const user = await getUserData(uid);
   const bowls = user?.bowls;
-  console.log(bowls, " is the bowls");
   const years = ["all-time"];
 
   for (let i = bowls.length - 1; i > 0; i--) {
@@ -406,7 +405,6 @@ export const getYearValues = async (uid) => {
     const date = curr?.date.split("-")[0];
     if (!years.includes(date)) years.push(date);
   }
-  console.log(years, " is years");
 
   return years;
 };
