@@ -34,11 +34,7 @@ const Entries = ({ year }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState({});
   const isDesktop = useBreakpointValue({ base: false, md: true });
 
-  const {
-    isOpen: viewIsOpen,
-    onOpen: viewOnOpen,
-    onClose: viewOnClose,
-  } = useDisclosure();
+  const { isOpen: viewIsOpen, onClose: viewOnClose } = useDisclosure();
 
   const { onClose: alertOnClose } = useDisclosure();
 

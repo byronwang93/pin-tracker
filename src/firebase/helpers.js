@@ -1,11 +1,4 @@
-import {
-  addDoc,
-  getDoc,
-  getDocs,
-  doc,
-  collection,
-  setDoc,
-} from "@firebase/firestore";
+import { getDoc, getDocs, doc, collection, setDoc } from "@firebase/firestore";
 import { db } from "./config";
 
 // user functions
