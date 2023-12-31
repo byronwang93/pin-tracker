@@ -8,7 +8,7 @@ import {
   last10GamesHandAverage,
 } from "../firebase/helpers";
 
-const SecondStatsBox = () => {
+const SecondStatsBox = ({ year }) => {
   const { value } = useContext(SignedInContext);
 
   const [average, setAverage] = useState(null);
@@ -21,28 +21,28 @@ const SecondStatsBox = () => {
 
   useEffect(() => {
     const setData = async () => {
-      const tempAvg = await allTimeAverage(value);
+      const tempAvg = await allTimeAverage(value, year);
       setAverage(tempAvg);
 
-      const tempOneAvg = await allTimeAverageHand(value, 1);
+      const tempOneAvg = await allTimeAverageHand(value, 1, year);
       setOneAverage(tempOneAvg);
 
-      const tempTwoAvg = await allTimeAverageHand(value, 2);
+      const tempTwoAvg = await allTimeAverageHand(value, 2, year);
       setTwoAverage(tempTwoAvg);
 
-      const temp10Avg = await last10GamesAverage(value);
+      const temp10Avg = await last10GamesAverage(value, year);
       setLast10Average(temp10Avg);
 
-      const temp10OneAvg = await last10GamesHandAverage(value, 1);
+      const temp10OneAvg = await last10GamesHandAverage(value, 1, year);
       setLast10OneAverage(temp10OneAvg);
 
-      const temp10TwoAvg = await last10GamesHandAverage(value, 2);
+      const temp10TwoAvg = await last10GamesHandAverage(value, 2, year);
       setLast10TwoAverage(temp10TwoAvg);
     };
 
     setData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [year]);
 
   return (
     <Box
