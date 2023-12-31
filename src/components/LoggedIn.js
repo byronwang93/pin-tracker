@@ -5,12 +5,14 @@ import {
   Flex,
   HStack,
   Img,
+  Select,
   Text,
   useDisclosure,
+  VStack,
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
-import { getUserData } from "../firebase/helpers";
+import { getUserData, getYearValues } from "../firebase/helpers";
 import AddBowlModal from "./AddBowlModal";
 import Stats from "./Stats";
 import Leaderboard from "./Leaderboard";
@@ -21,8 +23,19 @@ const LoggedIn = () => {
 
   const [user, setUser] = useState(null);
   const [loadingCheck, setLoadingCheck] = useState(false);
+  const [year, setYear] = useState("all-time");
+  const [yearsList, setYearsList] = useState([]);
 
   const [toggle, setToggle] = useState(0);
+
+  useEffect(() => {
+    const getYears = async () => {
+      const years = await getYearValues(value);
+      setYearsList(years);
+    };
+
+    getYears();
+  }, [value]);
 
   useEffect(() => {
     const getUserDetails = async () => {
@@ -39,6 +52,11 @@ const LoggedIn = () => {
     fetchUser();
     console.log("user is fetched");
   }, [value, loadingCheck]);
+
+  const handleYearChange = (event) => {
+    const selectedValue = event.target.value;
+    setYear(selectedValue);
+  };
 
   const logout = () => {
     console.log("logging out!");
@@ -101,36 +119,48 @@ const LoggedIn = () => {
         </Box>
       </HStack>
 
-      <Box textAlign="center" pb="30px">
-        <Box
-          display="flex"
-          justifyContent="center"
-          flexDirection={{ base: "column", md: "row" }}
-          alignItems="center"
-          mb="30px"
-        >
-          <Avatar boxSize="90px" src={user?.photoURL} alt="profile" />
-          <Text pl="20px" fontSize="30px">
-            Welcome {user?.firstName}
-          </Text>
+      <VStack>
+        <Box textAlign="center" pb="17px">
+          <Box
+            display="flex"
+            justifyContent="center"
+            flexDirection={{ base: "column", md: "row" }}
+            alignItems="center"
+            mb="30px"
+          >
+            <Avatar boxSize="90px" src={user?.photoURL} alt="profile" />
+            <Text pl="20px" fontSize="30px">
+              Welcome {user?.firstName}
+            </Text>
+          </Box>
+          <Button
+            onClick={onOpen}
+            bgColor="#FFF3D2"
+            border="2px solid #FDD468"
+            _hover={{
+              bgColor: "#E6DBBF",
+            }}
+          >
+            {" "}
+            <Text fontSize="20px" color="black" pr="6px">
+              +
+            </Text>{" "}
+            Upload Bowl
+          </Button>
+          <AddBowlModal isOpen={isOpen} onClose={onClose} />
         </Box>
-        <Button
-          onClick={onOpen}
-          bgColor="#FFF3D2"
-          border="2px solid #FDD468"
-          _hover={{
-            bgColor: "#E6DBBF",
-          }}
-        >
-          {" "}
-          <Text fontSize="20px" color="black" pr="6px">
-            +
-          </Text>{" "}
-          Upload Bowl
-        </Button>
-        <AddBowlModal isOpen={isOpen} onClose={onClose} />
-      </Box>
-      {toggle === 0 ? <Stats /> : <Leaderboard />}
+
+        <Select mb="20px" w="200px" value={year} onChange={handleYearChange}>
+          {yearsList.map((year, id) => {
+            return (
+              <option value={year} key={id}>
+                {year}
+              </option>
+            );
+          })}
+        </Select>
+      </VStack>
+      {toggle === 0 ? <Stats year={year} /> : <Leaderboard year={year} />}
     </Flex>
   );
 };
