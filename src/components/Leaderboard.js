@@ -12,7 +12,7 @@ import {
   globalGetHighestGameLeaderboard,
 } from "../firebase/helpers";
 
-const Leaderboard = () => {
+const Leaderboard = ({ year }) => {
   const isDesktop = useBreakpointValue({ base: false, md: true });
 
   const [games, setGames] = useState([]);
@@ -25,8 +25,8 @@ const Leaderboard = () => {
 
     const getData = async () => {
       try {
-        const gamesData = await globalGetHighestGameLeaderboard();
-        const avgData = await globalGetHighestAverageLeaderboard();
+        const gamesData = await globalGetHighestGameLeaderboard(year);
+        const avgData = await globalGetHighestAverageLeaderboard(year);
 
         setGames(gamesData);
         setAvgs(avgData);
@@ -41,12 +41,12 @@ const Leaderboard = () => {
     console.log(games, " is games");
     console.log(avgs, " is avgs");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [year]);
 
   return (
     <Box>
       {loading ? (
-        <Spinner size="xl" />
+        <Spinner color="#FDD468" size="xl" />
       ) : (
         <Box textAlign="-webkit-center">
           {/* first table */}
