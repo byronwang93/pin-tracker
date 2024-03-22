@@ -42,6 +42,7 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
     setThrowStyle(oldThrowStyle);
     setDate(oldDate);
     setDescription(oldDescription);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const styles = [
