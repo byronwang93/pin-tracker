@@ -46,7 +46,7 @@ export const editBowl = async (id, uid, newData) => {
 
   const updatedBowls = bowls.map((bowl) => {
     if (bowl.id === id) {
-      console.log(bowl, " is the old bowl");
+      console.log(bowl, " is old bowl");
       console.log("gonna be replaced by ", newData);
       return newData;
     } else {
