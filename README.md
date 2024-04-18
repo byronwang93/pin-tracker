@@ -1,1 +1,9 @@
-I've been getting into competitive-ish bowling lately and wanted to keep track of my improvements. This is a project designed to do just that! The landing page prompts you to log in with a google account so anyone can use this too if they were curious about their scores.
+As of September 2023, I got into the competitive side of bowling, and as a result, I wanted a platform to track my stats over time. If you're like me, rest assured because this is why I created Pin Tracker! An application created to track your bowling progression, keeping note of the following (all of which can be separated based on throwing style):
+- personal best
+- average every year
+- a chart visualizing your progress
+- ability to sort your bowls based off of score or date
+
+Additionally, I implemented a leaderboard functionality to allow you to track the progression of your friends too.
+
+Pin Tracker is free to use, allowing you to quickly sign in through google. You can visit the site now here! https://byronwang93.github.io/pin-tracker/
