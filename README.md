@@ -7,3 +7,10 @@ As of September 2023, I got into the competitive side of bowling, and as a resul
 Additionally, I implemented a leaderboard functionality to allow you to track the progression of your friends too.
 
 Pin Tracker is free to use, allowing you to quickly sign in through google. You can visit the site now here! https://byronwang93.github.io/pin-tracker/
+
+Sneakpeak of the mentioned features :)
+
+
+https://github.com/byronwang93/pin-tracker/assets/84694517/bc8a8a21-743b-45a0-a699-9bd9e7335a78
+
+
