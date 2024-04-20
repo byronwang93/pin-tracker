@@ -8,6 +8,14 @@ Additionally, I implemented a leaderboard functionality to allow you to track th
 
 Pin Tracker is free to use, allowing you to quickly sign in through google. You can visit the site now here! https://byronwang93.github.io/pin-tracker/
 
+✅ Feature log:
+- Dec 2023: Implemented separate year feature
+- Oct 1: Finished base + deployed
+
+👨‍💻 Incoming:
+- League bowling tracker
+- More stats for your bowls (for example spare rate + which pins you leave up more)
+
 Sneakpeak of the mentioned features :)
 
 
