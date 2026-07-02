@@ -5,6 +5,7 @@ import React from "react";
 // stats and entries update without a page reload.
 export const BowlsContext = React.createContext({
   bowls: [],
+  practiceSessions: [],
   loading: false,
   refetch: () => {},
 });

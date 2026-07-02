@@ -24,6 +24,7 @@ export const addUser = async (uid, name, email, photoURL) => {
       uid: uid,
       photoURL: photoURL,
       bowls: [],
+      practiceSessions: [],
       average: null,
       highestGame: null,
     };
@@ -75,6 +76,50 @@ export const addBowl = async (uid, data) => {
     await setDoc(docRef, { bowls: updatedBowls }, { merge: true });
   } catch (error) {
     console.error("error adding bowl: ", error);
+  }
+};
+
+export const addPracticeSession = async (uid, data) => {
+  const userData = await getUserData(uid);
+  const practiceSessions = userData?.practiceSessions ?? [];
+  const updatedSessions = [...practiceSessions, data];
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { practiceSessions: updatedSessions }, { merge: true });
+  } catch (error) {
+    console.error("error adding practice session: ", error);
+    // Re-thrown (unlike addBowl) so the caller can tell a save actually
+    // failed and keep its offline draft instead of discarding it.
+    throw error;
+  }
+};
+
+export const editPracticeSession = async (id, uid, newData) => {
+  const userData = await getUserData(uid);
+  const practiceSessions = userData?.practiceSessions ?? [];
+  const updatedSessions = practiceSessions.map((session) =>
+    session.id === id ? newData : session
+  );
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { practiceSessions: updatedSessions }, { merge: true });
+  } catch (error) {
+    console.error("error editing practice session: ", error);
+  }
+};
+
+export const deletePracticeSession = async (id, uid) => {
+  const userData = await getUserData(uid);
+  const practiceSessions = userData?.practiceSessions ?? [];
+  const updatedSessions = practiceSessions.filter((session) => session.id !== id);
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { practiceSessions: updatedSessions }, { merge: true });
+  } catch (error) {
+    console.error("error deleting practice session: ", error);
   }
 };
 

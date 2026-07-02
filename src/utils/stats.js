@@ -92,3 +92,154 @@ export const averageData = (bowls = [], name) => {
   if (bowls.length === 0) return { name, average: null, gamesBowled: null };
   return { name, average: average(bowls), gamesBowled: bowls.length };
 };
+
+// --- Spare shooting (Comp mode) ---
+// A "leave" is the set of pins left standing after ball 1 that a bowler is
+// trying to convert into a spare. Attempts come from two sources that must
+// stay separate in stats: real leaves from Live Game frames ("game"), and
+// deliberate drills from Spare Shooting sessions ("practice") — a drill rep
+// is easier than a real in-game leave, so blending them would be misleading.
+
+export const leaveKey = (pins = []) =>
+  [...pins].sort((a, b) => a - b).join("-");
+
+export const leaveLabel = (pins = []) =>
+  pins.length === 1 ? `${pins[0]}-pin` : `${[...pins].sort((a, b) => a - b).join("-")} split`;
+
+export const practiceAttempts = (practiceSessions = []) =>
+  practiceSessions.flatMap((session) =>
+    (session.reps ?? []).map((rep) => ({
+      pins: rep.pins,
+      made: rep.made,
+      source: "practice",
+      date: session.date,
+    }))
+  );
+
+const ALL_PINS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+// No bowl has `frames` data yet (Live Game isn't built) — this stays a safe
+// no-op until then, at which point every leave a bowler faces mid-game
+// starts flowing into these same stats automatically.
+export const gameAttempts = (bowls = []) =>
+  bowls.flatMap((bowl) => {
+    if (!Array.isArray(bowl.frames)) return [];
+    return bowl.frames.flatMap((frame) => {
+      const [roll1, roll2] = frame.rolls ?? [];
+      if (!roll1 || !roll2 || roll1.pinsDown?.length === 10) return [];
+      const leave = ALL_PINS.filter((pin) => !roll1.pinsDown.includes(pin));
+      const made = leave.every((pin) => roll2.pinsDown.includes(pin));
+      return [{ pins: leave, made, source: "game", date: bowl.date }];
+    });
+  });
+
+const spareAttempts = (bowls, practiceSessions) => [
+  ...gameAttempts(bowls),
+  ...practiceAttempts(practiceSessions),
+];
+
+export const spareConversionStats = (bowls = [], practiceSessions = []) => {
+  const byKey = {};
+  for (const attempt of spareAttempts(bowls, practiceSessions)) {
+    const key = leaveKey(attempt.pins);
+    if (!byKey[key]) {
+      byKey[key] = {
+        key,
+        pins: [...attempt.pins].sort((a, b) => a - b),
+        gameAttempts: 0,
+        gameMade: 0,
+        practiceAttempts: 0,
+        practiceMade: 0,
+      };
+    }
+    const row = byKey[key];
+    if (attempt.source === "game") {
+      row.gameAttempts += 1;
+      if (attempt.made) row.gameMade += 1;
+    } else {
+      row.practiceAttempts += 1;
+      if (attempt.made) row.practiceMade += 1;
+    }
+  }
+
+  const toPct = (made, total) => (total ? +((made / total) * 100).toFixed(1) : null);
+
+  return Object.values(byKey)
+    .map((row) => ({
+      ...row,
+      gamePct: toPct(row.gameMade, row.gameAttempts),
+      practicePct: toPct(row.practiceMade, row.practiceAttempts),
+    }))
+    .sort(
+      (a, b) =>
+        b.gameAttempts + b.practiceAttempts - (a.gameAttempts + a.practiceAttempts)
+    );
+};
+
+// Current streak (and worst-ever miss streak) per leave, so a bad run on one
+// specific pin stands out instead of getting averaged away.
+export const spareStreaks = (bowls = [], practiceSessions = []) => {
+  const attempts = [...spareAttempts(bowls, practiceSessions)].sort((a, b) =>
+    a.date < b.date ? -1 : a.date > b.date ? 1 : 0
+  );
+
+  const byKey = {};
+  for (const attempt of attempts) {
+    const key = leaveKey(attempt.pins);
+    if (!byKey[key]) {
+      byKey[key] = {
+        key,
+        pins: [...attempt.pins].sort((a, b) => a - b),
+        current: null,
+        longestMissStreak: 0,
+        _runningMissStreak: 0,
+      };
+    }
+    const row = byKey[key];
+    const result = attempt.made ? "made" : "missed";
+    row.current =
+      row.current?.result === result
+        ? { result, count: row.current.count + 1 }
+        : { result, count: 1 };
+    row._runningMissStreak = result === "missed" ? row._runningMissStreak + 1 : 0;
+    row.longestMissStreak = Math.max(row.longestMissStreak, row._runningMissStreak);
+  }
+
+  return Object.values(byKey).map(({ _runningMissStreak, ...row }) => row);
+};
+
+// Monday of the week containing `dateStr`, used as a chart bucket key.
+const weekBucket = (dateStr) => {
+  const date = new Date(`${dateStr}T00:00:00`);
+  const day = date.getDay();
+  date.setDate(date.getDate() - ((day + 6) % 7));
+  return date.toISOString().split("T")[0];
+};
+
+export const spareTrendOverTime = (bowls = [], practiceSessions = []) => {
+  const buckets = {};
+  for (const attempt of spareAttempts(bowls, practiceSessions)) {
+    const week = weekBucket(attempt.date);
+    if (!buckets[week]) {
+      buckets[week] = {
+        game: { made: 0, total: 0 },
+        practice: { made: 0, total: 0 },
+      };
+    }
+    const bucket = buckets[week][attempt.source];
+    bucket.total += 1;
+    if (attempt.made) bucket.made += 1;
+  }
+
+  const weeks = Object.keys(buckets).sort();
+  const toPct = (b) => (b.total ? +((b.made / b.total) * 100).toFixed(1) : null);
+
+  return {
+    game: weeks
+      .filter((week) => buckets[week].game.total > 0)
+      .map((week) => ({ period: week, pct: toPct(buckets[week].game) })),
+    practice: weeks
+      .filter((week) => buckets[week].practice.total > 0)
+      .map((week) => ({ period: week, pct: toPct(buckets[week].practice) })),
+  };
+};
