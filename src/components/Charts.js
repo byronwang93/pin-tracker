@@ -1,5 +1,5 @@
 import { Box, Text } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useMemo } from "react";
 import {
   LineChart,
   CartesianGrid,
@@ -8,9 +8,10 @@ import {
   Label,
   Tooltip,
   Line,
+  ResponsiveContainer,
 } from "recharts";
-import { SignedInContext } from "../App";
-import { sortBowlsDate } from "../firebase/helpers";
+import { BowlsContext } from "../context/BowlsContext";
+import { filterByYear, sortByDate, throwStyleLabel } from "../utils/stats";
 
 function CustomToolTip({ active, payload }) {
   if (active && payload && payload.length) {
@@ -25,7 +26,7 @@ function CustomToolTip({ active, payload }) {
       >
         <Text>{`Score: ${dataPoint.value}`}</Text>
         <Text>{`Date: ${dataPoint.name}`}</Text>
-        <Text>{`ThrowStyle: ${dataPoint.throwStyle}`}</Text>
+        <Text>{`Throw style: ${throwStyleLabel(dataPoint.throwStyle)}`}</Text>
       </Box>
     );
   }
@@ -34,61 +35,48 @@ function CustomToolTip({ active, payload }) {
 }
 
 const Charts = ({ year }) => {
-  const { value } = useContext(SignedInContext);
-  const [data, setNewData] = useState([]);
+  const { bowls } = useContext(BowlsContext);
 
-  useEffect(() => {
-    const setData = async () => {
-      const bowls = await sortBowlsDate(value, year);
-      const newBowls = [];
-
-      for (let i = bowls.length - 1; i >= 0; i--) {
-        const { date, score, throwStyle } = bowls[i];
-        let newData = {
-          name: date,
-          value: score,
-          throwStyle: throwStyle,
-        };
-
-        newBowls.push(newData);
-      }
-
-      setNewData(newBowls);
-    };
-    setData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, year]);
+  // oldest -> newest so the line reads left-to-right chronologically
+  const data = useMemo(() => {
+    const yearBowls = sortByDate(filterByYear(bowls, year));
+    return yearBowls
+      .map(({ date, score, throwStyle }) => ({
+        name: date,
+        value: score,
+        throwStyle,
+      }))
+      .reverse();
+  }, [bowls, year]);
 
   return (
-    <Box position="relative" right="10px" pt="40px" pb="40px" w="100%">
-      <Text pos="relative" right="225px" pb="20px" fontSize="40px">
+    <Box pt="40px" pb="40px" w="100%" maxW="700px">
+      <Text pb="20px" fontSize="40px" textAlign="left">
         Charts
       </Text>
-      <LineChart
-        width={650}
-        height={300}
-        data={data}
-        padding={{ top: 5, right: 30, left: 20, bottom: 20 }}
-        margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
-      >
-        <Line
-          strokeWidth="2px"
-          type="monotone"
-          dataKey="value"
-          // stroke="#8884d8"
-          stroke="#FFE9B0"
-          activeDot={{ r: 4 }}
-        />
-        <CartesianGrid stroke="#ccc" />
-        <Tooltip content={<CustomToolTip />} />
-        <XAxis margin="5px" dataKey="name">
-          <Label value="Bowls" offset={-10} position="insideBottom" />
-        </XAxis>
-        <YAxis
-          domain={[0, 300]}
-          label={{ value: "Score", angle: -90, position: "insideLeft" }}
-        />
-      </LineChart>
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart
+          data={data}
+          margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
+        >
+          <Line
+            strokeWidth="2px"
+            type="monotone"
+            dataKey="value"
+            stroke="#FFE9B0"
+            activeDot={{ r: 4 }}
+          />
+          <CartesianGrid stroke="#ccc" />
+          <Tooltip content={<CustomToolTip />} />
+          <XAxis margin="5px" dataKey="name">
+            <Label value="Bowls" offset={-10} position="insideBottom" />
+          </XAxis>
+          <YAxis
+            domain={[0, 300]}
+            label={{ value: "Score", angle: -90, position: "insideLeft" }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
     </Box>
   );
 };

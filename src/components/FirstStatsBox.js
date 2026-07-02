@@ -1,27 +1,19 @@
 import { Box, Text } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
-import { SignedInContext } from "../App";
-import { gamesBowled, getHighestGameHand } from "../firebase/helpers";
+import React, { useContext, useMemo } from "react";
+import { BowlsContext } from "../context/BowlsContext";
+import { filterByYear, gamesBowled, highestGame } from "../utils/stats";
 
 const FirstStatsBox = ({ year }) => {
-  const { value } = useContext(SignedInContext);
-  const [totalGames, setTotalGames] = useState(0);
-  const [highestOne, setHighestOne] = useState(null);
-  const [highestTwo, setHighestTwo] = useState(null);
+  const { bowls } = useContext(BowlsContext);
 
-  useEffect(() => {
-    const setData = async () => {
-      const games = await gamesBowled(value, year);
-      setTotalGames(games);
-      const highOne = await getHighestGameHand(value, 1, year);
-      setHighestOne(highOne);
-      const highTwo = await getHighestGameHand(value, 2, year);
-      setHighestTwo(highTwo);
+  const { totalGames, highestOne, highestTwo } = useMemo(() => {
+    const yearBowls = filterByYear(bowls, year);
+    return {
+      totalGames: gamesBowled(yearBowls),
+      highestOne: highestGame(yearBowls, 1),
+      highestTwo: highestGame(yearBowls, 2),
     };
-
-    setData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [year]);
+  }, [bowls, year]);
 
   return (
     <Box

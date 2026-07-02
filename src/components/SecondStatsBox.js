@@ -1,48 +1,33 @@
 import { Box, Text } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
-import { SignedInContext } from "../App";
+import React, { useContext, useMemo } from "react";
+import { BowlsContext } from "../context/BowlsContext";
 import {
-  allTimeAverage,
-  allTimeAverageHand,
-  last10GamesAverage,
-  last10GamesHandAverage,
-} from "../firebase/helpers";
+  average as avg,
+  filterByYear,
+  last10Average as last10Avg,
+} from "../utils/stats";
 
 const SecondStatsBox = ({ year }) => {
-  const { value } = useContext(SignedInContext);
+  const { bowls } = useContext(BowlsContext);
 
-  const [average, setAverage] = useState(null);
-  const [oneAverage, setOneAverage] = useState(null);
-  const [twoAverage, setTwoAverage] = useState(null);
-
-  const [last10Average, setLast10Average] = useState(null);
-  const [last10OneAverage, setLast10OneAverage] = useState(null);
-  const [last10TwoAverage, setLast10TwoAverage] = useState(null);
-
-  useEffect(() => {
-    const setData = async () => {
-      const tempAvg = await allTimeAverage(value, year);
-      setAverage(tempAvg);
-
-      const tempOneAvg = await allTimeAverageHand(value, 1, year);
-      setOneAverage(tempOneAvg);
-
-      const tempTwoAvg = await allTimeAverageHand(value, 2, year);
-      setTwoAverage(tempTwoAvg);
-
-      const temp10Avg = await last10GamesAverage(value, year);
-      setLast10Average(temp10Avg);
-
-      const temp10OneAvg = await last10GamesHandAverage(value, 1, year);
-      setLast10OneAverage(temp10OneAvg);
-
-      const temp10TwoAvg = await last10GamesHandAverage(value, 2, year);
-      setLast10TwoAverage(temp10TwoAvg);
+  const {
+    average,
+    oneAverage,
+    twoAverage,
+    last10Average,
+    last10OneAverage,
+    last10TwoAverage,
+  } = useMemo(() => {
+    const yearBowls = filterByYear(bowls, year);
+    return {
+      average: avg(yearBowls),
+      oneAverage: avg(yearBowls, 1),
+      twoAverage: avg(yearBowls, 2),
+      last10Average: last10Avg(yearBowls),
+      last10OneAverage: last10Avg(yearBowls, 1),
+      last10TwoAverage: last10Avg(yearBowls, 2),
     };
-
-    setData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [year]);
+  }, [bowls, year]);
 
   return (
     <Box

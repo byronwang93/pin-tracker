@@ -17,17 +17,19 @@ import {
 } from "@chakra-ui/react";
 import React, { useContext, useState } from "react";
 import { SignedInContext } from "../App";
+import { BowlsContext } from "../context/BowlsContext";
 import { addBowl } from "../firebase/helpers";
 import { v4 } from "uuid";
 
 const AddBowlModal = ({ isOpen, onClose }) => {
   const { value } = useContext(SignedInContext);
+  const { refetch } = useContext(BowlsContext);
   const toast = useToast();
 
-  const [score, setScore] = useState(null);
+  const [score, setScore] = useState("");
   const [throwStyle, setThrowStyle] = useState(1);
   const [description, setDescription] = useState("");
-  const [date, setDate] = useState(null);
+  const [date, setDate] = useState("");
 
   const [buttonClicked, setButtonClicked] = useState(false);
 
@@ -51,11 +53,12 @@ const AddBowlModal = ({ isOpen, onClose }) => {
       };
 
       await addBowl(value, data);
+      await refetch();
 
-      setScore(null);
+      setScore("");
       setDescription("");
       setThrowStyle(1);
-      setDate(null);
+      setDate("");
       onClose();
       toast({
         description: "Bowl Saved!",
@@ -72,10 +75,10 @@ const AddBowlModal = ({ isOpen, onClose }) => {
       <Modal
         isOpen={isOpen}
         onClose={() => {
-          setScore(null);
+          setScore("");
           setDescription("");
           setThrowStyle(1);
-          setDate(null);
+          setDate("");
           onClose();
         }}
         width="100%"
@@ -158,11 +161,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
             <ModalFooter width="100%">
               <Button
                 isDisabled={
-                  score === null ||
-                  score === "" ||
-                  date === null ||
-                  score > 300 ||
-                  buttonClicked
+                  score === "" || date === "" || score > 300 || buttonClicked
                 }
                 bgColor="#84876F"
                 color="white"

@@ -32,7 +32,7 @@ const NotLoggedIn = () => {
         maxWidth="750px"
         minWidth={{ base: "360px", sm: "500px", md: "600px" }}
         boxSize="60%"
-        src="./register-page.gif"
+        src={`${process.env.PUBLIC_URL}/register-page.gif`}
         alt="logo"
       />
       <Button
@@ -47,7 +47,7 @@ const NotLoggedIn = () => {
         _focus={{ boxShadow: "none" }}
         outline="none"
       >
-        <Img src="./google-logo-again.png" boxSize={5} />
+        <Img src={`${process.env.PUBLIC_URL}/google-logo-again.png`} boxSize={5} />
         <Text pl="8px" fontSize={{ base: "sm", sm: "sm", md: "md", lg: "lg" }}>
           Continue with Google
         </Text>

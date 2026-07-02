@@ -11,6 +11,7 @@ import {
   globalGetHighestAverageLeaderboard,
   globalGetHighestGameLeaderboard,
 } from "../firebase/helpers";
+import { throwStyleLabel } from "../utils/stats";
 
 const Leaderboard = ({ year }) => {
   const isDesktop = useBreakpointValue({ base: false, md: true });
@@ -31,15 +32,13 @@ const Leaderboard = ({ year }) => {
         setGames(gamesData);
         setAvgs(avgData);
       } catch (e) {
-        console.log(e, " is the error");
+        console.error(e, " is the error");
       } finally {
         setLoading(false);
       }
     };
 
     getData();
-    console.log(games, " is games");
-    console.log(avgs, " is avgs");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year]);
 
@@ -111,7 +110,7 @@ const Leaderboard = ({ year }) => {
                     </Text>
                     {isDesktop && (
                       <Text textAlign="left" w="150px" fontSize="20px">
-                        {game.hand}
+                        {throwStyleLabel(game.hand)}
                       </Text>
                     )}
                     <Text

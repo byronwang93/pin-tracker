@@ -16,18 +16,18 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useMemo, useRef, useState } from "react";
 import { SignedInContext } from "../App";
-import { deleteBowl, sortBowlsDate, sortBowlsScore } from "../firebase/helpers";
+import { deleteBowl } from "../firebase/helpers";
+import { BowlsContext } from "../context/BowlsContext";
+import { filterByYear, sortByDate, sortByScore } from "../utils/stats";
 import EditBowlModal from "./EditBowlModal";
 import ViewBowlModal from "./ViewBowlModal";
 
 const Entries = ({ year }) => {
   const { value } = useContext(SignedInContext);
+  const { bowls: allBowls, loading, refetch } = useContext(BowlsContext);
   const [toggle, setToggle] = useState(0);
-  const [bowls, setBowls] = useState([]);
-
-  const [loading, setLoading] = useState(false);
 
   const [editModalOpen, setEditModalOpen] = useState({});
   const [viewModalOpen, setViewModalOpen] = useState({});
@@ -87,40 +87,10 @@ const Entries = ({ year }) => {
     }));
   };
 
-  const getBowls = async () => {
-    let temp = [];
-    if (toggle === 0) {
-      temp = await sortBowlsDate(value, year);
-    } else {
-      temp = await sortBowlsScore(value, year);
-    }
-
-    setBowls(temp);
-  };
-
-  useEffect(() => {
-    setLoading(true);
-
-    const fetchData = async () => {
-      try {
-        let temp = [];
-        if (toggle === 0) {
-          temp = await sortBowlsDate(value, year);
-        } else {
-          temp = await sortBowlsScore(value, year);
-        }
-
-        setBowls(temp);
-      } catch (e) {
-        console.log(e, " is the error");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toggle, year]);
+  const bowls = useMemo(() => {
+    const yearBowls = filterByYear(allBowls, year);
+    return toggle === 0 ? sortByDate(yearBowls) : sortByScore(yearBowls);
+  }, [allBowls, year, toggle]);
 
   const toggles = [
     { text: "Date", setting: 0 },
@@ -178,10 +148,10 @@ const Entries = ({ year }) => {
             const handleDeleteClick = async () => {
               try {
                 await deleteBowl(bowl.id, value);
-                await getBowls();
+                await refetch();
                 alertOnClose();
               } catch (e) {
-                console.log(e, " is the error");
+                console.error(e, " is the error");
               }
 
               toast({
@@ -231,7 +201,7 @@ const Entries = ({ year }) => {
                       }}
                       _hover={{ cursor: "pointer", boxSize: 6 }}
                       boxSize={5}
-                      src="./view-more-icon.svg"
+                      src={`${process.env.PUBLIC_URL}/view-more-icon.svg`}
                       alt="logo"
                     />
                   )}
@@ -246,12 +216,11 @@ const Entries = ({ year }) => {
                   />
                   <Img
                     onClick={() => {
-                      console.log(bowl.id, " is the id");
                       openEditModal(bowl.id);
                     }}
                     _hover={{ cursor: "pointer", boxSize: 6 }}
                     boxSize={5}
-                    src="./edit-icon.svg"
+                    src={`${process.env.PUBLIC_URL}/edit-icon.svg`}
                     alt="logo"
                   />
                   <EditBowlModal
@@ -259,12 +228,7 @@ const Entries = ({ year }) => {
                     isOpen={editModalOpen[bowl.id] || false}
                     onClose={() => {
                       closeEditModal(bowl.id);
-
-                      const afterBowls = async () => {
-                        await getBowls();
-                      };
-
-                      afterBowls();
+                      refetch();
                     }}
                   />
                   <Img
@@ -273,7 +237,7 @@ const Entries = ({ year }) => {
                     }}
                     _hover={{ cursor: "pointer", boxSize: 6 }}
                     boxSize={5}
-                    src="./trash-icon.svg"
+                    src={`${process.env.PUBLIC_URL}/trash-icon.svg`}
                     alt="logo"
                   />
                   <AlertDialog

@@ -10,9 +10,17 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { SignedInContext } from "../App";
-import { getUserData, getYearValues } from "../firebase/helpers";
+import { getUserData } from "../firebase/helpers";
+import { getYearValues } from "../utils/stats";
+import { BowlsContext } from "../context/BowlsContext";
 import AddBowlModal from "./AddBowlModal";
 import Stats from "./Stats";
 import Leaderboard from "./Leaderboard";
@@ -22,36 +30,28 @@ const LoggedIn = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [user, setUser] = useState(null);
-  const [loadingCheck, setLoadingCheck] = useState(false);
+  const [bowls, setBowls] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [year, setYear] = useState("all-time");
-  const [yearsList, setYearsList] = useState([]);
 
   const [toggle, setToggle] = useState(0);
 
-  useEffect(() => {
-    const getYears = async () => {
-      const years = await getYearValues(value);
-      setYearsList(years);
-    };
-
-    getYears();
+  // Fetch the user document once; every stat/entry reads from `bowls` in
+  // context instead of firing its own network read. Mutations call refetch().
+  const refetch = useCallback(async () => {
+    if (!value) return;
+    setLoading(true);
+    const data = await getUserData(value);
+    setUser(data);
+    setBowls(data?.bowls ?? []);
+    setLoading(false);
   }, [value]);
 
   useEffect(() => {
-    const getUserDetails = async () => {
-      const data = await getUserData(value);
-      return data;
-    };
+    refetch();
+  }, [refetch]);
 
-    const fetchUser = async () => {
-      const object = await getUserDetails();
-      setUser(object);
-      setLoadingCheck(true);
-    };
-
-    fetchUser();
-    console.log("user is fetched");
-  }, [value, loadingCheck]);
+  const yearsList = useMemo(() => getYearValues(bowls), [bowls]);
 
   const handleYearChange = (event) => {
     const selectedValue = event.target.value;
@@ -65,6 +65,7 @@ const LoggedIn = () => {
   };
 
   return (
+    <BowlsContext.Provider value={{ bowls, loading, refetch }}>
     <Flex
       justify="space-between"
       alignItems="center"
@@ -73,7 +74,7 @@ const LoggedIn = () => {
     >
       <HStack justify="space-between" className="header" width="100%">
         <Box w="30%">
-          <Img src="./pin-tracker.png" width="230px" alt="logo" />
+          <Img src={`${process.env.PUBLIC_URL}/pin-tracker.png`} width="230px" alt="logo" />
         </Box>
         <Flex
           justifyContent="space-around"
@@ -162,6 +163,7 @@ const LoggedIn = () => {
       </VStack>
       {toggle === 0 ? <Stats year={year} /> : <Leaderboard year={year} />}
     </Flex>
+    </BowlsContext.Provider>
   );
 };
 
