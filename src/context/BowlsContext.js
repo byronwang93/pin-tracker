@@ -8,4 +8,6 @@ export const BowlsContext = React.createContext({
   practiceSessions: [],
   loading: false,
   refetch: () => {},
+  compMode: false,
+  setCompMode: () => {},
 });

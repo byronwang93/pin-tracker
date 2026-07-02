@@ -27,6 +27,7 @@ export const addUser = async (uid, name, email, photoURL) => {
       practiceSessions: [],
       average: null,
       highestGame: null,
+      compMode: false,
     };
 
     const userRef = doc(db, "users", uid);
@@ -120,6 +121,15 @@ export const deletePracticeSession = async (id, uid) => {
     await setDoc(docRef, { practiceSessions: updatedSessions }, { merge: true });
   } catch (error) {
     console.error("error deleting practice session: ", error);
+  }
+};
+
+export const updateCompMode = async (uid, compMode) => {
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { compMode }, { merge: true });
+  } catch (error) {
+    console.error("error updating comp mode: ", error);
   }
 };
 
