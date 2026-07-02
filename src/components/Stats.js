@@ -28,26 +28,33 @@ const Stats = ({ year }) => {
   }
 
   return (
-    <Box w="100%" textAlign="-webkit-center" px={{ base: "20px", md: "0" }}>
-      <Tabs
-        colorScheme="yellow"
-        isFitted
-        variant="soft-rounded"
-        w={{ base: "100%", md: "70%" }}
-        maxW="500px"
-      >
+    <Box w="100%" textAlign="-webkit-center">
+      <Tabs colorScheme="yellow" variant="soft-rounded">
         <TabList
+          flexDirection={{ base: "column", md: "row" }}
           gap="10px"
           mb="20px"
-          mx="10px"
+          mx="auto"
+          w={{ base: "90%", md: "70%" }}
+          maxW={{ base: "220px", md: "500px" }}
           bgColor="#3C3D36"
           p="6px"
           borderRadius="12px"
         >
-          <Tab color="white" borderRadius="8px">
+          <Tab
+            w={{ base: "100%", md: "auto" }}
+            flex={{ md: 1 }}
+            color="white"
+            borderRadius="8px"
+          >
             Overview
           </Tab>
-          <Tab color="white" borderRadius="8px">
+          <Tab
+            w={{ base: "100%", md: "auto" }}
+            flex={{ md: 1 }}
+            color="white"
+            borderRadius="8px"
+          >
             Spares
           </Tab>
         </TabList>

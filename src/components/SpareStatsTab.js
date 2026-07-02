@@ -217,7 +217,7 @@ const SpareStatsTab = ({ year }) => {
       </VStack>
 
       {chartData.length > 0 && (
-        <Box w="100%" maxW="700px">
+        <Box w="100%" maxW="700px" px={{ base: "20px", md: "0" }}>
           <Text pb="10px" fontSize="24px" textAlign="left">
             Conversion Trend
           </Text>

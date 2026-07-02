@@ -14,7 +14,7 @@ const SpareSessionHistory = ({ sessions }) => {
   if (sorted.length === 0) return null;
 
   return (
-    <Box w="100%" maxW="600px">
+    <Box w="100%" maxW="600px" px={{ base: "20px", md: "0" }}>
       <Text pb="10px" fontSize="24px" textAlign="left">
         Session History
       </Text>
