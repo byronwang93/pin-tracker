@@ -9,7 +9,6 @@ import {
   Switch,
   Text,
   useDisclosure,
-  useToast,
   VStack,
 } from "@chakra-ui/react";
 import React, {
@@ -20,27 +19,28 @@ import React, {
   useState,
 } from "react";
 import { SignedInContext } from "../App";
-import { getUserData, updateCompMode } from "../firebase/helpers";
+import {
+  getUserData,
+  updateCompMode,
+  updateDefaultThrowStyle,
+} from "../firebase/helpers";
 import { getYearValues, rangeLabel } from "../utils/stats";
 import { BowlsContext } from "../context/BowlsContext";
 import AddBowlModal from "./AddBowlModal";
 import Stats from "./Stats";
 import Leaderboard from "./Leaderboard";
 import SpareShootingView from "./SpareShootingView";
+import LiveGameView from "./LiveGameView";
+import SettingsModal from "./SettingsModal";
 
 const LoggedIn = () => {
   const { value } = useContext(SignedInContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
-
-  const comingSoon = (feature) => {
-    toast({
-      title: `${feature} is coming soon!`,
-      status: "info",
-      duration: 2000,
-      isClosable: true,
-    });
-  };
+  const {
+    isOpen: settingsIsOpen,
+    onOpen: onSettingsOpen,
+    onClose: onSettingsClose,
+  } = useDisclosure();
 
   const [user, setUser] = useState(null);
   const [bowls, setBowls] = useState([]);
@@ -56,6 +56,9 @@ const LoggedIn = () => {
     () => localStorage.getItem("compMode") === "true"
   );
   const [view, setView] = useState("home");
+  // Default hand for new entries (Upload Bowl / Live Game setup) — same
+  // cross-device persistence shape as compMode below.
+  const [defaultThrowStyle, setDefaultThrowStyleState] = useState(1);
 
   useEffect(() => {
     localStorage.setItem("compMode", compMode);
@@ -66,6 +69,11 @@ const LoggedIn = () => {
   const setCompMode = (nextValue) => {
     setCompModeState(nextValue);
     if (value) updateCompMode(value, nextValue);
+  };
+
+  const setDefaultThrowStyle = (nextValue) => {
+    setDefaultThrowStyleState(nextValue);
+    if (value) updateDefaultThrowStyle(value, nextValue);
   };
 
   // Fetch the user document once; every stat/entry reads from `bowls` in
@@ -79,6 +87,9 @@ const LoggedIn = () => {
     setPracticeSessions(data?.practiceSessions ?? []);
     if (typeof data?.compMode === "boolean") {
       setCompModeState(data.compMode);
+    }
+    if (data?.defaultThrowStyle === 1 || data?.defaultThrowStyle === 2) {
+      setDefaultThrowStyleState(data.defaultThrowStyle);
     }
     setLoading(false);
   }, [value]);
@@ -125,10 +136,14 @@ const LoggedIn = () => {
         refetch,
         compMode,
         setCompMode,
+        defaultThrowStyle,
+        setDefaultThrowStyle,
       }}
     >
     {view === "spareShooting" ? (
       <SpareShootingView onExit={() => setView("home")} />
+    ) : view === "liveGame" ? (
+      <LiveGameView onExit={() => setView("home")} />
     ) : (
     <Flex
       justify="space-between"
@@ -168,21 +183,39 @@ const LoggedIn = () => {
             Leaderboard
           </Text>
         </Flex>
-        <Box pr="40px" w="30%" textAlign="end">
+        <Flex
+          pr={{ base: "10px", md: "40px" }}
+          w="30%"
+          justify="flex-end"
+          flexDirection={{ base: "column", md: "row" }}
+          gap="10px"
+        >
           <Button
-            w={{ base: "100px", sm: "120px" }}
+            size={{ base: "sm", md: "md" }}
+            bgColor="#84876F"
+            color="white"
+            _hover={{ bgColor: "#606351" }}
+            fontSize={{ base: "14px", md: "17px" }}
+            onClick={onSettingsOpen}
+          >
+            Settings
+          </Button>
+          <Button
+            size={{ base: "sm", md: "md" }}
+            w={{ base: "auto", sm: "120px" }}
             bgColor="#FFF3D2"
             border="2px solid #FDD468"
             _hover={{
               bgColor: "#E6DBBF",
             }}
-            fontSize="17px"
+            fontSize={{ base: "14px", md: "17px" }}
             onClick={logout}
           >
             Log Out
           </Button>
-        </Box>
+        </Flex>
       </HStack>
+      <SettingsModal isOpen={settingsIsOpen} onClose={onSettingsClose} />
 
       <HStack justify="center" mt="10px" mb="5px" spacing="10px">
         <Text
@@ -231,7 +264,7 @@ const LoggedIn = () => {
             {compMode && (
               <>
                 <Button
-                  onClick={() => comingSoon("Live Game")}
+                  onClick={() => setView("liveGame")}
                   bgColor="#FFF3D2"
                   border="2px solid #FDD468"
                   _hover={{

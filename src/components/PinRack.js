@@ -10,9 +10,16 @@ const PIN_ROWS = [
   [1],
 ];
 
+const KNOCKED_STYLE = { bg: "#5A5A52", border: "#5A5A52", color: "#8A8A82" };
+
 const STATE_STYLES = {
   default: { bg: "#FFF3D2", border: "#FDD468", color: "black" },
   selected: { bg: "#FDD468", border: "white", color: "black" },
+  // Live Game: tapped down this roll — muted, still tappable to undo.
+  knocked: KNOCKED_STYLE,
+  // Live Game: already knocked down by an earlier roll in the same frame —
+  // muted and non-interactive, since that pin is physically gone.
+  cleared: KNOCKED_STYLE,
 };
 
 const SELECTED_GLOW = "0 0 0 3px white, 0 0 12px 2px #FDD468";
@@ -32,26 +39,28 @@ const PinRack = ({
         <Box key={rowIndex} display="flex" gap="8px">
           {row.map((pin) => {
             const isSelected = pinState[pin] === "selected";
+            const isCleared = pinState[pin] === "cleared";
+            const isKnocked = pinState[pin] === "knocked";
+            const isClickable = onPinClick && !isCleared;
             const style = STATE_STYLES[pinState[pin]] ?? STATE_STYLES.default;
             return (
               <VStack key={pin} spacing="2px">
                 <Circle
                   size={size}
-                  // Selected always wins over a heatmap color override, so
-                  // tapping a pin visibly "lights up" instead of just
-                  // getting a thin outline change on top of the same fill.
-                  bg={isSelected ? style.bg : pinColor[pin] ?? style.bg}
+                  // Selected/knocked/cleared always win over a heatmap color
+                  // override, so tapping a pin visibly reflects its state
+                  // instead of just getting a thin outline change on top of
+                  // the same fill.
+                  bg={isSelected || isCleared || isKnocked ? style.bg : pinColor[pin] ?? style.bg}
                   border="2px solid"
                   borderColor={style.border}
                   boxShadow={isSelected ? SELECTED_GLOW : "none"}
                   color={style.color}
                   fontWeight="bold"
                   transition="all 0.15s"
-                  cursor={onPinClick ? "pointer" : "default"}
-                  onClick={onPinClick ? () => onPinClick(pin) : undefined}
-                  _active={
-                    onPinClick ? { transform: "scale(0.92)" } : undefined
-                  }
+                  cursor={isClickable ? "pointer" : "default"}
+                  onClick={isClickable ? () => onPinClick(pin) : undefined}
+                  _active={isClickable ? { transform: "scale(0.92)" } : undefined}
                 >
                   {pin}
                 </Circle>

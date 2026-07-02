@@ -51,7 +51,11 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
   ];
 
   const saveBowl = async () => {
+    // Spread the original bowl first so fields this form doesn't expose
+    // (Live Game's `frames`/`notes`/`gameType`) survive an edit instead of
+    // being wiped by a full-replace write.
     let data = {
+      ...bowl,
       id: id,
       score: Number(score),
       date: date,

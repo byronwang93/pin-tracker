@@ -10,4 +10,6 @@ export const BowlsContext = React.createContext({
   refetch: () => {},
   compMode: false,
   setCompMode: () => {},
+  defaultThrowStyle: 1,
+  setDefaultThrowStyle: () => {},
 });

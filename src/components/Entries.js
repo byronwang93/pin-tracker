@@ -194,7 +194,7 @@ const Entries = ({ year }) => {
                   {bowl.date}
                 </Text>
                 <HStack spacing="10px" pr="15px">
-                  {bowl.description && (
+                  {(bowl.description || bowl.frames) && (
                     <Img
                       onClick={() => {
                         openViewModal(bowl.id);
@@ -209,6 +209,7 @@ const Entries = ({ year }) => {
                     score={bowl.score}
                     date={bowl.date}
                     description={bowl.description}
+                    frames={bowl.frames}
                     isOpen={viewModalOpen[bowl.id] || false}
                     onClose={() => {
                       closeViewModal(bowl.id);

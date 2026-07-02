@@ -28,6 +28,7 @@ export const addUser = async (uid, name, email, photoURL) => {
       average: null,
       highestGame: null,
       compMode: false,
+      defaultThrowStyle: 1,
     };
 
     const userRef = doc(db, "users", uid);
@@ -77,6 +78,9 @@ export const addBowl = async (uid, data) => {
     await setDoc(docRef, { bowls: updatedBowls }, { merge: true });
   } catch (error) {
     console.error("error adding bowl: ", error);
+    // Re-thrown so callers (e.g. Live Game) can tell a save actually failed
+    // and keep their offline draft instead of discarding it.
+    throw error;
   }
 };
 
@@ -130,6 +134,15 @@ export const updateCompMode = async (uid, compMode) => {
     await setDoc(docRef, { compMode }, { merge: true });
   } catch (error) {
     console.error("error updating comp mode: ", error);
+  }
+};
+
+export const updateDefaultThrowStyle = async (uid, defaultThrowStyle) => {
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { defaultThrowStyle }, { merge: true });
+  } catch (error) {
+    console.error("error updating default throw style: ", error);
   }
 };
 

@@ -15,7 +15,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
 import { BowlsContext } from "../context/BowlsContext";
 import { addBowl } from "../firebase/helpers";
@@ -23,13 +23,20 @@ import { v4 } from "uuid";
 
 const AddBowlModal = ({ isOpen, onClose }) => {
   const { value } = useContext(SignedInContext);
-  const { refetch } = useContext(BowlsContext);
+  const { refetch, defaultThrowStyle } = useContext(BowlsContext);
   const toast = useToast();
 
   const [score, setScore] = useState("");
-  const [throwStyle, setThrowStyle] = useState(1);
+  const [throwStyle, setThrowStyle] = useState(defaultThrowStyle);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
+
+  // Re-sync to the current default every time the modal opens, since
+  // `defaultThrowStyle` may not have loaded from Firestore yet when this
+  // component first mounts (it's rendered once and just toggled visible).
+  useEffect(() => {
+    if (isOpen) setThrowStyle(defaultThrowStyle);
+  }, [isOpen, defaultThrowStyle]);
 
   const [buttonClicked, setButtonClicked] = useState(false);
 
@@ -52,20 +59,29 @@ const AddBowlModal = ({ isOpen, onClose }) => {
         description: description,
       };
 
-      await addBowl(value, data);
-      await refetch();
+      try {
+        await addBowl(value, data);
+        await refetch();
 
-      setScore("");
-      setDescription("");
-      setThrowStyle(1);
-      setDate("");
-      onClose();
-      toast({
-        description: "Bowl Saved!",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
+        setScore("");
+        setDescription("");
+        setThrowStyle(1);
+        setDate("");
+        onClose();
+        toast({
+          description: "Bowl Saved!",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      } catch (error) {
+        toast({
+          description: "Couldn't save — no connection? Try again.",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
       setButtonClicked(false);
     }
   };
@@ -77,7 +93,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
         onClose={() => {
           setScore("");
           setDescription("");
-          setThrowStyle(1);
+          setThrowStyle(defaultThrowStyle);
           setDate("");
           onClose();
         }}
