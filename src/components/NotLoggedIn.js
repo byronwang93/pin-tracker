@@ -23,7 +23,7 @@ const NotLoggedIn = () => {
 
   useEffect(() => {
     setValue(localStorage.getItem("uid"));
-  }, []);
+  }, [setValue]);
 
   return (
     <Box textAlign="-webkit-center" pb="70px">
