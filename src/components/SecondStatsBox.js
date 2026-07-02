@@ -3,7 +3,7 @@ import React, { useContext, useMemo } from "react";
 import { BowlsContext } from "../context/BowlsContext";
 import {
   average as avg,
-  filterByYear,
+  filterByRange,
   last10Average as last10Avg,
 } from "../utils/stats";
 
@@ -18,7 +18,7 @@ const SecondStatsBox = ({ year }) => {
     last10OneAverage,
     last10TwoAverage,
   } = useMemo(() => {
-    const yearBowls = filterByYear(bowls, year);
+    const yearBowls = filterByRange(bowls, year);
     return {
       average: avg(yearBowls),
       oneAverage: avg(yearBowls, 1),

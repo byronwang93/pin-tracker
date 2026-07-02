@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { BowlsContext } from "../context/BowlsContext";
-import { filterByYear, sortByDate, throwStyleLabel } from "../utils/stats";
+import { filterByRange, sortByDate, throwStyleLabel } from "../utils/stats";
 
 function CustomToolTip({ active, payload }) {
   if (active && payload && payload.length) {
@@ -39,7 +39,7 @@ const Charts = ({ year }) => {
 
   // oldest -> newest so the line reads left-to-right chronologically
   const data = useMemo(() => {
-    const yearBowls = sortByDate(filterByYear(bowls, year));
+    const yearBowls = sortByDate(filterByRange(bowls, year));
     return yearBowls
       .map(({ date, score, throwStyle }) => ({
         name: date,

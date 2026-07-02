@@ -8,10 +8,31 @@ export const throwStyleLabel = (style) => THROW_STYLES[style] ?? "Unknown";
 
 // dates are stored as ISO "YYYY-MM-DD", which sorts correctly as a string —
 // so we don't rely on the (Firestore-mangled) `comparableDate` field.
-export const filterByYear = (bowls = [], year) => {
-  if (year === "all-time") return bowls;
-  return bowls.filter((bowl) => bowl?.date?.split("-")[0] === year);
+//
+// `range` is either "all-time", a specific calendar year ("2026"), or a
+// rolling window ("last-1-month", "last-3-months", "last-6-months").
+export const filterByRange = (items = [], range) => {
+  if (!range || range === "all-time") return items;
+
+  if (range.startsWith("last-")) {
+    const months = parseInt(range.split("-")[1], 10);
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - months);
+    const cutoffDate = cutoff.toLocaleDateString("en-CA");
+    return items.filter((item) => item?.date >= cutoffDate);
+  }
+
+  return items.filter((item) => item?.date?.split("-")[0] === range);
 };
+
+const RANGE_LABELS = {
+  "all-time": "all-time",
+  "last-1-month": "Last Month",
+  "last-3-months": "Last 3 Months",
+  "last-6-months": "Last 6 Months",
+};
+
+export const rangeLabel = (range) => RANGE_LABELS[range] ?? range;
 
 // newest first
 export const sortByDate = (bowls = []) =>

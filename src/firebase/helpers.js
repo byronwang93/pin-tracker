@@ -1,6 +1,6 @@
 import { getDoc, getDocs, doc, collection, setDoc } from "@firebase/firestore";
 import { db } from "./config";
-import { averageData, filterByYear, highestGameData } from "../utils/stats";
+import { averageData, filterByRange, highestGameData } from "../utils/stats";
 
 // user functions
 export const getUserData = async (id) => {
@@ -88,7 +88,7 @@ export const globalGetHighestGameLeaderboard = async (year) => {
   const users = await getAllUsers();
 
   return users
-    .map((user) => highestGameData(filterByYear(user.bowls ?? [], year), user.name))
+    .map((user) => highestGameData(filterByRange(user.bowls ?? [], year), user.name))
     .filter((row) => row.max !== null)
     .sort((a, b) => b.max - a.max);
 };
@@ -97,7 +97,7 @@ export const globalGetHighestAverageLeaderboard = async (year) => {
   const users = await getAllUsers();
 
   return users
-    .map((user) => averageData(filterByYear(user.bowls ?? [], year), user.name))
+    .map((user) => averageData(filterByRange(user.bowls ?? [], year), user.name))
     .filter((row) => row.average !== null)
     .sort((a, b) => b.average - a.average);
 };

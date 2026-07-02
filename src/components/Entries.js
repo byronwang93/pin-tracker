@@ -20,7 +20,7 @@ import React, { useContext, useMemo, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { deleteBowl } from "../firebase/helpers";
 import { BowlsContext } from "../context/BowlsContext";
-import { filterByYear, sortByDate, sortByScore } from "../utils/stats";
+import { filterByRange, sortByDate, sortByScore } from "../utils/stats";
 import EditBowlModal from "./EditBowlModal";
 import ViewBowlModal from "./ViewBowlModal";
 
@@ -88,7 +88,7 @@ const Entries = ({ year }) => {
   };
 
   const bowls = useMemo(() => {
-    const yearBowls = filterByYear(allBowls, year);
+    const yearBowls = filterByRange(allBowls, year);
     return toggle === 0 ? sortByDate(yearBowls) : sortByScore(yearBowls);
   }, [allBowls, year, toggle]);
 

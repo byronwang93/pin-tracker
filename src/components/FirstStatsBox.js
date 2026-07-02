@@ -1,13 +1,13 @@
 import { Box, Text } from "@chakra-ui/react";
 import React, { useContext, useMemo } from "react";
 import { BowlsContext } from "../context/BowlsContext";
-import { filterByYear, gamesBowled, highestGame } from "../utils/stats";
+import { filterByRange, gamesBowled, highestGame } from "../utils/stats";
 
 const FirstStatsBox = ({ year }) => {
   const { bowls } = useContext(BowlsContext);
 
   const { totalGames, highestOne, highestTwo } = useMemo(() => {
-    const yearBowls = filterByYear(bowls, year);
+    const yearBowls = filterByRange(bowls, year);
     return {
       totalGames: gamesBowled(yearBowls),
       highestOne: highestGame(yearBowls, 1),
