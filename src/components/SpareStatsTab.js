@@ -26,13 +26,25 @@ import SpareSessionHistory from "./SpareSessionHistory";
 // data to call it "bad" the way a real heatmap color implies.
 const MIN_SAMPLE_SIZE = 3;
 
+// Red -> yellow -> green, interpolated continuously rather than in three
+// hard buckets, so e.g. 65% and 69% render as visibly different shades
+// instead of both just being "the red one."
+const RED = [217, 122, 108];
+const YELLOW = [224, 200, 104];
+const GREEN = [127, 191, 127];
+const lerp = (a, b, t) => Math.round(a + (b - a) * t);
+
 const heatmapColor = (pct, attempts = 0) => {
   if (pct === null || pct === undefined || attempts < MIN_SAMPLE_SIZE) {
     return "#5A5A52";
   }
-  if (pct >= 90) return "#7FBF7F";
-  if (pct >= 70) return "#E0C868";
-  return "#D97A6C";
+  const clamped = Math.max(0, Math.min(100, pct));
+  const [from, to, t] =
+    clamped <= 50
+      ? [RED, YELLOW, clamped / 50]
+      : [YELLOW, GREEN, (clamped - 50) / 50];
+  const [r, g, b] = [0, 1, 2].map((i) => lerp(from[i], to[i], t));
+  return `rgb(${r}, ${g}, ${b})`;
 };
 
 const pctOf = (made, attempts) =>
