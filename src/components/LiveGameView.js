@@ -21,14 +21,45 @@ import { SignedInContext } from "../App";
 import { BowlsContext } from "../context/BowlsContext";
 import { addBowl } from "../firebase/helpers";
 import {
-  frameDisplayMarks,
+  frameRollInfo,
   frameScores,
   getGameState,
+  maxPossibleScore,
   submitRoll,
   totalScore,
   undoLastRoll,
 } from "../utils/bowlingScore";
 import PinRack from "./PinRack";
+
+// Marks render inline so a split roll can be circled without disturbing
+// the rest of the frame box's layout.
+const FrameMarks = ({ rolls }) => (
+  <HStack spacing="1px" justify="center">
+    {rolls.map((roll, i) =>
+      roll.isSplit ? (
+        <Box
+          key={i}
+          as="span"
+          display="inline-flex"
+          alignItems="center"
+          justifyContent="center"
+          boxSize="15px"
+          borderRadius="full"
+          border="1.5px solid"
+          borderColor="red.400"
+          fontSize="11px"
+          color="white"
+        >
+          {roll.mark}
+        </Box>
+      ) : (
+        <Text key={i} as="span" fontSize="14px" color="white">
+          {roll.mark}
+        </Text>
+      ),
+    )}
+  </HStack>
+);
 
 const DRAFT_KEY = "liveDraft:liveGame";
 const today = () => new Date().toLocaleDateString("en-CA");
@@ -310,7 +341,7 @@ const LiveGameView = ({ onExit }) => {
             <HStack spacing="4px" pb="4px">
               {Array.from({ length: 10 }).map((_, index) => {
                 const frame = frames[index] ?? { rolls: [] };
-                const marks = frameDisplayMarks(frame);
+                const rolls = frameRollInfo(frame);
                 const isCurrent = index === gameState.frameIndex && !gameState.isComplete;
                 return (
                   <VStack
@@ -325,9 +356,9 @@ const LiveGameView = ({ onExit }) => {
                     <Text fontSize="11px" color="#A0A0A0">
                       {index + 1}
                     </Text>
-                    <Text fontSize="14px" color="white" minH="18px">
-                      {marks.join(" ")}
-                    </Text>
+                    <Box minH="18px">
+                      {rolls.length ? <FrameMarks rolls={rolls} /> : null}
+                    </Box>
                     <Text fontSize="13px" fontWeight="bold" color="white" minH="16px">
                       {scores[index] ?? ""}
                     </Text>
@@ -336,6 +367,12 @@ const LiveGameView = ({ onExit }) => {
               })}
             </HStack>
           </Box>
+
+          {!gameState.isComplete && (
+            <Text fontSize="13px" color="#A0A0A0">
+              Max possible: {maxPossibleScore(frames)}
+            </Text>
+          )}
 
           <Button
             size="sm"
