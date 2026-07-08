@@ -216,9 +216,12 @@ const weekBucket = (dateStr) => {
   return date.toISOString().split("T")[0];
 };
 
-export const spareTrendOverTime = (bowls = [], practiceSessions = []) => {
+// `leaveKeyFilter`, when given, restricts the trend to attempts at that
+// specific leave (e.g. from a tapped pin) instead of every spare combined.
+export const spareTrendOverTime = (bowls = [], practiceSessions = [], leaveKeyFilter = null) => {
   const buckets = {};
   for (const attempt of spareAttempts(bowls, practiceSessions)) {
+    if (leaveKeyFilter && leaveKey(attempt.pins) !== leaveKeyFilter) continue;
     const week = weekBucket(attempt.date);
     if (!buckets[week]) {
       buckets[week] = {
@@ -242,4 +245,20 @@ export const spareTrendOverTime = (bowls = [], practiceSessions = []) => {
       .filter((week) => buckets[week].practice.total > 0)
       .map((week) => ({ period: week, pct: toPct(buckets[week].practice) })),
   };
+};
+
+// Pairs each session with just the reps matching a specific leave (for
+// display), dropping sessions with no matching reps — without touching the
+// session itself, since a session's reps can target several different
+// leaves ("New Target" mid-session) and editing must still operate on every
+// rep, not just the ones currently filtered into view.
+export const sessionsForLeave = (sessions = [], leaveKeyFilter = null) => {
+  return sessions
+    .map((session) => ({
+      session,
+      displayReps: leaveKeyFilter
+        ? (session.reps ?? []).filter((rep) => leaveKey(rep.pins) === leaveKeyFilter)
+        : session.reps ?? [],
+    }))
+    .filter(({ displayReps }) => displayReps.length > 0);
 };

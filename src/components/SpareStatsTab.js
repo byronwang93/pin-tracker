@@ -71,9 +71,11 @@ const SpareStatsTab = ({ year }) => {
     return Object.fromEntries(streaks.map((streak) => [streak.key, streak]));
   }, [yearBowls, yearSessions]);
 
+  const leaveKeyFilter = filterPins.length ? leaveKey(filterPins) : null;
+
   const trend = useMemo(
-    () => spareTrendOverTime(yearBowls, yearSessions),
-    [yearBowls, yearSessions]
+    () => spareTrendOverTime(yearBowls, yearSessions, leaveKeyFilter),
+    [yearBowls, yearSessions, leaveKeyFilter]
   );
 
   const chartData = useMemo(() => {
@@ -232,6 +234,12 @@ const SpareStatsTab = ({ year }) => {
         <Box w="100%" maxW="700px" px={{ base: "20px", md: "0" }}>
           <Text pb="10px" fontSize="24px" textAlign="left">
             Conversion Trend
+            {leaveKeyFilter && (
+              <Text as="span" fontSize="14px" color="#A0A0A0">
+                {" "}
+                — {displayed.label}
+              </Text>
+            )}
           </Text>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart
@@ -268,7 +276,11 @@ const SpareStatsTab = ({ year }) => {
         </Box>
       )}
 
-      <SpareSessionHistory sessions={yearSessions} />
+      <SpareSessionHistory
+        sessions={yearSessions}
+        leaveKeyFilter={leaveKeyFilter}
+        filterLabel={displayed.label}
+      />
     </VStack>
   );
 };

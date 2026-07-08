@@ -1,28 +1,41 @@
 import { Box, HStack, Img, Text, VStack } from "@chakra-ui/react";
 import React, { useMemo, useState } from "react";
-import { sortByDate } from "../utils/stats";
+import { sessionsForLeave, sortByDate } from "../utils/stats";
 import EditPracticeSessionModal from "./EditPracticeSessionModal";
 
 // Past Spare Shooting sessions, editable/deletable — mirrors the Entries.js
 // list pattern (per-row edit modal keyed by id) applied to practice sessions
-// instead of bowls.
-const SpareSessionHistory = ({ sessions }) => {
+// instead of bowls. `leaveKeyFilter` scopes the shown attempt counts to a
+// tapped pin/split — but the edit modal always gets the full, unfiltered
+// session, since a session's reps can span multiple targets and editing
+// must not risk dropping the ones currently filtered out of view.
+const SpareSessionHistory = ({ sessions, leaveKeyFilter = null, filterLabel }) => {
   const [editOpenId, setEditOpenId] = useState(null);
 
   const sorted = useMemo(() => sortByDate(sessions), [sessions]);
+  const filtered = useMemo(
+    () => sessionsForLeave(sorted, leaveKeyFilter),
+    [sorted, leaveKeyFilter]
+  );
 
-  if (sorted.length === 0) return null;
+  if (filtered.length === 0) return null;
 
   return (
     <Box w="100%" maxW="600px" px={{ base: "20px", md: "0" }}>
       <Text pb="10px" fontSize="24px" textAlign="left">
         Session History
+        {leaveKeyFilter && (
+          <Text as="span" fontSize="14px" color="#A0A0A0">
+            {" "}
+            — {filterLabel}
+          </Text>
+        )}
       </Text>
       <VStack maxH="300px" overflowY="auto" align="stretch" spacing="8px">
-        {sorted.map((session, index) => {
-          const madeCount = session.reps.filter((rep) => rep.made).length;
-          const pct = session.reps.length
-            ? Math.round((madeCount / session.reps.length) * 100)
+        {filtered.map(({ session, displayReps }, index) => {
+          const madeCount = displayReps.filter((rep) => rep.made).length;
+          const pct = displayReps.length
+            ? Math.round((madeCount / displayReps.length) * 100)
             : 0;
           return (
             <HStack
@@ -34,7 +47,7 @@ const SpareSessionHistory = ({ sessions }) => {
             >
               <Text color="white">{session.date}</Text>
               <Text color="white">
-                {session.reps.length} attempts • {pct}% made
+                {displayReps.length} attempts • {pct}% made
               </Text>
               <Img
                 onClick={() => setEditOpenId(session.id)}
