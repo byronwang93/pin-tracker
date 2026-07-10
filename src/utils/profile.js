@@ -13,6 +13,16 @@ export const COVERSTOCK_OPTIONS = [
 export const coverstockLabel = (value) =>
   COVERSTOCK_OPTIONS.find((option) => option.value === value)?.label ?? value;
 
+// Fixed like coverstock/role — the two fundamental bowling ball core
+// categories, a small, stable vocabulary.
+export const CORE_OPTIONS = [
+  { value: "symmetric", label: "Symmetric" },
+  { value: "asymmetric", label: "Asymmetric" },
+];
+
+export const coreLabel = (value) =>
+  CORE_OPTIONS.find((option) => option.value === value)?.label ?? value;
+
 export const ROLE_OPTIONS = [
   { value: "benchmark", label: "Benchmark" },
   { value: "medium-hook", label: "Medium Hook" },

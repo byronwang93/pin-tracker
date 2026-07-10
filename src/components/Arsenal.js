@@ -19,7 +19,7 @@ import React, { useContext, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { BowlsContext } from "../context/BowlsContext";
 import { deleteArsenalBall } from "../firebase/helpers";
-import { coverstockLabel, ROLE_COLORS, roleLabel } from "../utils/profile";
+import { coreLabel, coverstockLabel, ROLE_COLORS, roleLabel } from "../utils/profile";
 import BallModal from "./BallModal";
 
 const Arsenal = () => {
@@ -143,6 +143,7 @@ const Arsenal = () => {
                 <VStack align="flex-start" spacing="2px" fontSize="13px">
                   {ball.weight && <Text color="#A0A0A0">Weight: <Text as="span" color="white">{ball.weight} lbs</Text></Text>}
                   <Text color="#A0A0A0">Cover: <Text as="span" color="white">{coverstockLabel(ball.coverstock)}</Text></Text>
+                  {ball.core && <Text color="#A0A0A0">Core: <Text as="span" color="white">{coreLabel(ball.core)}</Text></Text>}
                 </VStack>
 
                 {ball.notes && (

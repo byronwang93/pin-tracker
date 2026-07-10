@@ -21,7 +21,7 @@ import { v4 } from "uuid";
 import { SignedInContext } from "../App";
 import { BowlsContext } from "../context/BowlsContext";
 import { addArsenalBall, editArsenalBall } from "../firebase/helpers";
-import { COVERSTOCK_OPTIONS, ROLE_COLORS, ROLE_OPTIONS } from "../utils/profile";
+import { CORE_OPTIONS, COVERSTOCK_OPTIONS, ROLE_COLORS, ROLE_OPTIONS } from "../utils/profile";
 
 // Add + Edit combined — `ball` present means edit mode. Delete lives on the
 // Arsenal card itself (Entries.js's edit/delete icon pair), not in here.
@@ -34,6 +34,7 @@ const BallModal = ({ ball, isOpen, onClose }) => {
   const [name, setName] = useState("");
   const [weight, setWeight] = useState("");
   const [coverstock, setCoverstock] = useState(COVERSTOCK_OPTIONS[0].value);
+  const [core, setCore] = useState(CORE_OPTIONS[0].value);
   const [role, setRole] = useState(ROLE_OPTIONS[0].value);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -43,6 +44,7 @@ const BallModal = ({ ball, isOpen, onClose }) => {
       setName(ball?.name ?? "");
       setWeight(ball?.weight ?? "");
       setCoverstock(ball?.coverstock ?? COVERSTOCK_OPTIONS[0].value);
+      setCore(ball?.core ?? CORE_OPTIONS[0].value);
       setRole(ball?.role ?? ROLE_OPTIONS[0].value);
       setNotes(ball?.notes ?? "");
     }
@@ -56,6 +58,7 @@ const BallModal = ({ ball, isOpen, onClose }) => {
         name: name.trim(),
         weight: weight === "" ? null : Number(weight),
         coverstock,
+        core,
         role,
         notes,
       };
@@ -118,6 +121,17 @@ const BallModal = ({ ball, isOpen, onClose }) => {
                 <Text>Coverstock</Text>
                 <Select value={coverstock} onChange={(event) => setCoverstock(event.target.value)}>
                   {COVERSTOCK_OPTIONS.map((option) => (
+                    <option value={option.value} key={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              </Box>
+
+              <Box width="98.5%">
+                <Text>Core</Text>
+                <Select value={core} onChange={(event) => setCore(event.target.value)}>
+                  {CORE_OPTIONS.map((option) => (
                     <option value={option.value} key={option.value}>
                       {option.label}
                     </option>
