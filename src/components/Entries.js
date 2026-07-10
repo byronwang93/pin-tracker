@@ -32,6 +32,7 @@ const Entries = ({ year }) => {
   const [editModalOpen, setEditModalOpen] = useState({});
   const [viewModalOpen, setViewModalOpen] = useState({});
   const [deleteModalOpen, setDeleteModalOpen] = useState({});
+  const [deletingId, setDeletingId] = useState(null);
   const isDesktop = useBreakpointValue({ base: false, md: true });
 
   const { isOpen: viewIsOpen, onClose: viewOnClose } = useDisclosure();
@@ -146,20 +147,27 @@ const Entries = ({ year }) => {
         ) : (
           bowls.map((bowl, index) => {
             const handleDeleteClick = async () => {
+              setDeletingId(bowl.id);
               try {
                 await deleteBowl(bowl.id, value);
                 await refetch();
                 alertOnClose();
+                toast({
+                  description: "Bowl Deleted!",
+                  status: "success",
+                  duration: 3000,
+                  isClosable: true,
+                });
               } catch (e) {
-                console.error(e, " is the error");
+                toast({
+                  description: "Couldn't delete — no connection? Try again.",
+                  status: "warning",
+                  duration: 5000,
+                  isClosable: true,
+                });
+              } finally {
+                setDeletingId(null);
               }
-
-              toast({
-                description: "Bowl Deleted!",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-              });
             };
 
             return (
@@ -275,9 +283,10 @@ const Entries = ({ year }) => {
                           <Button
                             colorScheme="red"
                             onClick={handleDeleteClick}
+                            isDisabled={deletingId === bowl.id}
                             ml={3}
                           >
-                            Delete
+                            {deletingId === bowl.id ? "Deleting..." : "Delete"}
                           </Button>
                         </AlertDialogFooter>
                       </AlertDialogContent>

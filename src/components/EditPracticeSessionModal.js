@@ -40,6 +40,8 @@ const EditPracticeSessionModal = ({ session, isOpen, onClose }) => {
   const [notes, setNotes] = useState("");
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const cancelRef = useRef();
 
   useEffect(() => {
@@ -74,28 +76,52 @@ const EditPracticeSessionModal = ({ session, isOpen, onClose }) => {
   };
 
   const saveChanges = async () => {
-    await editPracticeSession(session.id, value, { ...session, notes, reps });
-    await refetch();
-    toast({
-      description: "Session updated!",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-    onClose();
+    setSaving(true);
+    try {
+      await editPracticeSession(session.id, value, { ...session, notes, reps });
+      await refetch();
+      toast({
+        description: "Session updated!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        description: "Couldn't save — no connection? Try again.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDeleteSession = async () => {
-    await deletePracticeSession(session.id, value);
-    await refetch();
-    setDeleteAlertOpen(false);
-    toast({
-      description: "Session deleted!",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-    onClose();
+    setDeleting(true);
+    try {
+      await deletePracticeSession(session.id, value);
+      await refetch();
+      setDeleteAlertOpen(false);
+      toast({
+        description: "Session deleted!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        description: "Couldn't delete — no connection? Try again.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (!session) return null;
@@ -185,6 +211,7 @@ const EditPracticeSessionModal = ({ session, isOpen, onClose }) => {
             <Button
               colorScheme="red"
               variant="outline"
+              isDisabled={saving}
               onClick={() => setDeleteAlertOpen(true)}
             >
               Delete Session
@@ -193,9 +220,10 @@ const EditPracticeSessionModal = ({ session, isOpen, onClose }) => {
               bgColor="#84876F"
               color="white"
               _hover={{ bgColor: "#606351" }}
+              isDisabled={saving}
               onClick={saveChanges}
             >
-              Save Changes
+              {saving ? "Saving..." : "Save Changes"}
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -220,12 +248,18 @@ const EditPracticeSessionModal = ({ session, isOpen, onClose }) => {
                 _hover={{ bgColor: "#606351" }}
                 color="white"
                 ref={cancelRef}
+                isDisabled={deleting}
                 onClick={() => setDeleteAlertOpen(false)}
               >
                 Cancel
               </Button>
-              <Button colorScheme="red" onClick={handleDeleteSession} ml={3}>
-                Delete
+              <Button
+                colorScheme="red"
+                onClick={handleDeleteSession}
+                isDisabled={deleting}
+                ml={3}
+              >
+                {deleting ? "Deleting..." : "Delete"}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -52,6 +52,9 @@ export const editBowl = async (id, uid, newData) => {
     await setDoc(docRef, { bowls: updatedBowls }, { merge: true });
   } catch (error) {
     console.error("error editing bowl: ", error);
+    // Re-thrown so the caller can detect an offline failure and keep the
+    // edit form open / show a retry-friendly error instead of a false "Saved!".
+    throw error;
   }
 };
 
@@ -65,6 +68,7 @@ export const deleteBowl = async (id, uid) => {
     await setDoc(docRef, { bowls: updatedBowls }, { merge: true });
   } catch (e) {
     console.error("error deleting bowl: ", e);
+    throw e;
   }
 };
 
@@ -94,8 +98,8 @@ export const addPracticeSession = async (uid, data) => {
     await setDoc(docRef, { practiceSessions: updatedSessions }, { merge: true });
   } catch (error) {
     console.error("error adding practice session: ", error);
-    // Re-thrown (unlike addBowl) so the caller can tell a save actually
-    // failed and keep its offline draft instead of discarding it.
+    // Re-thrown so the caller can tell a save actually failed and keep its
+    // offline draft instead of discarding it.
     throw error;
   }
 };
@@ -112,6 +116,7 @@ export const editPracticeSession = async (id, uid, newData) => {
     await setDoc(docRef, { practiceSessions: updatedSessions }, { merge: true });
   } catch (error) {
     console.error("error editing practice session: ", error);
+    throw error;
   }
 };
 
@@ -125,6 +130,7 @@ export const deletePracticeSession = async (id, uid) => {
     await setDoc(docRef, { practiceSessions: updatedSessions }, { merge: true });
   } catch (error) {
     console.error("error deleting practice session: ", error);
+    throw error;
   }
 };
 

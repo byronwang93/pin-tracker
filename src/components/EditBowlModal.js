@@ -36,6 +36,7 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
   const [throwStyle, setThrowStyle] = useState(null);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setScore(oldScore);
@@ -64,15 +65,26 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
       description: description,
     };
 
-    await editBowl(id, value, data);
-
-    onClose();
-    toast({
-      description: "Bowl Saved!",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
+    setSaving(true);
+    try {
+      await editBowl(id, value, data);
+      onClose();
+      toast({
+        description: "Bowl Saved!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        description: "Couldn't save — no connection? Try again.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -165,7 +177,7 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
 
             <ModalFooter width="100%">
               <Button
-                isDisabled={score === null || date === null || score > 300}
+                isDisabled={score === null || date === null || score > 300 || saving}
                 bgColor="#84876F"
                 color="white"
                 width="inherit"
@@ -176,7 +188,7 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
                   color: "white",
                 }}
               >
-                Save
+                {saving ? "Saving..." : "Save"}
               </Button>
             </ModalFooter>
           </VStack>
