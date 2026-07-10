@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { connectAuthEmulator, getAuth, GoogleAuthProvider } from "firebase/auth";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -18,5 +18,19 @@ const storage = getStorage(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+
+// Dev-only bypass for testing without a real Google account or touching
+// real data: sign-in still goes through the same
+// signInWithPopup(auth, provider) call in NotLoggedIn.js, but against the
+// local Firebase Auth Emulator (a fake IDP screen, no real OAuth); Firestore
+// reads/writes go to the local Firestore Emulator too, since production
+// Firestore's security rules reject the emulator's unsigned auth tokens
+// anyway. Fully isolated fake data — inert unless explicitly opted into
+// locally (`firebase emulators:start --only auth,firestore` +
+// REACT_APP_USE_AUTH_EMULATOR=true).
+if (process.env.REACT_APP_USE_AUTH_EMULATOR === "true") {
+  connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+  connectFirestoreEmulator(db, "localhost", 8080);
+}
 
 export { auth, provider, db, storage };
