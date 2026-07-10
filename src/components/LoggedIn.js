@@ -29,6 +29,7 @@ import { BowlsContext } from "../context/BowlsContext";
 import AddBowlModal from "./AddBowlModal";
 import Stats from "./Stats";
 import Leaderboard from "./Leaderboard";
+import Profile from "./Profile";
 import SpareShootingView from "./SpareShootingView";
 import LiveGameView from "./LiveGameView";
 import SettingsModal from "./SettingsModal";
@@ -45,6 +46,8 @@ const LoggedIn = () => {
   const [user, setUser] = useState(null);
   const [bowls, setBowls] = useState([]);
   const [practiceSessions, setPracticeSessions] = useState([]);
+  const [arsenal, setArsenal] = useState([]);
+  const [journalEntries, setJournalEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState("all-time");
 
@@ -85,6 +88,8 @@ const LoggedIn = () => {
     setUser(data);
     setBowls(data?.bowls ?? []);
     setPracticeSessions(data?.practiceSessions ?? []);
+    setArsenal(data?.arsenal ?? []);
+    setJournalEntries(data?.journalEntries ?? []);
     if (typeof data?.compMode === "boolean") {
       setCompModeState(data.compMode);
     }
@@ -97,6 +102,13 @@ const LoggedIn = () => {
   useEffect(() => {
     refetch();
   }, [refetch]);
+
+  // Profile (toggle 2) is a Comp Mode feature — if Comp gets switched off
+  // while it's showing, fall back to Stats instead of leaving the view on a
+  // now-hidden tab.
+  useEffect(() => {
+    if (!compMode && toggle === 2) setToggle(0);
+  }, [compMode, toggle]);
 
   // Rolling-window presets sit between "all-time" and the specific calendar
   // years so Spare Shooting sessions (which might land in a month with no
@@ -134,6 +146,8 @@ const LoggedIn = () => {
         practiceSessions,
         loading,
         refetch,
+        arsenal,
+        journalEntries,
         compMode,
         setCompMode,
         defaultThrowStyle,
@@ -175,13 +189,26 @@ const LoggedIn = () => {
           <Text
             fontSize={{ base: "20px", sm: "25px" }}
             _hover={{ cursor: "pointer" }}
-            color={toggle === 0 ? "white" : "#FDD468"}
+            color={toggle === 1 ? "#FDD468" : "white"}
             onClick={() => {
               setToggle(1);
             }}
+            mr={compMode ? "10px" : "0px"}
           >
             Leaderboard
           </Text>
+          {compMode && (
+            <Text
+              fontSize={{ base: "20px", sm: "25px" }}
+              _hover={{ cursor: "pointer" }}
+              color={toggle === 2 ? "#FDD468" : "white"}
+              onClick={() => {
+                setToggle(2);
+              }}
+            >
+              Profile
+            </Text>
+          )}
         </Flex>
         <Flex
           pr={{ base: "10px", md: "40px" }}
@@ -297,17 +324,25 @@ const LoggedIn = () => {
           <AddBowlModal isOpen={isOpen} onClose={onClose} />
         </Box>
 
-        <Select mb="20px" w="200px" value={year} onChange={handleYearChange}>
-          {yearsList.map((rangeValue, id) => {
-            return (
-              <option value={rangeValue} key={id}>
-                {rangeLabel(rangeValue)}
-              </option>
-            );
-          })}
-        </Select>
+        {toggle !== 2 && (
+          <Select mb="20px" w="200px" value={year} onChange={handleYearChange}>
+            {yearsList.map((rangeValue, id) => {
+              return (
+                <option value={rangeValue} key={id}>
+                  {rangeLabel(rangeValue)}
+                </option>
+              );
+            })}
+          </Select>
+        )}
       </VStack>
-      {toggle === 0 ? <Stats year={year} /> : <Leaderboard year={year} />}
+      {toggle === 0 ? (
+        <Stats year={year} />
+      ) : toggle === 1 ? (
+        <Leaderboard year={year} />
+      ) : (
+        <Profile />
+      )}
     </Flex>
     )}
     </BowlsContext.Provider>

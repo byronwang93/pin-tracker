@@ -25,6 +25,8 @@ export const addUser = async (uid, name, email, photoURL) => {
       photoURL: photoURL,
       bowls: [],
       practiceSessions: [],
+      arsenal: [],
+      journalEntries: [],
       average: null,
       highestGame: null,
       compMode: false,
@@ -130,6 +132,94 @@ export const deletePracticeSession = async (id, uid) => {
     await setDoc(docRef, { practiceSessions: updatedSessions }, { merge: true });
   } catch (error) {
     console.error("error deleting practice session: ", error);
+    throw error;
+  }
+};
+
+// arsenal functions (Profile tab, Comp Mode)
+export const addArsenalBall = async (uid, data) => {
+  const userData = await getUserData(uid);
+  const arsenal = userData?.arsenal ?? [];
+  const updatedArsenal = [...arsenal, data];
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { arsenal: updatedArsenal }, { merge: true });
+  } catch (error) {
+    console.error("error adding ball: ", error);
+    throw error;
+  }
+};
+
+export const editArsenalBall = async (id, uid, newData) => {
+  const userData = await getUserData(uid);
+  const arsenal = userData?.arsenal ?? [];
+  const updatedArsenal = arsenal.map((ball) => (ball.id === id ? newData : ball));
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { arsenal: updatedArsenal }, { merge: true });
+  } catch (error) {
+    console.error("error editing ball: ", error);
+    throw error;
+  }
+};
+
+export const deleteArsenalBall = async (id, uid) => {
+  const userData = await getUserData(uid);
+  const arsenal = userData?.arsenal ?? [];
+  const updatedArsenal = arsenal.filter((ball) => ball.id !== id);
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { arsenal: updatedArsenal }, { merge: true });
+  } catch (error) {
+    console.error("error deleting ball: ", error);
+    throw error;
+  }
+};
+
+// journal functions (Profile tab, Comp Mode)
+export const addJournalEntry = async (uid, data) => {
+  const userData = await getUserData(uid);
+  const journalEntries = userData?.journalEntries ?? [];
+  const updatedEntries = [...journalEntries, data];
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { journalEntries: updatedEntries }, { merge: true });
+  } catch (error) {
+    console.error("error adding journal entry: ", error);
+    throw error;
+  }
+};
+
+export const editJournalEntry = async (id, uid, newData) => {
+  const userData = await getUserData(uid);
+  const journalEntries = userData?.journalEntries ?? [];
+  const updatedEntries = journalEntries.map((entry) =>
+    entry.id === id ? newData : entry
+  );
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { journalEntries: updatedEntries }, { merge: true });
+  } catch (error) {
+    console.error("error editing journal entry: ", error);
+    throw error;
+  }
+};
+
+export const deleteJournalEntry = async (id, uid) => {
+  const userData = await getUserData(uid);
+  const journalEntries = userData?.journalEntries ?? [];
+  const updatedEntries = journalEntries.filter((entry) => entry.id !== id);
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { journalEntries: updatedEntries }, { merge: true });
+  } catch (error) {
+    console.error("error deleting journal entry: ", error);
     throw error;
   }
 };

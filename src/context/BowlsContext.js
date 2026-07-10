@@ -6,6 +6,8 @@ import React from "react";
 export const BowlsContext = React.createContext({
   bowls: [],
   practiceSessions: [],
+  arsenal: [],
+  journalEntries: [],
   loading: false,
   refetch: () => {},
   compMode: false,
