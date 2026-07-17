@@ -83,12 +83,18 @@ const JournalEntryModal = ({ entry, isOpen, onClose }) => {
             )
           );
         })
-        .catch(() => {
+        .catch((error) => {
           setImages((prev) =>
             prev.map((image) =>
               image.id === localId ? { ...image, status: "error" } : image
             )
           );
+          toast({
+            description: error?.message || "Couldn't upload that photo. Try again.",
+            status: "warning",
+            duration: 8000,
+            isClosable: true,
+          });
         });
     });
   };

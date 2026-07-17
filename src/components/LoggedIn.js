@@ -34,6 +34,16 @@ import SpareShootingView from "./SpareShootingView";
 import LiveGameView from "./LiveGameView";
 import SettingsModal from "./SettingsModal";
 
+// Keeps the current top-level tab in the URL (?tab=stats|leaderboard|profile)
+// so a refresh (or a shared link) lands back on the same view.
+const TAB_PARAMS = ["stats", "leaderboard", "profile"];
+
+const getInitialToggle = () => {
+  const tab = new URLSearchParams(window.location.search).get("tab");
+  const index = TAB_PARAMS.indexOf(tab);
+  return index === -1 ? 0 : index;
+};
+
 const LoggedIn = () => {
   const { value } = useContext(SignedInContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -51,7 +61,7 @@ const LoggedIn = () => {
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState("all-time");
 
-  const [toggle, setToggle] = useState(0);
+  const [toggle, setToggle] = useState(getInitialToggle);
   // Seeded from localStorage for an instant paint before Firestore loads;
   // refetch() then corrects it to whatever's saved on the user's profile, so
   // Comp mode follows you across devices instead of being per-browser.
@@ -109,6 +119,14 @@ const LoggedIn = () => {
   useEffect(() => {
     if (!compMode && toggle === 2) setToggle(0);
   }, [compMode, toggle]);
+
+  // Mirror the active tab into the URL (replace, not push — switching tabs
+  // shouldn't fill up the back-button history) so a refresh lands back here.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("tab", TAB_PARAMS[toggle]);
+    window.history.replaceState(null, "", `${window.location.pathname}?${params}`);
+  }, [toggle]);
 
   // Rolling-window presets sit between "all-time" and the specific calendar
   // years so Spare Shooting sessions (which might land in a month with no

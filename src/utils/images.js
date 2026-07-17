@@ -4,6 +4,14 @@
 const MAX_DIMENSION = 1600;
 const JPEG_QUALITY = 0.82;
 
+// iPhones save camera photos as HEIC/HEIF by default. Safari can decode that
+// into a canvas, but Chrome/Android/Edge have no HEIC decoder at all — the
+// Image element just fires onerror. There's no client-side polyfill for
+// this (would need a large WASM decoder), so we detect it up front and give
+// an actionable message instead of a bare "couldn't load image".
+const isHeic = (file) =>
+  /heic|heif/i.test(file.type) || /\.hei[cf]$/i.test(file.name);
+
 export const compressImage = (file) =>
   new Promise((resolve, reject) => {
     const img = new Image();
@@ -21,7 +29,7 @@ export const compressImage = (file) =>
         (blob) => {
           URL.revokeObjectURL(objectUrl);
           if (blob) resolve(blob);
-          else reject(new Error("Image compression failed"));
+          else reject(new Error("Couldn't process this photo — try a different one."));
         },
         "image/jpeg",
         JPEG_QUALITY
@@ -29,7 +37,13 @@ export const compressImage = (file) =>
     };
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      reject(new Error("Couldn't load image"));
+      reject(
+        new Error(
+          isHeic(file)
+            ? 'HEIC photos aren\'t supported by this browser. On iPhone, go to Settings > Camera > Formats and choose "Most Compatible", or pick a different photo.'
+            : "Couldn't load this photo — try a different one."
+        )
+      );
     };
     img.src = objectUrl;
   });
