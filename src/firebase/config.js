@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth, GoogleAuthProvider } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -26,11 +26,12 @@ const provider = new GoogleAuthProvider();
 // reads/writes go to the local Firestore Emulator too, since production
 // Firestore's security rules reject the emulator's unsigned auth tokens
 // anyway. Fully isolated fake data — inert unless explicitly opted into
-// locally (`firebase emulators:start --only auth,firestore` +
+// locally (`firebase emulators:start --only auth,firestore,storage` +
 // REACT_APP_USE_AUTH_EMULATOR=true).
 if (process.env.REACT_APP_USE_AUTH_EMULATOR === "true") {
   connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
   connectFirestoreEmulator(db, "localhost", 8080);
+  connectStorageEmulator(storage, "localhost", 9199);
 }
 
 export { auth, provider, db, storage };

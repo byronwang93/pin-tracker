@@ -25,6 +25,7 @@ import {
   JOURNAL_TAGS,
 } from "../utils/profile";
 import JournalEntryModal from "./JournalEntryModal";
+import ViewJournalEntryModal from "./ViewJournalEntryModal";
 
 const FILTER_PILLS = [...JOURNAL_TAGS, CUSTOM_TAG_FILTER];
 const pillLabel = (tag) => (tag === CUSTOM_TAG_FILTER ? "Custom" : tag);
@@ -34,8 +35,10 @@ const Journal = () => {
   const { journalEntries, refetch } = useContext(BowlsContext);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isViewOpen, onOpen: onViewOpen, onClose: onViewClose } = useDisclosure();
 
   const [editingEntry, setEditingEntry] = useState(null);
+  const [viewingEntry, setViewingEntry] = useState(null);
   const [tagFilter, setTagFilter] = useState(null);
   const [deleteAlertId, setDeleteAlertId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -54,6 +57,11 @@ const Journal = () => {
   const openEdit = (entry) => {
     setEditingEntry(entry);
     onOpen();
+  };
+
+  const openView = (entry) => {
+    setViewingEntry(entry);
+    onViewOpen();
   };
 
   const handleDelete = async (id) => {
@@ -136,8 +144,16 @@ const Journal = () => {
               p="12px"
               borderRadius="7px"
               bgColor={index % 2 === 0 ? "#3C3D36" : "transparent"}
+              _hover={{ bgColor: "#454740" }}
             >
-              <VStack align="flex-start" spacing="4px" flex="1" minW="0">
+              <VStack
+                align="flex-start"
+                spacing="4px"
+                flex="1"
+                minW="0"
+                cursor="pointer"
+                onClick={() => openView(entry)}
+              >
                 <HStack spacing="10px" flexWrap="wrap">
                   <Text fontSize="12px" color="#A0A0A0">
                     {entry.date}
@@ -163,6 +179,11 @@ const Journal = () => {
                       {tag}
                     </Text>
                   ))}
+                  {(entry.images ?? []).length > 0 && (
+                    <Text fontSize="11px" color="#A0A0A0">
+                      {entry.images.length} photo{entry.images.length > 1 ? "s" : ""}
+                    </Text>
+                  )}
                 </HStack>
                 <Text fontSize="13.5px" color="#d8d8d4" noOfLines={2}>
                   {entry.body}
@@ -171,14 +192,20 @@ const Journal = () => {
 
               <HStack spacing="8px" pl="10px" flexShrink={0}>
                 <Img
-                  onClick={() => openEdit(entry)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    openEdit(entry);
+                  }}
                   _hover={{ cursor: "pointer", boxSize: 6 }}
                   boxSize={5}
                   src={`${process.env.PUBLIC_URL}/edit-icon.svg`}
                   alt="edit note"
                 />
                 <Img
-                  onClick={() => setDeleteAlertId(entry.id)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setDeleteAlertId(entry.id);
+                  }}
                   _hover={{ cursor: "pointer", boxSize: 6 }}
                   boxSize={5}
                   src={`${process.env.PUBLIC_URL}/trash-icon.svg`}
@@ -228,6 +255,12 @@ const Journal = () => {
       )}
 
       <JournalEntryModal entry={editingEntry} isOpen={isOpen} onClose={onClose} />
+      <ViewJournalEntryModal
+        entry={viewingEntry}
+        isOpen={isViewOpen}
+        onClose={onViewClose}
+        onEdit={openEdit}
+      />
     </Box>
   );
 };

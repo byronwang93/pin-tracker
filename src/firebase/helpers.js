@@ -1,5 +1,12 @@
 import { getDoc, getDocs, doc, collection, setDoc } from "@firebase/firestore";
-import { db } from "./config";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref as storageRef,
+  uploadBytes,
+} from "@firebase/storage";
+import { v4 } from "uuid";
+import { db, storage } from "./config";
 import { averageData, filterByRange, highestGameData } from "../utils/stats";
 
 // user functions
@@ -206,6 +213,30 @@ export const editJournalEntry = async (id, uid, newData) => {
     await setDoc(docRef, { journalEntries: updatedEntries }, { merge: true });
   } catch (error) {
     console.error("error editing journal entry: ", error);
+    throw error;
+  }
+};
+
+// Storage path is namespaced per-uid so security rules can scope
+// read/write access to the signed-in user's own images.
+export const uploadJournalImage = async (uid, blob) => {
+  const path = `journal-images/${uid}/${v4()}.jpg`;
+  const fileRef = storageRef(storage, path);
+  try {
+    await uploadBytes(fileRef, blob, { contentType: "image/jpeg" });
+    const url = await getDownloadURL(fileRef);
+    return { url, path };
+  } catch (error) {
+    console.error("error uploading journal image: ", error);
+    throw error;
+  }
+};
+
+export const deleteJournalImage = async (path) => {
+  try {
+    await deleteObject(storageRef(storage, path));
+  } catch (error) {
+    console.error("error deleting journal image: ", error);
     throw error;
   }
 };
