@@ -39,6 +39,7 @@ export const addUser = async (uid, name, email, photoURL) => {
       compMode: false,
       defaultThrowStyle: 1,
       backgroundTheme: "warm",
+      hideNonDominantHand: false,
     };
 
     const userRef = doc(db, "users", uid);
@@ -280,6 +281,15 @@ export const updateBackgroundTheme = async (uid, backgroundTheme) => {
     await setDoc(docRef, { backgroundTheme }, { merge: true });
   } catch (error) {
     console.error("error updating background theme: ", error);
+  }
+};
+
+export const updateHideNonDominantHand = async (uid, hideNonDominantHand) => {
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { hideNonDominantHand }, { merge: true });
+  } catch (error) {
+    console.error("error updating hide non-dominant hand: ", error);
   }
 };
 

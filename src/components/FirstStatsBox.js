@@ -4,7 +4,7 @@ import { BowlsContext } from "../context/BowlsContext";
 import { filterByRange, gamesBowled, highestGame } from "../utils/stats";
 
 const FirstStatsBox = ({ year }) => {
-  const { bowls } = useContext(BowlsContext);
+  const { bowls, defaultThrowStyle, hideNonDominantHand } = useContext(BowlsContext);
 
   const { totalGames, highestOne, highestTwo } = useMemo(() => {
     const yearBowls = filterByRange(bowls, year);
@@ -14,6 +14,9 @@ const FirstStatsBox = ({ year }) => {
       highestTwo: highestGame(yearBowls, 2),
     };
   }, [bowls, year]);
+
+  const showOne = !hideNonDominantHand || defaultThrowStyle === 1;
+  const showTwo = !hideNonDominantHand || defaultThrowStyle === 2;
 
   return (
     <Box
@@ -44,34 +47,38 @@ const FirstStatsBox = ({ year }) => {
           {totalGames !== null ? totalGames : "--"}
         </Text>
       </Box>
-      <Box
-        alignSelf="baseline"
-        textAlign="left"
-        maxW="150px"
-        display="flex"
-        flexDirection="column"
-      >
-        <Text fontSize="18px" color="#A0A0A0">
-          Highest Game (one-handed)
-        </Text>
-        <Text p="5px 0px 13px 0px" fontSize="30px">
-          {highestOne !== null ? highestOne : "--"}
-        </Text>
-      </Box>
-      <Box
-        alignSelf="baseline"
-        maxW="150px"
-        textAlign="left"
-        display="flex"
-        flexDirection="column"
-      >
-        <Text fontSize="18px" color="#A0A0A0">
-          Highest Game (two-handed)
-        </Text>
-        <Text p="5px 0px 1px 0px" fontSize="30px">
-          {highestTwo !== null ? highestTwo : "--"}
-        </Text>
-      </Box>
+      {showOne && (
+        <Box
+          alignSelf="baseline"
+          textAlign="left"
+          maxW="150px"
+          display="flex"
+          flexDirection="column"
+        >
+          <Text fontSize="18px" color="#A0A0A0">
+            Highest Game{showTwo ? " (one-handed)" : ""}
+          </Text>
+          <Text p="5px 0px 13px 0px" fontSize="30px">
+            {highestOne !== null ? highestOne : "--"}
+          </Text>
+        </Box>
+      )}
+      {showTwo && (
+        <Box
+          alignSelf="baseline"
+          maxW="150px"
+          textAlign="left"
+          display="flex"
+          flexDirection="column"
+        >
+          <Text fontSize="18px" color="#A0A0A0">
+            Highest Game{showOne ? " (two-handed)" : ""}
+          </Text>
+          <Text p="5px 0px 1px 0px" fontSize="30px">
+            {highestTwo !== null ? highestTwo : "--"}
+          </Text>
+        </Box>
+      )}
     </Box>
   );
 };

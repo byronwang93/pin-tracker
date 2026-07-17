@@ -8,12 +8,14 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Switch,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import React, { useContext } from "react";
 import { BowlsContext } from "../context/BowlsContext";
 import { BACKGROUND_THEMES } from "../utils/backgroundThemes";
+import { throwStyleLabel } from "../utils/stats";
 
 const styles = [
   { title: "One-handed", hand: 1 },
@@ -29,7 +31,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
     setDefaultThrowStyle,
     backgroundTheme,
     setBackgroundTheme,
+    hideNonDominantHand,
+    setHideNonDominantHand,
   } = useContext(BowlsContext);
+  const nonDominantHand = defaultThrowStyle === 1 ? 2 : 1;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} width="100%">
@@ -62,23 +67,53 @@ const SettingsModal = ({ isOpen, onClose }) => {
             </Box>
 
             <Box pt="20px">
+              <Text>Stats Display</Text>
+              <Text fontSize="14px" color="#A0A0A0" pb="8px">
+                Hide {throwStyleLabel(nonDominantHand)} stats on the Stats page —
+                only show your {throwStyleLabel(defaultThrowStyle)} numbers.
+              </Text>
+              <HStack spacing="10px">
+                <Switch
+                  colorScheme="yellow"
+                  size="lg"
+                  isChecked={hideNonDominantHand}
+                  onChange={(event) => setHideNonDominantHand(event.target.checked)}
+                />
+                <Text color={hideNonDominantHand ? "#FDD468" : "white"}>
+                  {hideNonDominantHand ? "Hidden" : "Showing both"}
+                </Text>
+              </HStack>
+            </Box>
+
+            <Box pt="20px">
               <Text>Background</Text>
               <Text fontSize="14px" color="#A0A0A0" pb="8px">
                 Color of the ambient shapes drifting behind the app.
               </Text>
-              <HStack flexWrap="wrap">
-                {BACKGROUND_THEMES.map(({ value, label }) => (
-                  <Button
-                    p={{ base: "10px 20px", sm: "10px 30px" }}
-                    key={value}
-                    _hover={{ color: "white", bgColor: "#606351" }}
-                    color="white"
-                    bgColor="#84876F"
-                    outline={backgroundTheme === value && "2px solid"}
-                    onClick={() => setBackgroundTheme(value)}
-                  >
-                    {label}
-                  </Button>
+              <HStack flexWrap="wrap" spacing="14px" alignItems="flex-start">
+                {BACKGROUND_THEMES.map(({ value, label, colors }) => (
+                  <VStack key={value} spacing="6px">
+                    <Button
+                      p={{ base: "10px 20px", sm: "10px 30px" }}
+                      _hover={{ color: "white", bgColor: "#606351" }}
+                      color="white"
+                      bgColor="#84876F"
+                      outline={backgroundTheme === value && "2px solid"}
+                      onClick={() => setBackgroundTheme(value)}
+                    >
+                      {label}
+                    </Button>
+                    <HStack spacing="3px">
+                      {colors.map((color, i) => (
+                        <Box
+                          key={i}
+                          boxSize="12px"
+                          borderRadius="3px"
+                          bgColor={color}
+                        />
+                      ))}
+                    </HStack>
+                  </VStack>
                 ))}
               </HStack>
             </Box>

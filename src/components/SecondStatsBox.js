@@ -8,7 +8,7 @@ import {
 } from "../utils/stats";
 
 const SecondStatsBox = ({ year }) => {
-  const { bowls } = useContext(BowlsContext);
+  const { bowls, defaultThrowStyle, hideNonDominantHand } = useContext(BowlsContext);
 
   const {
     average,
@@ -28,6 +28,9 @@ const SecondStatsBox = ({ year }) => {
       last10TwoAverage: last10Avg(yearBowls, 2),
     };
   }, [bowls, year]);
+
+  const showOne = !hideNonDominantHand || defaultThrowStyle === 1;
+  const showTwo = !hideNonDominantHand || defaultThrowStyle === 2;
 
   return (
     <Box
@@ -74,34 +77,38 @@ const SecondStatsBox = ({ year }) => {
             {average !== 0 ? average : "--"}
           </Text>
         </Box>
-        <Box
-          alignSelf="baseline"
-          textAlign="left"
-          width="150px"
-          display="flex"
-          flexDirection="column"
-        >
-          <Text fontSize="18px" color="#A0A0A0">
-            All-time (one-handed)
-          </Text>
-          <Text p="5px 0px 13px 0px" fontSize="30px">
-            {oneAverage !== 0 ? oneAverage : "--"}
-          </Text>
-        </Box>
-        <Box
-          alignSelf="baseline"
-          w="150px"
-          textAlign="left"
-          display="flex"
-          flexDirection="column"
-        >
-          <Text fontSize="18px" color="#A0A0A0">
-            All-time (two-handed)
-          </Text>
-          <Text p="5px 0px 1px 0px" fontSize="30px">
-            {twoAverage !== 0 ? twoAverage : "--"}
-          </Text>
-        </Box>
+        {showOne && (
+          <Box
+            alignSelf="baseline"
+            textAlign="left"
+            width="150px"
+            display="flex"
+            flexDirection="column"
+          >
+            <Text fontSize="18px" color="#A0A0A0">
+              All-time (one-handed)
+            </Text>
+            <Text p="5px 0px 13px 0px" fontSize="30px">
+              {oneAverage !== 0 ? oneAverage : "--"}
+            </Text>
+          </Box>
+        )}
+        {showTwo && (
+          <Box
+            alignSelf="baseline"
+            w="150px"
+            textAlign="left"
+            display="flex"
+            flexDirection="column"
+          >
+            <Text fontSize="18px" color="#A0A0A0">
+              All-time (two-handed)
+            </Text>
+            <Text p="5px 0px 1px 0px" fontSize="30px">
+              {twoAverage !== 0 ? twoAverage : "--"}
+            </Text>
+          </Box>
+        )}
       </Box>
 
       <Box
@@ -131,34 +138,38 @@ const SecondStatsBox = ({ year }) => {
             {last10Average !== 0 ? last10Average : "--"}
           </Text>
         </Box>
-        <Box
-          alignSelf="baseline"
-          textAlign="left"
-          maxW="150px"
-          display="flex"
-          flexDirection="column"
-        >
-          <Text fontSize="18px" color="#A0A0A0">
-            Last 10 Games (one-handed)
-          </Text>
-          <Text p="5px 0px 13px 0px" fontSize="30px">
-            {last10OneAverage !== 0 ? last10OneAverage : "--"}
-          </Text>
-        </Box>
-        <Box
-          alignSelf="baseline"
-          maxW="150px"
-          textAlign="left"
-          display="flex"
-          flexDirection="column"
-        >
-          <Text fontSize="18px" color="#A0A0A0">
-            Last 10 Games (two-handed)
-          </Text>
-          <Text p="5px 0px 1px 0px" fontSize="30px">
-            {last10TwoAverage !== 0 ? last10TwoAverage : "--"}
-          </Text>
-        </Box>
+        {showOne && (
+          <Box
+            alignSelf="baseline"
+            textAlign="left"
+            maxW="150px"
+            display="flex"
+            flexDirection="column"
+          >
+            <Text fontSize="18px" color="#A0A0A0">
+              Last 10 Games (one-handed)
+            </Text>
+            <Text p="5px 0px 13px 0px" fontSize="30px">
+              {last10OneAverage !== 0 ? last10OneAverage : "--"}
+            </Text>
+          </Box>
+        )}
+        {showTwo && (
+          <Box
+            alignSelf="baseline"
+            maxW="150px"
+            textAlign="left"
+            display="flex"
+            flexDirection="column"
+          >
+            <Text fontSize="18px" color="#A0A0A0">
+              Last 10 Games (two-handed)
+            </Text>
+            <Text p="5px 0px 1px 0px" fontSize="30px">
+              {last10TwoAverage !== 0 ? last10TwoAverage : "--"}
+            </Text>
+          </Box>
+        )}
       </Box>
     </Box>
   );

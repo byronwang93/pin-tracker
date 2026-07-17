@@ -24,6 +24,7 @@ import {
   updateBackgroundTheme,
   updateCompMode,
   updateDefaultThrowStyle,
+  updateHideNonDominantHand,
 } from "../firebase/helpers";
 import { getYearValues, rangeLabel } from "../utils/stats";
 import { BowlsContext } from "../context/BowlsContext";
@@ -77,10 +78,19 @@ const LoggedIn = () => {
   // Default hand for new entries (Upload Bowl / Live Game setup) — same
   // cross-device persistence shape as compMode below.
   const [defaultThrowStyle, setDefaultThrowStyleState] = useState(1);
+  // When on, Stats only shows the hand matching defaultThrowStyle above —
+  // same cross-device persistence shape as compMode below.
+  const [hideNonDominantHand, setHideNonDominantHandState] = useState(
+    () => localStorage.getItem("hideNonDominantHand") === "true"
+  );
 
   useEffect(() => {
     localStorage.setItem("compMode", compMode);
   }, [compMode]);
+
+  useEffect(() => {
+    localStorage.setItem("hideNonDominantHand", hideNonDominantHand);
+  }, [hideNonDominantHand]);
 
   // User-driven toggle: updates local state/cache immediately, and persists
   // to the profile so other devices pick it up on their next refetch().
@@ -92,6 +102,11 @@ const LoggedIn = () => {
   const setDefaultThrowStyle = (nextValue) => {
     setDefaultThrowStyleState(nextValue);
     if (value) updateDefaultThrowStyle(value, nextValue);
+  };
+
+  const setHideNonDominantHand = (nextValue) => {
+    setHideNonDominantHandState(nextValue);
+    if (value) updateHideNonDominantHand(value, nextValue);
   };
 
   // backgroundTheme itself lives in App.js (BackgroundAnimation renders even
@@ -119,6 +134,9 @@ const LoggedIn = () => {
     }
     if (data?.defaultThrowStyle === 1 || data?.defaultThrowStyle === 2) {
       setDefaultThrowStyleState(data.defaultThrowStyle);
+    }
+    if (typeof data?.hideNonDominantHand === "boolean") {
+      setHideNonDominantHandState(data.hideNonDominantHand);
     }
     if (typeof data?.backgroundTheme === "string") {
       setAppBackgroundTheme(data.backgroundTheme);
@@ -189,6 +207,8 @@ const LoggedIn = () => {
         setDefaultThrowStyle,
         backgroundTheme,
         setBackgroundTheme,
+        hideNonDominantHand,
+        setHideNonDominantHand,
       }}
     >
     {view === "spareShooting" ? (

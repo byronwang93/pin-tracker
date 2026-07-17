@@ -10,10 +10,10 @@
         border-radius: 0;
     }
     8%{
-        opacity: 0.16;
+        opacity: 0.08;
     }
     92%{
-        opacity: 0.16;
+        opacity: 0.08;
     }
     100%{
         transform: translateY(-1000px) rotate(var(--spin, 720deg));

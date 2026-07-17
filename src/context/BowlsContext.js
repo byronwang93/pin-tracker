@@ -16,4 +16,6 @@ export const BowlsContext = React.createContext({
   setDefaultThrowStyle: () => {},
   backgroundTheme: "warm",
   setBackgroundTheme: () => {},
+  hideNonDominantHand: false,
+  setHideNonDominantHand: () => {},
 });
