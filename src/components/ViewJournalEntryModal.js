@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   HStack,
   Img,
   Modal,
@@ -9,6 +10,7 @@ import {
   ModalOverlay,
   SimpleGrid,
   Text,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
@@ -18,8 +20,51 @@ import React, { useState } from "react";
 // "Edit" here just closes this and opens JournalEntryModal on the same entry.
 const ViewJournalEntryModal = ({ entry, isOpen, onClose, onEdit }) => {
   const [lightboxUrl, setLightboxUrl] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
 
   if (!entry) return null;
+
+  // Mobile browsers already do pinch-zoom/pan on a real image — opening the
+  // raw file gets that for free instead of us reimplementing gestures.
+  const openFullSize = () => window.open(lightboxUrl, "_blank", "noopener");
+
+  // navigator.share with a file surfaces the OS's native "Save to Photos"
+  // sheet on mobile without leaving the app; desktop browsers (and any
+  // browser without file-share support) fall back to a plain download.
+  const saveImage = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch(lightboxUrl);
+      const blob = await response.blob();
+      const file = new File([blob], "photo.jpg", { type: blob.type || "image/jpeg" });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = "photo.jpg";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        toast({
+          description: "Couldn't save that photo — try \"Open Full Size\" and save it from there instead.",
+          status: "warning",
+          duration: 6000,
+          isClosable: true,
+        });
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleClose = () => {
     setLightboxUrl(null);
@@ -115,11 +160,33 @@ const ViewJournalEntryModal = ({ entry, isOpen, onClose, onEdit }) => {
           zIndex="popover"
           bgColor="rgba(0,0,0,0.9)"
           display="flex"
+          flexDirection="column"
           alignItems="center"
           justifyContent="center"
           onClick={() => setLightboxUrl(null)}
         >
-          <Img src={lightboxUrl} alt="" maxW="90%" maxH="90%" objectFit="contain" />
+          <Img src={lightboxUrl} alt="" maxW="90%" maxH="75%" objectFit="contain" />
+          <HStack spacing="10px" pt="20px" onClick={(event) => event.stopPropagation()}>
+            <Button
+              size="sm"
+              bgColor="rgba(255,255,255,0.12)"
+              color="white"
+              _hover={{ bgColor: "rgba(255,255,255,0.2)" }}
+              onClick={openFullSize}
+            >
+              Open Full Size
+            </Button>
+            <Button
+              size="sm"
+              bgColor="#FFF3D2"
+              color="black"
+              _hover={{ bgColor: "#E6DBBF" }}
+              onClick={saveImage}
+              isDisabled={saving}
+            >
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </HStack>
         </Box>
       )}
     </>

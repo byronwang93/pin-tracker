@@ -204,17 +204,6 @@ const LoggedIn = () => {
           >
             Stats
           </Text>
-          <Text
-            fontSize={{ base: "20px", sm: "25px" }}
-            _hover={{ cursor: "pointer" }}
-            color={toggle === 1 ? "#FDD468" : "white"}
-            onClick={() => {
-              setToggle(1);
-            }}
-            mr={compMode ? "10px" : "0px"}
-          >
-            Leaderboard
-          </Text>
           {compMode && (
             <Text
               fontSize={{ base: "20px", sm: "25px" }}
@@ -223,10 +212,21 @@ const LoggedIn = () => {
               onClick={() => {
                 setToggle(2);
               }}
+              mr="10px"
             >
               Profile
             </Text>
           )}
+          <Text
+            fontSize={{ base: "20px", sm: "25px" }}
+            _hover={{ cursor: "pointer" }}
+            color={toggle === 1 ? "#FDD468" : "white"}
+            onClick={() => {
+              setToggle(1);
+            }}
+          >
+            Leaderboard
+          </Text>
         </Flex>
         <Flex
           pr={{ base: "10px", md: "40px" }}
