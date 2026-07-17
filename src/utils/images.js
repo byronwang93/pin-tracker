@@ -5,17 +5,29 @@ const MAX_DIMENSION = 1600;
 const JPEG_QUALITY = 0.82;
 
 // iPhones save camera photos as HEIC/HEIF by default. Safari can decode that
-// into a canvas, but Chrome/Android/Edge have no HEIC decoder at all — the
-// Image element just fires onerror. There's no client-side polyfill for
-// this (would need a large WASM decoder), so we detect it up front and give
-// an actionable message instead of a bare "couldn't load image".
+// natively, but Chrome/Android/Edge have no HEIC decoder at all — the Image
+// element just fires onerror there. heic2any wraps a WASM build of libheif
+// so decoding works the same on every browser; it's loaded on demand (not in
+// the main bundle) since most uploads are already JPEG/PNG and won't need it.
 const isHeic = (file) =>
   /heic|heif/i.test(file.type) || /\.hei[cf]$/i.test(file.name);
 
-export const compressImage = (file) =>
-  new Promise((resolve, reject) => {
+const decodeHeic = async (file) => {
+  const heic2any = (await import("heic2any")).default;
+  try {
+    const result = await heic2any({ blob: file, toType: "image/jpeg", quality: JPEG_QUALITY });
+    return Array.isArray(result) ? result[0] : result;
+  } catch {
+    throw new Error("Couldn't process this HEIC photo — try a different one.");
+  }
+};
+
+export const compressImage = async (file) => {
+  const sourceBlob = isHeic(file) ? await decodeHeic(file) : file;
+
+  return new Promise((resolve, reject) => {
     const img = new Image();
-    const objectUrl = URL.createObjectURL(file);
+    const objectUrl = URL.createObjectURL(sourceBlob);
 
     img.onload = () => {
       const scale = Math.min(1, MAX_DIMENSION / Math.max(img.width, img.height));
@@ -37,13 +49,8 @@ export const compressImage = (file) =>
     };
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      reject(
-        new Error(
-          isHeic(file)
-            ? 'HEIC photos aren\'t supported by this browser. On iPhone, go to Settings > Camera > Formats and choose "Most Compatible", or pick a different photo.'
-            : "Couldn't load this photo — try a different one."
-        )
-      );
+      reject(new Error("Couldn't load this photo — try a different one."));
     };
     img.src = objectUrl;
   });
+};
