@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useContext } from "react";
 import { BowlsContext } from "../context/BowlsContext";
+import { BACKGROUND_THEMES } from "../utils/backgroundThemes";
 
 const styles = [
   { title: "One-handed", hand: 1 },
@@ -23,7 +24,12 @@ const styles = [
 // pre-fill Upload Bowl / Live Game setup, synced to the profile like Comp
 // Mode so it follows you across devices.
 const SettingsModal = ({ isOpen, onClose }) => {
-  const { defaultThrowStyle, setDefaultThrowStyle } = useContext(BowlsContext);
+  const {
+    defaultThrowStyle,
+    setDefaultThrowStyle,
+    backgroundTheme,
+    setBackgroundTheme,
+  } = useContext(BowlsContext);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} width="100%">
@@ -50,6 +56,28 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     onClick={() => setDefaultThrowStyle(hand)}
                   >
                     {title}
+                  </Button>
+                ))}
+              </HStack>
+            </Box>
+
+            <Box pt="20px">
+              <Text>Background</Text>
+              <Text fontSize="14px" color="#A0A0A0" pb="8px">
+                Color of the ambient shapes drifting behind the app.
+              </Text>
+              <HStack flexWrap="wrap">
+                {BACKGROUND_THEMES.map(({ value, label }) => (
+                  <Button
+                    p={{ base: "10px 20px", sm: "10px 30px" }}
+                    key={value}
+                    _hover={{ color: "white", bgColor: "#606351" }}
+                    color="white"
+                    bgColor="#84876F"
+                    outline={backgroundTheme === value && "2px solid"}
+                    onClick={() => setBackgroundTheme(value)}
+                  >
+                    {label}
                   </Button>
                 ))}
               </HStack>

@@ -38,6 +38,7 @@ export const addUser = async (uid, name, email, photoURL) => {
       highestGame: null,
       compMode: false,
       defaultThrowStyle: 1,
+      backgroundTheme: "warm",
     };
 
     const userRef = doc(db, "users", uid);
@@ -270,6 +271,15 @@ export const updateDefaultThrowStyle = async (uid, defaultThrowStyle) => {
     await setDoc(docRef, { defaultThrowStyle }, { merge: true });
   } catch (error) {
     console.error("error updating default throw style: ", error);
+  }
+};
+
+export const updateBackgroundTheme = async (uid, backgroundTheme) => {
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { backgroundTheme }, { merge: true });
+  } catch (error) {
+    console.error("error updating background theme: ", error);
   }
 };
 

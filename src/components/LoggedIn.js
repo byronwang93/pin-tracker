@@ -21,6 +21,7 @@ import React, {
 import { SignedInContext } from "../App";
 import {
   getUserData,
+  updateBackgroundTheme,
   updateCompMode,
   updateDefaultThrowStyle,
 } from "../firebase/helpers";
@@ -45,7 +46,11 @@ const getInitialToggle = () => {
 };
 
 const LoggedIn = () => {
-  const { value } = useContext(SignedInContext);
+  const {
+    value,
+    backgroundTheme,
+    setBackgroundTheme: setAppBackgroundTheme,
+  } = useContext(SignedInContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: settingsIsOpen,
@@ -89,6 +94,15 @@ const LoggedIn = () => {
     if (value) updateDefaultThrowStyle(value, nextValue);
   };
 
+  // backgroundTheme itself lives in App.js (BackgroundAnimation renders even
+  // on the logged-out screen) — this wraps the raw setter with the same
+  // localStorage + Firestore persistence every other setting here uses.
+  const setBackgroundTheme = (nextValue) => {
+    setAppBackgroundTheme(nextValue);
+    localStorage.setItem("backgroundTheme", nextValue);
+    if (value) updateBackgroundTheme(value, nextValue);
+  };
+
   // Fetch the user document once; every stat/entry reads from `bowls` in
   // context instead of firing its own network read. Mutations call refetch().
   const refetch = useCallback(async () => {
@@ -106,8 +120,11 @@ const LoggedIn = () => {
     if (data?.defaultThrowStyle === 1 || data?.defaultThrowStyle === 2) {
       setDefaultThrowStyleState(data.defaultThrowStyle);
     }
+    if (typeof data?.backgroundTheme === "string") {
+      setAppBackgroundTheme(data.backgroundTheme);
+    }
     setLoading(false);
-  }, [value]);
+  }, [value, setAppBackgroundTheme]);
 
   useEffect(() => {
     refetch();
@@ -170,6 +187,8 @@ const LoggedIn = () => {
         setCompMode,
         defaultThrowStyle,
         setDefaultThrowStyle,
+        backgroundTheme,
+        setBackgroundTheme,
       }}
     >
     {view === "spareShooting" ? (

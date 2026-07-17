@@ -14,4 +14,6 @@ export const BowlsContext = React.createContext({
   setCompMode: () => {},
   defaultThrowStyle: 1,
   setDefaultThrowStyle: () => {},
+  backgroundTheme: "warm",
+  setBackgroundTheme: () => {},
 });

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import "./App.css";
 import BackgroundAnimation from "./components/BackgroundAnimation";
 import HomePage from "./components/HomePage";
+import { DEFAULT_BACKGROUND_THEME } from "./utils/backgroundThemes";
 
 export const SignedInContext = React.createContext();
 
@@ -24,9 +25,18 @@ const theme = extendTheme({
 
 function App() {
   const [value, setValue] = useState("");
+  // Seeded from localStorage for an instant paint before Firestore loads,
+  // same pattern as compMode in LoggedIn.js — lives up here (not in
+  // LoggedIn's BowlsContext) since BackgroundAnimation renders even on the
+  // logged-out screen.
+  const [backgroundTheme, setBackgroundTheme] = useState(
+    () => localStorage.getItem("backgroundTheme") || DEFAULT_BACKGROUND_THEME
+  );
   return (
     <ChakraProvider theme={theme}>
-      <SignedInContext.Provider value={{ value, setValue }}>
+      <SignedInContext.Provider
+        value={{ value, setValue, backgroundTheme, setBackgroundTheme }}
+      >
         <VStack
           display="flex"
           w="100%"
@@ -34,7 +44,7 @@ function App() {
           justify={!value && "center"}
         >
           <HomePage />
-          <BackgroundAnimation />
+          <BackgroundAnimation theme={backgroundTheme} />
         </VStack>
       </SignedInContext.Provider>
     </ChakraProvider>
