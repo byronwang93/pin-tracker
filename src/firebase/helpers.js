@@ -1,4 +1,5 @@
 import { getDoc, getDocs, doc, collection, setDoc } from "@firebase/firestore";
+import { httpsCallable } from "@firebase/functions";
 import {
   deleteObject,
   getDownloadURL,
@@ -6,7 +7,7 @@ import {
   uploadBytes,
 } from "@firebase/storage";
 import { v4 } from "uuid";
-import { db, storage } from "./config";
+import { db, functions, storage } from "./config";
 import { averageData, filterByRange, highestGameData } from "../utils/stats";
 
 // user functions
@@ -184,6 +185,30 @@ export const deleteArsenalBall = async (id, uid) => {
     await setDoc(docRef, { arsenal: updatedArsenal }, { merge: true });
   } catch (error) {
     console.error("error deleting ball: ", error);
+    throw error;
+  }
+};
+
+// bowwwl.com ball lookup (Cloud Functions — see /functions). Search hits
+// bowwwl's own JSON autocomplete endpoint; fetching details scrapes the
+// detail page and mirrors the ball image into our own Storage bucket.
+export const searchBowwwlBalls = async (query) => {
+  const search = httpsCallable(functions, "searchBowwwlBalls");
+  const { data } = await search({ query });
+  return data.results;
+};
+
+export const fetchBowwwlBallDetails = async (url) => {
+  const fetchDetails = httpsCallable(functions, "fetchBowwwlBallDetails");
+  const { data } = await fetchDetails({ url });
+  return data;
+};
+
+export const deleteBallImage = async (path) => {
+  try {
+    await deleteObject(storageRef(storage, path));
+  } catch (error) {
+    console.error("error deleting ball image: ", error);
     throw error;
   }
 };

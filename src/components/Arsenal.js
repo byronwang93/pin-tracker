@@ -18,8 +18,8 @@ import {
 import React, { useContext, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { BowlsContext } from "../context/BowlsContext";
-import { deleteArsenalBall } from "../firebase/helpers";
-import { coreLabel, coverstockLabel, ROLE_COLORS, roleLabel } from "../utils/profile";
+import { deleteArsenalBall, deleteBallImage } from "../firebase/helpers";
+import { closestSpec, coreLabel, coverstockLabel, ROLE_COLORS, roleLabel } from "../utils/profile";
 import BallModal from "./BallModal";
 
 const Arsenal = () => {
@@ -46,7 +46,9 @@ const Arsenal = () => {
   const handleDelete = async (id) => {
     setDeletingId(id);
     try {
+      const ball = arsenal.find((b) => b.id === id);
       await deleteArsenalBall(id, value);
+      if (ball?.imagePath) deleteBallImage(ball.imagePath).catch(() => {});
       await refetch();
       setDeleteAlertId(null);
       toast({
@@ -92,6 +94,7 @@ const Arsenal = () => {
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing="14px">
           {arsenal.map((ball) => {
             const colors = ROLE_COLORS[ball.role];
+            const spec = closestSpec(ball.specsByWeight, ball.weight);
             return (
               <VStack
                 key={ball.id}
@@ -102,26 +105,31 @@ const Arsenal = () => {
                 align="stretch"
               >
                 <HStack justify="space-between" align="flex-start">
-                  <VStack align="flex-start" spacing="4px">
-                    <Text fontSize="17px" fontWeight="bold">
-                      {ball.name}
-                    </Text>
-                    {colors && (
-                      <Text
-                        fontSize="11px"
-                        fontWeight="bold"
-                        letterSpacing="0.04em"
-                        textTransform="uppercase"
-                        bgColor={colors.bg}
-                        color={colors.color}
-                        px="9px"
-                        py="2px"
-                        borderRadius="100px"
-                      >
-                        {roleLabel(ball.role)}
-                      </Text>
+                  <HStack align="flex-start" spacing="10px">
+                    {ball.imageUrl && (
+                      <Img src={ball.imageUrl} alt="" boxSize="44px" objectFit="contain" borderRadius="4px" />
                     )}
-                  </VStack>
+                    <VStack align="flex-start" spacing="4px">
+                      <Text fontSize="17px" fontWeight="bold">
+                        {ball.name}
+                      </Text>
+                      {colors && (
+                        <Text
+                          fontSize="11px"
+                          fontWeight="bold"
+                          letterSpacing="0.04em"
+                          textTransform="uppercase"
+                          bgColor={colors.bg}
+                          color={colors.color}
+                          px="9px"
+                          py="2px"
+                          borderRadius="100px"
+                        >
+                          {roleLabel(ball.role)}
+                        </Text>
+                      )}
+                    </VStack>
+                  </HStack>
                   <HStack spacing="8px">
                     <Img
                       onClick={() => openEdit(ball)}
@@ -141,9 +149,16 @@ const Arsenal = () => {
                 </HStack>
 
                 <VStack align="flex-start" spacing="2px" fontSize="13px">
+                  {ball.brand && <Text color="#A0A0A0">Brand: <Text as="span" color="white">{ball.brand}</Text></Text>}
                   {ball.weight && <Text color="#A0A0A0">Weight: <Text as="span" color="white">{ball.weight} lbs</Text></Text>}
                   <Text color="#A0A0A0">Cover: <Text as="span" color="white">{coverstockLabel(ball.coverstock)}</Text></Text>
                   {ball.core && <Text color="#A0A0A0">Core: <Text as="span" color="white">{coreLabel(ball.core)}</Text></Text>}
+                  {spec && (
+                    <Text color="#A0A0A0">
+                      {Object.entries(spec.values).map(([label, val]) => `${label} ${val}`).join(" · ")}
+                      <Text as="span" color="white"> ({spec.weight} lb)</Text>
+                    </Text>
+                  )}
                 </VStack>
 
                 {ball.notes && (

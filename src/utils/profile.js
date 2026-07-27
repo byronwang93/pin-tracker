@@ -13,6 +13,25 @@ export const COVERSTOCK_OPTIONS = [
 export const coverstockLabel = (value) =>
   COVERSTOCK_OPTIONS.find((option) => option.value === value)?.label ?? value;
 
+// Best-effort mapping from bowwwl.com's free-text coverstock type (e.g.
+// "Urethane Solid", "Pearl Reactive") onto our fixed dropdown — checked in
+// order of specificity since e.g. "particle" balls are technically solid
+// reactive too. Falls back to null (leave the dropdown at its default) when
+// nothing matches, since the raw text is still shown separately.
+const COVERSTOCK_GUESSES = [
+  { test: /particle/i, value: "particle" },
+  { test: /urethane/i, value: "urethane" },
+  { test: /polyester|plastic/i, value: "polyester" },
+  { test: /hybrid/i, value: "reactive-hybrid" },
+  { test: /pearl/i, value: "reactive-pearl" },
+  { test: /solid/i, value: "reactive-solid" },
+];
+
+export const guessCoverstockOption = (rawType) => {
+  if (!rawType) return null;
+  return COVERSTOCK_GUESSES.find(({ test }) => test.test(rawType))?.value ?? null;
+};
+
 // Fixed like coverstock/role — the two fundamental bowling ball core
 // categories, a small, stable vocabulary.
 export const CORE_OPTIONS = [
@@ -22,6 +41,25 @@ export const CORE_OPTIONS = [
 
 export const coreLabel = (value) =>
   CORE_OPTIONS.find((option) => option.value === value)?.label ?? value;
+
+export const guessCoreOption = (rawType) => {
+  if (!rawType) return null;
+  if (/asymmetric/i.test(rawType)) return "asymmetric";
+  if (/symmetric/i.test(rawType)) return "symmetric";
+  return null;
+};
+
+// Closest per-weight RG/Diff entry (from a bowwwl-linked ball's
+// specsByWeight) to a given drilled weight — bowwwl lists specs per weight
+// (12-16lb), which rarely matches exactly, so this is informational display,
+// not a form field. Used by both the Arsenal card and BallModal.
+export const closestSpec = (specsByWeight, weight) => {
+  if (!specsByWeight?.length) return null;
+  if (!weight) return specsByWeight[0];
+  return specsByWeight.reduce((closest, spec) =>
+    Math.abs(spec.weight - weight) < Math.abs(closest.weight - weight) ? spec : closest
+  );
+};
 
 export const ROLE_OPTIONS = [
   { value: "benchmark", label: "Benchmark" },
