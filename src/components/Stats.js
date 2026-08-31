@@ -2,6 +2,7 @@ import { Box, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import React, { useContext } from "react";
 import { BowlsContext } from "../context/BowlsContext";
 import Charts from "./Charts";
+import CompStatsBox from "./CompStatsBox";
 import Entries from "./Entries";
 import FirstStatsBox from "./FirstStatsBox";
 import SecondStatsBox from "./SecondStatsBox";
@@ -11,6 +12,7 @@ const Overview = ({ year }) => (
   <>
     <FirstStatsBox year={year} />
     <SecondStatsBox year={year} />
+    <CompStatsBox year={year} />
     <Charts year={year} />
     <Entries year={year} />
   </>

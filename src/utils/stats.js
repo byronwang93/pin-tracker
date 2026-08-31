@@ -133,6 +133,48 @@ export const gameAttempts = (bowls = []) =>
     });
   });
 
+// --- Strike % / overall spare conversion (Comp mode) ---
+// Both need `bowl.frames`, which only exists for games logged via Live Game
+// — the regular Add Bowl form only stores a final score. `gamesWithFrames`
+// is surfaced so the UI can show real sample size instead of implying this
+// covers every logged game.
+
+export const strikeStats = (bowls = []) => {
+  let strikes = 0;
+  let frameCount = 0;
+  let gamesWithFrames = 0;
+  for (const bowl of bowls) {
+    if (!Array.isArray(bowl.frames) || bowl.frames.length === 0) continue;
+    gamesWithFrames += 1;
+    for (const frame of bowl.frames) {
+      const [roll1] = frame.rolls ?? [];
+      if (!roll1) continue;
+      frameCount += 1;
+      if (roll1.pinsDown?.length === 10) strikes += 1;
+    }
+  }
+  return {
+    strikes,
+    frameCount,
+    gamesWithFrames,
+    pct: frameCount ? +((strikes / frameCount) * 100).toFixed(1) : null,
+  };
+};
+
+export const spareConversionOverview = (bowls = []) => {
+  const attempts = gameAttempts(bowls);
+  const made = attempts.filter((attempt) => attempt.made).length;
+  const gamesWithFrames = new Set(
+    bowls.filter((bowl) => Array.isArray(bowl.frames) && bowl.frames.length > 0).map((bowl) => bowl.id)
+  ).size;
+  return {
+    made,
+    attempts: attempts.length,
+    gamesWithFrames,
+    pct: attempts.length ? +((made / attempts.length) * 100).toFixed(1) : null,
+  };
+};
+
 const spareAttempts = (bowls, practiceSessions) => [
   ...gameAttempts(bowls),
   ...practiceAttempts(practiceSessions),

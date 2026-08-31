@@ -140,7 +140,7 @@ const JournalEntryModal = ({ entry, isOpen, onClose }) => {
         body,
         images: images
           .filter((image) => image.status === "ready")
-          .map(({ id, url, path }) => ({ id, url, path })),
+          .map(({ id, url, path }) => ({ id, url, path: path ?? null })),
       };
       if (isEdit) {
         await editJournalEntry(entry.id, value, data);
