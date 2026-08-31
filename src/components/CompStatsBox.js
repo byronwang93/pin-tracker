@@ -3,8 +3,7 @@ import React, { useContext, useMemo } from "react";
 import { BowlsContext } from "../context/BowlsContext";
 import { filterByRange, spareConversionOverview, strikeStats } from "../utils/stats";
 
-const sampleTooltip = (gamesWithFrames) =>
-  `Based on ${gamesWithFrames} game${gamesWithFrames === 1 ? "" : "s"} logged with Live Game — games logged with the quick Add Game form don't track frame-by-frame data, so they're not counted here.`;
+const SAMPLE_TOOLTIP = "Only counts games logged with Live Game";
 
 // Comp Mode only — see src/components/Stats.js. Sits below Averages on the
 // Overview tab, right next to the stats it's most related to.
@@ -41,7 +40,7 @@ const CompStatsBox = ({ year }) => {
           <Text fontSize="18px" color="#A0A0A0">
             Strike %
           </Text>
-          <Tooltip label={sampleTooltip(strikePct.gamesWithFrames)} hasArrow placement="top">
+          <Tooltip label={SAMPLE_TOOLTIP} hasArrow placement="top">
             <Text as="span" fontSize="12px" color="#A0A0A0" cursor="help">
               ⓘ
             </Text>
@@ -56,7 +55,7 @@ const CompStatsBox = ({ year }) => {
           <Text fontSize="18px" color="#A0A0A0">
             Spare Conversion %
           </Text>
-          <Tooltip label={sampleTooltip(spareOverview.gamesWithFrames)} hasArrow placement="top">
+          <Tooltip label={SAMPLE_TOOLTIP} hasArrow placement="top">
             <Text as="span" fontSize="12px" color="#A0A0A0" cursor="help">
               ⓘ
             </Text>
