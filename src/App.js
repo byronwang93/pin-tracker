@@ -23,6 +23,12 @@ const theme = extendTheme({
   },
 });
 
+// iOS Safari (26+) tints its bottom toolbar from fixed elements at the
+// bottom edge. Chakra's default bottom-positioned toasts would tint it
+// orange/green and Safari wouldn't re-sample after the toast left, so
+// toasts live at the top instead.
+const toastOptions = { defaultOptions: { position: "top" } };
+
 function App() {
   const [value, setValue] = useState("");
   // Seeded from localStorage for an instant paint before Firestore loads,
@@ -33,7 +39,7 @@ function App() {
     () => localStorage.getItem("backgroundTheme") || DEFAULT_BACKGROUND_THEME
   );
   return (
-    <ChakraProvider theme={theme}>
+    <ChakraProvider theme={theme} toastOptions={toastOptions}>
       <SignedInContext.Provider
         value={{ value, setValue, backgroundTheme, setBackgroundTheme }}
       >
