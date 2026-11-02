@@ -1,3 +1,5 @@
+import { formatDate } from "./stats";
+
 // Leagues and tournaments ("events") live in users/{uid}.events[]. A bowl
 // belongs to at most one event via `eventId`; no eventId means practice.
 // League bowls also carry `week`, and `leagueDate` when they were bowled on
@@ -81,4 +83,29 @@ export const suggestedWeek = (bowls = [], event) => {
   const lastWeek = Math.max(...leagueBowls.map((bowl) => bowl.week));
   const inLastWeek = leagueBowls.filter((bowl) => bowl.week === lastWeek).length;
   return inLastWeek < (event.gamesPerNight || 3) ? lastWeek : lastWeek + 1;
+};
+
+const dateRange = (start, end) => {
+  if (!start) return "";
+  if (!end || end === start) return formatDate(start);
+  return `${formatDate(start)} – ${formatDate(end)}`;
+};
+
+// One-line description under an event's name in Profile and its page.
+export const eventMeta = (event, bowls = []) => {
+  const games = eventBowls(bowls, event.id);
+  const book = games.length ? ` · book ${Math.floor(eventSummary(games).average)}` : "";
+  if (event.kind === "league") {
+    const weeks = new Set(games.map((bowl) => bowl.week).filter((week) => week != null));
+    if (event.archived) {
+      const ended = event.endDate ? ` · ended ${formatDate(event.endDate)}` : "";
+      return `${weeks.size} weeks${ended}${book}`;
+    }
+    const night = event.weekday != null ? `${WEEKDAYS[event.weekday]}s · ` : "";
+    const lastWeek = weeks.size ? ` · wk ${Math.max(...weeks)}` : "";
+    return `${night}${event.gamesPerNight || 3} games${lastWeek}${book}`;
+  }
+  const upcoming = event.startDate > today() ? " · upcoming" : "";
+  const count = games.length ? ` · ${games.length} games` : "";
+  return `${dateRange(event.startDate, event.endDate)} · ${formatLabel(event.format).toLowerCase()}${count}${upcoming}`;
 };
