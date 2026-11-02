@@ -202,6 +202,7 @@ const Events = () => {
             as={Button}
             flexShrink={0}
             bgColor="#FFF3D2"
+            color="black"
             border="2px solid #FDD468"
             _hover={{ bgColor: "#E6DBBF" }}
             _active={{ bgColor: "#E6DBBF" }}
@@ -209,7 +210,9 @@ const Events = () => {
             <Text as="span" fontSize="20px" color="black" pr="6px">
               +
             </Text>
-            Add
+            <Text as="span" color="black">
+              Add
+            </Text>
           </MenuButton>
           <MenuList bgColor="#3C3D36" borderColor="#4B4C43">
             <MenuItem bgColor="#3C3D36" _hover={{ bgColor: "#606351" }} onClick={() => openNew("league")}>
@@ -273,7 +276,7 @@ const Events = () => {
                 {deleteTarget?.name} {deleteTarget?.kind === "league" ? deleteTarget?.season : ""} will be
                 removed.{" "}
                 {deleteCount > 0
-                  ? `Its ${deleteCount} games stay in your entries as practice.`
+                  ? `Its ${deleteCount === 1 ? "game stays" : `${deleteCount} games stay`} in your entries as practice.`
                   : "It has no games."}
               </Text>
               {deleteCount > 0 && (
@@ -283,7 +286,7 @@ const Events = () => {
                   isChecked={deleteGames}
                   onChange={(e) => setDeleteGames(e.target.checked)}
                 >
-                  Also delete its {deleteCount} games
+                  Also delete {deleteCount === 1 ? "its game" : `its ${deleteCount} games`}
                 </Checkbox>
               )}
               {deleteGames && (

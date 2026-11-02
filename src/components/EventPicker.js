@@ -78,11 +78,14 @@ const EventPicker = ({ value, onChange, label = "What is this?", includePast = f
               as={Button}
               flexShrink={0}
               bgColor="#FFF3D2"
+              color="black"
               border="2px solid #FDD468"
               _hover={{ bgColor: "#E6DBBF" }}
               _active={{ bgColor: "#E6DBBF" }}
             >
-              + New
+              <Text as="span" color="black">
+                + New
+              </Text>
             </MenuButton>
             <MenuList bgColor="#3C3D36" borderColor="#4B4C43">
               <MenuItem bgColor="#3C3D36" _hover={{ bgColor: "#606351" }} onClick={() => openNew("league")}>

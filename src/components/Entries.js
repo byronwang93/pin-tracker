@@ -20,13 +20,15 @@ import React, { useContext, useMemo, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { deleteBowl } from "../firebase/helpers";
 import { BowlsContext } from "../context/BowlsContext";
+import { isNoTap } from "../utils/events";
 import { filterByRange, formatDate, sortByDate, sortByScore } from "../utils/stats";
 import EditBowlModal from "./EditBowlModal";
+import { EventBadge, NoTapMark, OffNightInfo } from "./EventBadge";
 import ViewBowlModal from "./ViewBowlModal";
 
 const Entries = ({ year }) => {
   const { value } = useContext(SignedInContext);
-  const { bowls: allBowls, loading, refetch } = useContext(BowlsContext);
+  const { bowls: allBowls, events, loading, refetch } = useContext(BowlsContext);
   const [toggle, setToggle] = useState(0);
 
   const [editModalOpen, setEditModalOpen] = useState({});
@@ -88,10 +90,17 @@ const Entries = ({ year }) => {
     }));
   };
 
+  const eventsById = useMemo(
+    () => Object.fromEntries(events.map((event) => [event.id, event])),
+    [events]
+  );
+
   const bowls = useMemo(() => {
     const yearBowls = filterByRange(allBowls, year);
     return toggle === 0 ? sortByDate(yearBowls) : sortByScore(yearBowls);
   }, [allBowls, year, toggle]);
+
+  const hasNoTap = bowls.some((bowl) => isNoTap(eventsById[bowl.eventId]));
 
   const toggles = [
     { text: "Date", setting: 0 },
@@ -128,12 +137,17 @@ const Entries = ({ year }) => {
           );
         })}
       </HStack>
-      <HStack pb="18px" textAlign="left" pl={isDesktop ? "32px" : "25px"}>
-        <Text fontSize="20px" w={isDesktop ? "108px" : "60px"} color="#A0A0A0">
+      <HStack pb="18px" textAlign="left" pl={isDesktop ? "32px" : "20px"}>
+        <Text fontSize="20px" w={isDesktop ? "88px" : "62px"} color="#A0A0A0">
           score
         </Text>
+        {isDesktop && (
+          <Text fontSize="20px" w="168px" color="#A0A0A0">
+            type
+          </Text>
+        )}
         <Text fontSize="20px" color="#A0A0A0">
-          date
+          {isDesktop ? "date" : "date · type"}
         </Text>
       </HStack>
       <VStack maxHeight="450px" alignItems="baseline" overflowY="auto">
@@ -165,34 +179,43 @@ const Entries = ({ year }) => {
               }
             };
 
+            const event = bowl.eventId ? eventsById[bowl.eventId] : null;
+            const badge = (
+              <>
+                <EventBadge bowl={bowl} event={event} />
+                <OffNightInfo bowl={bowl} />
+              </>
+            );
             return (
               <HStack
                 key={index}
                 p="12px"
-                pl={isDesktop ? "35px" : "25px"}
+                pl={isDesktop ? "35px" : "20px"}
                 borderRadius="7px"
                 w="100%"
                 bgColor={index % 2 === 0 && "#3C3D36"}
                 textAlign="left"
               >
-                <Text w={isDesktop ? "114px" : "60px"} fontSize="20px">
+                <Text w={isDesktop ? "94px" : "56px"} fontSize="20px" flexShrink={0}>
                   {bowl.score}
+                  {isNoTap(event) && <NoTapMark />}
                 </Text>
-                <Text
-                  w={isDesktop ? "250px" : "130px"}
+                {isDesktop && <Box w="170px">{badge}</Box>}
+                <Box
+                  w={isDesktop ? "130px" : "140px"}
                   // Desktop keeps the edit/delete icons in one column whether
                   // or not the "view more" icon is there.
                   mr={
                     !isDesktop
                       ? "5px"
                       : bowl.description || bowl.frames
-                      ? "70px"
-                      : "100px"
+                      ? "10px"
+                      : "40px"
                   }
-                  fontSize="20px"
                 >
-                  {formatDate(bowl.date)}
-                </Text>
+                  <Text fontSize="20px">{formatDate(bowl.date)}</Text>
+                  {!isDesktop && <Box lineHeight="1">{badge}</Box>}
+                </Box>
                 <HStack spacing="10px" pr="15px">
                   {(bowl.description || bowl.frames) && (
                     <Img
@@ -291,6 +314,14 @@ const Entries = ({ year }) => {
         )}
         <ViewBowlModal isOpen={viewIsOpen} onClose={viewOnClose} />
       </VStack>
+      {hasNoTap && (
+        <Text fontSize="13px" color="#A0A0A0" textAlign="left" pt="8px">
+          <Text as="span" color="#D97A6C" fontWeight="bold">
+            **
+          </Text>{" "}
+          9-pin no-tap. Left out of averages, high game and high series.
+        </Text>
+      )}
     </Box>
   );
 };

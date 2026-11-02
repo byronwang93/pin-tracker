@@ -106,7 +106,7 @@ export const eventMeta = (event, bowls = []) => {
     return `${night}${event.gamesPerNight || 3} games${lastWeek}${book}`;
   }
   const upcoming = event.startDate > today() ? " · upcoming" : "";
-  const count = games.length ? ` · ${games.length} games` : "";
+  const count = games.length ? ` · ${games.length} game${games.length === 1 ? "" : "s"}` : "";
   return `${dateRange(event.startDate, event.endDate)} · ${formatLabel(event.format).toLowerCase()}${count}${upcoming}`;
 };
 
