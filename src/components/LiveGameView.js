@@ -9,7 +9,6 @@ import {
   Button,
   Heading,
   HStack,
-  Select,
   Text,
   Textarea,
   useToast,
@@ -29,6 +28,8 @@ import {
   totalScore,
   undoLastRoll,
 } from "../utils/bowlingScore";
+import { eventFieldsFor, eventTitle, isActiveEvent, isNoTap, suggestedWeek } from "../utils/events";
+import EventPicker from "./EventPicker";
 import PinRack from "./PinRack";
 
 // Marks render inline so a split roll can be circled without disturbing
@@ -65,11 +66,18 @@ const DRAFT_KEY = "liveDraft:liveGame";
 const today = () => new Date().toLocaleDateString("en-CA");
 const ALL_PINS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-const GAME_TYPES = [
-  { value: "practice", label: "Practice" },
-  { value: "league", label: "League" },
-  { value: "tournament", label: "Tournament" },
-];
+// The event picked for the last game, so games 2 and 3 of a night start on
+// it. Only reused the same day — the first game of a day starts on Practice.
+const LAST_PICK_KEY = "liveGame:lastEventPick";
+
+const loadLastPick = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LAST_PICK_KEY));
+    return saved?.date === today() ? saved.eventId : "";
+  } catch {
+    return "";
+  }
+};
 
 const loadDraft = () => {
   try {
@@ -88,7 +96,7 @@ const hasAnyRoll = (frames) => frames.some((frame) => frame.rolls.length > 0);
 // a killed tab or dead alley wifi mid-game never loses a roll.
 const LiveGameView = ({ onExit }) => {
   const { value } = useContext(SignedInContext);
-  const { refetch, defaultThrowStyle } = useContext(BowlsContext);
+  const { refetch, defaultThrowStyle, bowls, events } = useContext(BowlsContext);
   const toast = useToast();
 
   const [draftChecked, setDraftChecked] = useState(false);
@@ -96,7 +104,13 @@ const LiveGameView = ({ onExit }) => {
   const [gameDate, setGameDate] = useState(today);
   const [notes, setNotes] = useState("");
   const [throwStyle, setThrowStyle] = useState(defaultThrowStyle);
-  const [gameType, setGameType] = useState("practice");
+  const [pick, setPick] = useState(() => {
+    const event = events.find((e) => e.id === loadLastPick() && isActiveEvent(e));
+    return {
+      eventId: event?.id ?? "",
+      week: event?.kind === "league" ? suggestedWeek(bowls, event) : null,
+    };
+  });
   const [frames, setFrames] = useState([]);
   const [tappedPins, setTappedPins] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -113,7 +127,7 @@ const LiveGameView = ({ onExit }) => {
       setGameDate(draft.date);
       setNotes(draft.notes ?? "");
       setThrowStyle(draft.throwStyle ?? defaultThrowStyle);
-      setGameType(draft.gameType ?? "practice");
+      setPick(draft.pick ?? { eventId: "", week: null });
       setFrames(draft.frames ?? []);
       setPhase("game");
       if (!resumeToastShownRef.current) {
@@ -137,15 +151,24 @@ const LiveGameView = ({ onExit }) => {
     } else {
       localStorage.setItem(
         DRAFT_KEY,
-        JSON.stringify({ date: gameDate, notes, throwStyle, gameType, frames }),
+        JSON.stringify({ date: gameDate, notes, throwStyle, pick, frames }),
       );
     }
-  }, [frames, notes, gameDate, throwStyle, gameType, draftChecked]);
+  }, [frames, notes, gameDate, throwStyle, pick, draftChecked]);
 
   if (!draftChecked) return null;
 
   const gameState = getGameState(frames);
   const scores = frameScores(frames);
+  const event = events.find((e) => e.id === pick.eventId);
+  // Games already saved in this league week / tournament day, for the
+  // "game 2 · series so far" line.
+  const earlierGames = event
+    ? bowls.filter((bowl) =>
+        bowl.eventId === event.id &&
+        (event.kind === "league" ? bowl.week === pick.week : bowl.date === gameDate)
+      )
+    : [];
 
   const togglePin = (pin) => {
     setTappedPins((prev) =>
@@ -154,7 +177,10 @@ const LiveGameView = ({ onExit }) => {
   };
 
   const submit = (pinsDown) => {
-    setFrames((prev) => submitRoll(prev, pinsDown));
+    // 9-pin no-tap: 9 down on a full rack counts as a strike.
+    const noTapStrike =
+      isNoTap(event) && gameState.standingPins.length === 10 && pinsDown.length === 9;
+    setFrames((prev) => submitRoll(prev, noTapStrike ? ALL_PINS : pinsDown));
     setTappedPins([]);
   };
 
@@ -182,11 +208,12 @@ const LiveGameView = ({ onExit }) => {
         comparableDate: new Date(gameDate),
         bowledAt: bowledAtRef.current,
         throwStyle,
-        gameType,
         notes,
         score: totalScore(frames),
         frames,
+        ...eventFieldsFor(bowls, event, pick.week, gameDate),
       });
+      localStorage.setItem(LAST_PICK_KEY, JSON.stringify({ date: today(), eventId: pick.eventId }));
       await refetch();
       bowledAtRef.current = null;
       localStorage.removeItem(DRAFT_KEY);
@@ -303,18 +330,7 @@ const LiveGameView = ({ onExit }) => {
             </HStack>
           </Box>
 
-          <Box w="100%">
-            <Text color="#A0A0A0" fontSize={{ base: "15px", md: "14px" }}>
-              Game Type
-            </Text>
-            <Select value={gameType} onChange={(event) => setGameType(event.target.value)}>
-              {GAME_TYPES.map(({ value: gtValue, label }) => (
-                <option value={gtValue} key={gtValue}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Box>
+          <EventPicker value={pick} onChange={setPick} />
 
           <Box w="100%">
             <Text color="#A0A0A0" fontSize={{ base: "15px", md: "14px" }}>
@@ -344,6 +360,23 @@ const LiveGameView = ({ onExit }) => {
 
       {phase === "game" && (
         <>
+          {event && (
+            <VStack spacing="0px">
+              <Text color="#A0A0A0" fontSize="13px">
+                {event.kind === "league" ? `Wk ${pick.week} · ` : ""}Game {earlierGames.length + 1}
+                {earlierGames.length > 0 &&
+                  ` · ${earlierGames.reduce((sum, bowl) => sum + bowl.score, 0)} so far`}
+              </Text>
+              <Text color="white" fontSize="17px">
+                {eventTitle(event)}
+                {isNoTap(event) && (
+                  <Text as="span" color="#FDD468" fontSize="13px">
+                    {" "}· 9-pin no-tap
+                  </Text>
+                )}
+              </Text>
+            </VStack>
+          )}
           <Box w="95%" maxW="600px" overflowX="auto">
             <HStack spacing="4px" pb="4px">
               {Array.from({ length: 10 }).map((_, index) => {

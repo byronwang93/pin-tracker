@@ -109,3 +109,38 @@ export const eventMeta = (event, bowls = []) => {
   const count = games.length ? ` · ${games.length} games` : "";
   return `${dateRange(event.startDate, event.endDate)} · ${formatLabel(event.format).toLowerCase()}${count}${upcoming}`;
 };
+
+const addDays = (iso, days) => {
+  const [year, month, day] = iso.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day + days));
+  return date.toISOString().slice(0, 10);
+};
+
+const weekdayOf = (iso) => {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+};
+
+// The league night a game belongs to, when it was bowled on another day
+// (pre-bowl / roll-off) — null when bowled on league night or unknowable.
+// Projects from the nearest week we already know the league-night date of.
+export const leagueDateFor = (bowls = [], event, week, date) => {
+  if (event?.kind !== "league" || event.weekday == null || !date || week == null) return null;
+  if (weekdayOf(date) === event.weekday) return null;
+  const known = eventBowls(bowls, event.id)
+    .filter((bowl) => bowl.week != null)
+    .map((bowl) => ({ week: bowl.week, night: bowl.leagueDate || bowl.date }))
+    .filter(({ night }) => weekdayOf(night) === event.weekday)
+    .sort((a, b) => Math.abs(a.week - week) - Math.abs(b.week - week))[0];
+  if (known) return addDays(known.night, (week - known.week) * 7);
+  // No reference yet: the next league night on or after the game.
+  return addDays(date, (event.weekday - weekdayOf(date) + 7) % 7);
+};
+
+// Fields to store on a bowl for the picked event ({} = practice).
+export const eventFieldsFor = (bowls = [], event, week, date) => {
+  if (!event) return {};
+  if (event.kind !== "league") return { eventId: event.id };
+  const leagueDate = leagueDateFor(bowls, event, week, date);
+  return { eventId: event.id, week, ...(leagueDate ? { leagueDate } : {}) };
+};

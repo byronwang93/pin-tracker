@@ -57,7 +57,8 @@ const Field = ({ label, optional, children }) => (
 
 // Add + Edit for both kinds — `event` present means edit, `kind` picks the
 // form for a new one. Delete lives on the card (Events.js), like Arsenal.
-const EventModal = ({ event, kind, isOpen, onClose }) => {
+// `onSaved` gets the saved event, so a picker can select one it just made.
+const EventModal = ({ event, kind, isOpen, onClose, onSaved }) => {
   const { value } = useContext(SignedInContext);
   const { refetch } = useContext(BowlsContext);
   const toast = useToast();
@@ -97,6 +98,7 @@ const EventModal = ({ event, kind, isOpen, onClose }) => {
       if (create) await addEvent(value, data);
       else await editEvent(data.id, value, data);
       await refetch();
+      onSaved?.(data);
       onClose();
       toast({ description: message, status: "success", duration: 3000, isClosable: true });
     } catch (error) {
