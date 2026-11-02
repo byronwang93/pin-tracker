@@ -37,7 +37,6 @@ export const addUser = async (uid, name, email, photoURL) => {
       journalEntries: [],
       average: null,
       highestGame: null,
-      compMode: false,
       defaultThrowStyle: 1,
       backgroundTheme: "warm",
       hideNonDominantHand: false,
@@ -279,15 +278,6 @@ export const deleteJournalEntry = async (id, uid) => {
   } catch (error) {
     console.error("error deleting journal entry: ", error);
     throw error;
-  }
-};
-
-export const updateCompMode = async (uid, compMode) => {
-  const docRef = doc(db, "users", uid);
-  try {
-    await setDoc(docRef, { compMode }, { merge: true });
-  } catch (error) {
-    console.error("error updating comp mode: ", error);
   }
 };
 

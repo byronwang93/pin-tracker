@@ -10,8 +10,6 @@ export const BowlsContext = React.createContext({
   journalEntries: [],
   loading: false,
   refetch: () => {},
-  compMode: false,
-  setCompMode: () => {},
   defaultThrowStyle: 1,
   setDefaultThrowStyle: () => {},
   backgroundTheme: "warm",

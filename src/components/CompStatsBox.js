@@ -5,10 +5,10 @@ import { filterByRange, spareConversionOverview, strikeStats } from "../utils/st
 
 const SAMPLE_TOOLTIP = "Only counts games logged with Live Game";
 
-// Comp Mode only — see src/components/Stats.js. Sits below Averages on the
-// Overview tab, right next to the stats it's most related to.
+// Sits below Averages on the Overview tab, right next to the stats it's most
+// related to.
 const CompStatsBox = ({ year }) => {
-  const { bowls, compMode } = useContext(BowlsContext);
+  const { bowls } = useContext(BowlsContext);
 
   const { strikePct, spareOverview } = useMemo(() => {
     const yearBowls = filterByRange(bowls, year);
@@ -17,8 +17,6 @@ const CompStatsBox = ({ year }) => {
       spareOverview: spareConversionOverview(yearBowls),
     };
   }, [bowls, year]);
-
-  if (!compMode) return null;
 
   return (
     <Box

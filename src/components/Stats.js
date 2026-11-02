@@ -1,6 +1,5 @@
 import { Box, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
-import React, { useContext } from "react";
-import { BowlsContext } from "../context/BowlsContext";
+import React from "react";
 import Charts from "./Charts";
 import CompStatsBox from "./CompStatsBox";
 import Entries from "./Entries";
@@ -19,16 +18,6 @@ const Overview = ({ year }) => (
 );
 
 const Stats = ({ year }) => {
-  const { compMode } = useContext(BowlsContext);
-
-  if (!compMode) {
-    return (
-      <Box w="100%" textAlign="-webkit-center">
-        <Overview year={year} />
-      </Box>
-    );
-  }
-
   return (
     <Box w="100%" textAlign="-webkit-center">
       <Tabs colorScheme="yellow" variant="soft-rounded">

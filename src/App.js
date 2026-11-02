@@ -32,7 +32,7 @@ const toastOptions = { defaultOptions: { position: "top" } };
 function App() {
   const [value, setValue] = useState("");
   // Seeded from localStorage for an instant paint before Firestore loads,
-  // same pattern as compMode in LoggedIn.js — lives up here (not in
+  // same pattern as other settings in LoggedIn.js — lives up here (not in
   // LoggedIn's BowlsContext) since BackgroundAnimation renders even on the
   // logged-out screen.
   const [backgroundTheme, setBackgroundTheme] = useState(
