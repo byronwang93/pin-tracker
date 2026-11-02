@@ -1,6 +1,7 @@
 import { Box, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import React from "react";
 import Charts from "./Charts";
+import ByTypeBox from "./ByTypeBox";
 import CompStatsBox from "./CompStatsBox";
 import Entries from "./Entries";
 import FirstStatsBox from "./FirstStatsBox";
@@ -11,6 +12,7 @@ const Overview = ({ year }) => (
   <>
     <FirstStatsBox year={year} />
     <SecondStatsBox year={year} />
+    <ByTypeBox year={year} />
     <CompStatsBox year={year} />
     <Charts year={year} />
     <Entries year={year} />

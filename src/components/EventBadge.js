@@ -10,12 +10,18 @@ const BADGE_COLORS = {
 
 // Same badges as the By type box: Practice, League · Wk N, Tourney.
 // Hover shows the event's full name.
-export const EventBadge = ({ bowl, event }) => {
+export const EventBadge = ({ bowl, event, plain = false }) => {
   const kind = event ? (event.kind === "league" ? "league" : "tournament") : "practice";
   const { color, bg } = BADGE_COLORS[kind];
   const label =
-    kind === "practice" ? "Practice" : kind === "league" ? `League · Wk ${bowl.week ?? "?"}` : "Tourney";
-  const title = event
+    kind === "practice"
+      ? "Practice"
+      : kind === "league"
+      ? plain
+        ? "League"
+        : `League · Wk ${bowl.week ?? "?"}`
+      : "Tourney";
+  const title = event && !plain
     ? `${event.name}${event.kind === "league" && event.season ? ` ${event.season}` : ""}`
     : undefined;
   return (
