@@ -24,6 +24,7 @@ import {
   updateDefaultThrowStyle,
   updateHideNonDominantHand,
 } from "../firebase/helpers";
+import { eventTitle, isDateScope } from "../utils/events";
 import { getYearValues, rangeLabel } from "../utils/stats";
 import { BowlsContext } from "../context/BowlsContext";
 import AddBowlModal from "./AddBowlModal";
@@ -156,6 +157,20 @@ const LoggedIn = () => {
       ...sortedYears,
     ];
   }, [bowls, practiceSessions]);
+
+  // Stats can also be scoped to one league season, all tournaments,
+  // practice or no-tap (see scopeBowls in utils/events.js). There's no
+  // all-seasons league view on purpose — leagues change over the years.
+  const leagueSeasons = useMemo(
+    () =>
+      events
+        .filter((event) => event.kind === "league")
+        .sort((a, b) => ((a.startDate ?? "") < (b.startDate ?? "") ? 1 : -1)),
+    [events]
+  );
+
+  // The Leaderboard compares users, so it only understands date ranges.
+  const leaderboardYear = isDateScope(year) ? year : "all-time";
 
   const handleYearChange = (event) => {
     const selectedValue = event.target.value;
@@ -335,22 +350,52 @@ const LoggedIn = () => {
           <AddBowlModal isOpen={isOpen} onClose={onClose} />
         </Box>
 
-        {toggle !== 2 && (
-          <Select mb="20px" w="200px" value={year} onChange={handleYearChange}>
-            {yearsList.map((rangeValue, id) => {
-              return (
-                <option value={rangeValue} key={id}>
+        {toggle === 0 && (
+          <Select mb="20px" w="260px" value={year} onChange={handleYearChange}>
+            {yearsList.slice(0, 4).map((rangeValue) => (
+              <option value={rangeValue} key={rangeValue}>
+                {rangeLabel(rangeValue)}
+              </option>
+            ))}
+            <optgroup label="Years">
+              {yearsList.slice(4).map((rangeValue) => (
+                <option value={rangeValue} key={rangeValue}>
                   {rangeLabel(rangeValue)}
                 </option>
-              );
-            })}
+              ))}
+            </optgroup>
+            {leagueSeasons.length > 0 && (
+              <optgroup label="Leagues">
+                {leagueSeasons.map((event) => (
+                  <option value={`event:${event.id}`} key={event.id}>
+                    {eventTitle(event)}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            <optgroup label="Tournaments">
+              <option value="tournaments">All tournaments</option>
+            </optgroup>
+            <optgroup label="Other">
+              <option value="practice">Practice only</option>
+              <option value="notap">No-tap</option>
+            </optgroup>
+          </Select>
+        )}
+        {toggle === 1 && (
+          <Select mb="20px" w="200px" value={leaderboardYear} onChange={handleYearChange}>
+            {yearsList.map((rangeValue) => (
+              <option value={rangeValue} key={rangeValue}>
+                {rangeLabel(rangeValue)}
+              </option>
+            ))}
           </Select>
         )}
       </VStack>
       {toggle === 0 ? (
         <Stats year={year} />
       ) : toggle === 1 ? (
-        <Leaderboard year={year} />
+        <Leaderboard year={leaderboardYear} />
       ) : (
         <Profile />
       )}

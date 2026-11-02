@@ -20,8 +20,8 @@ import React, { useContext, useMemo, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { deleteBowl } from "../firebase/helpers";
 import { BowlsContext } from "../context/BowlsContext";
-import { isNoTap } from "../utils/events";
-import { filterByRange, formatDate, sortByDate, sortByScore } from "../utils/stats";
+import { isNoTap, scopeBowls } from "../utils/events";
+import { formatDate, sortByDate, sortByScore } from "../utils/stats";
 import EditBowlModal from "./EditBowlModal";
 import { EventBadge, NoTapMark, OffNightInfo } from "./EventBadge";
 import ViewBowlModal from "./ViewBowlModal";
@@ -96,9 +96,9 @@ const Entries = ({ year }) => {
   );
 
   const bowls = useMemo(() => {
-    const yearBowls = filterByRange(allBowls, year);
+    const yearBowls = scopeBowls(allBowls, events, year, { includeUncounted: true });
     return toggle === 0 ? sortByDate(yearBowls) : sortByScore(yearBowls);
-  }, [allBowls, year, toggle]);
+  }, [allBowls, events, year, toggle]);
 
   const hasNoTap = bowls.some((bowl) => isNoTap(eventsById[bowl.eventId]));
 

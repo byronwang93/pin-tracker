@@ -1,19 +1,22 @@
 import { Box, Text } from "@chakra-ui/react";
 import React, { useContext, useMemo } from "react";
 import { BowlsContext } from "../context/BowlsContext";
-import { filterByRange, gamesBowled, highestGame } from "../utils/stats";
+import { highSeries, scopeBowls } from "../utils/events";
+import { gamesBowled, highestGame } from "../utils/stats";
 
 const FirstStatsBox = ({ year }) => {
-  const { bowls, defaultThrowStyle, hideNonDominantHand } = useContext(BowlsContext);
+  const { bowls, events, defaultThrowStyle, hideNonDominantHand } = useContext(BowlsContext);
 
-  const { totalGames, highestOne, highestTwo } = useMemo(() => {
-    const yearBowls = filterByRange(bowls, year);
+  const { totalGames, highestOne, highestTwo, bestSeries } = useMemo(() => {
+    const yearBowls = scopeBowls(bowls, events, year);
     return {
       totalGames: gamesBowled(yearBowls),
+      // League nights and 3-game tournament days only — never practice.
+      bestSeries: highSeries(yearBowls)?.total ?? null,
       highestOne: highestGame(yearBowls, 1),
       highestTwo: highestGame(yearBowls, 2),
     };
-  }, [bowls, year]);
+  }, [bowls, events, year]);
 
   const showOne = !hideNonDominantHand || defaultThrowStyle === 1;
   const showTwo = !hideNonDominantHand || defaultThrowStyle === 2;
@@ -79,6 +82,21 @@ const FirstStatsBox = ({ year }) => {
           </Text>
         </Box>
       )}
+      <Box
+        alignSelf="baseline"
+        maxW="150px"
+        textAlign="left"
+        display="flex"
+        flexDirection="column"
+        pl={{ base: "0px", md: "20px" }}
+      >
+        <Text fontSize="18px" color="#A0A0A0">
+          High Series
+        </Text>
+        <Text p="5px 0px 1px 0px" fontSize="30px">
+          {bestSeries !== null ? bestSeries : "--"}
+        </Text>
+      </Box>
     </Box>
   );
 };

@@ -3,12 +3,12 @@ import React, { useContext, useMemo } from "react";
 import { BowlsContext } from "../context/BowlsContext";
 import {
   average as avg,
-  filterByRange,
   last10Average as last10Avg,
 } from "../utils/stats";
+import { scopeBowls } from "../utils/events";
 
 const SecondStatsBox = ({ year }) => {
-  const { bowls, defaultThrowStyle, hideNonDominantHand } = useContext(BowlsContext);
+  const { bowls, events, defaultThrowStyle, hideNonDominantHand } = useContext(BowlsContext);
 
   const {
     average,
@@ -18,7 +18,7 @@ const SecondStatsBox = ({ year }) => {
     last10OneAverage,
     last10TwoAverage,
   } = useMemo(() => {
-    const yearBowls = filterByRange(bowls, year);
+    const yearBowls = scopeBowls(bowls, events, year);
     return {
       average: avg(yearBowls),
       oneAverage: avg(yearBowls, 1),
@@ -27,7 +27,11 @@ const SecondStatsBox = ({ year }) => {
       last10OneAverage: last10Avg(yearBowls, 1),
       last10TwoAverage: last10Avg(yearBowls, 2),
     };
-  }, [bowls, year]);
+  }, [bowls, events, year]);
+
+  // "All-time" only reads right on the all-time view; a year, league season
+  // or tournament scope is just that scope's average.
+  const label = year === "all-time" ? "All-time" : "Average";
 
   const showOne = !hideNonDominantHand || defaultThrowStyle === 1;
   const showTwo = !hideNonDominantHand || defaultThrowStyle === 2;
@@ -71,7 +75,7 @@ const SecondStatsBox = ({ year }) => {
           flexDirection="column"
         >
           <Text fontSize="18px" color="#A0A0A0">
-            All-time
+            {label}
           </Text>
           <Text p="5px 0px 13px 0px" fontSize="30px">
             {average !== 0 ? average : "--"}
@@ -86,7 +90,7 @@ const SecondStatsBox = ({ year }) => {
             flexDirection="column"
           >
             <Text fontSize="18px" color="#A0A0A0">
-              All-time (one-handed)
+              {label} (one-handed)
             </Text>
             <Text p="5px 0px 13px 0px" fontSize="30px">
               {oneAverage !== 0 ? oneAverage : "--"}
@@ -102,7 +106,7 @@ const SecondStatsBox = ({ year }) => {
             flexDirection="column"
           >
             <Text fontSize="18px" color="#A0A0A0">
-              All-time (two-handed)
+              {label} (two-handed)
             </Text>
             <Text p="5px 0px 1px 0px" fontSize="30px">
               {twoAverage !== 0 ? twoAverage : "--"}

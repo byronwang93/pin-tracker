@@ -1,4 +1,4 @@
-import { formatDate } from "./stats";
+import { filterByRange, formatDate } from "./stats";
 
 // Leagues and tournaments ("events") live in users/{uid}.events[]. A bowl
 // belongs to at most one event via `eventId`; no eventId means practice.
@@ -171,4 +171,43 @@ export const initialPick = (events = [], bowls = []) => {
     eventId: event?.id ?? "",
     week: event?.kind === "league" ? suggestedWeek(bowls, event) : null,
   };
+};
+
+// --- Stats scope (the dropdown above Stats) ---
+// Date scopes: "all-time", "last-N-months", or a year. Event scopes:
+// "event:<id>" (one league season or tournament), "tournaments", "practice",
+// "notap".
+export const isDateScope = (scope) =>
+  !scope || scope === "all-time" || scope.startsWith("last-") || /^\d{4}$/.test(scope);
+
+export const scopeEventId = (scope) => (scope?.startsWith("event:") ? scope.slice(6) : null);
+
+// Bowls a scope covers. Date scopes leave out games from events that don't
+// count toward averages (no-tap, team) — unless `includeUncounted`, which
+// the Entries list uses so those games still show (marked **).
+export const scopeBowls = (bowls = [], events = [], scope, { includeUncounted = false } = {}) => {
+  const byId = Object.fromEntries(events.map((event) => [event.id, event]));
+  const counts = (bowl) => !bowl.eventId || byId[bowl.eventId]?.countsTowardAverages !== false;
+  if (isDateScope(scope)) {
+    const inRange = filterByRange(bowls, scope);
+    return includeUncounted ? inRange : inRange.filter(counts);
+  }
+  const eventId = scopeEventId(scope);
+  if (eventId) return eventBowls(bowls, eventId);
+  if (scope === "practice") return bowls.filter((bowl) => !bowl.eventId);
+  if (scope === "notap") return bowls.filter((bowl) => isNoTap(byId[bowl.eventId]));
+  if (scope === "tournaments") {
+    return bowls.filter((bowl) => {
+      const event = byId[bowl.eventId];
+      return event && event.kind !== "league" && (includeUncounted || counts(bowl));
+    });
+  }
+  return bowls;
+};
+
+// Spare Shooting sessions aren't games, so they only belong to date scopes
+// and Practice.
+export const scopeSessions = (sessions = [], scope) => {
+  if (isDateScope(scope)) return filterByRange(sessions, scope);
+  return scope === "practice" ? sessions : [];
 };

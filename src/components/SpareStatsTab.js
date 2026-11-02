@@ -11,13 +11,13 @@ import {
 } from "recharts";
 import { BowlsContext } from "../context/BowlsContext";
 import {
-  filterByRange,
   leaveKey,
   leaveLabel,
   spareConversionStats,
   spareStreaks,
   spareTrendOverTime,
 } from "../utils/stats";
+import { scopeBowls, scopeSessions } from "../utils/events";
 import PinRack from "./PinRack";
 import SpareSessionHistory from "./SpareSessionHistory";
 
@@ -51,13 +51,13 @@ const pctOf = (made, attempts) =>
   attempts ? +((made / attempts) * 100).toFixed(1) : null;
 
 const SpareStatsTab = ({ year }) => {
-  const { bowls, practiceSessions } = useContext(BowlsContext);
+  const { bowls, events, practiceSessions } = useContext(BowlsContext);
   const [source, setSource] = useState("practice"); // 'game' | 'practice'
   const [filterPins, setFilterPins] = useState([]);
 
-  const yearBowls = useMemo(() => filterByRange(bowls, year), [bowls, year]);
+  const yearBowls = useMemo(() => scopeBowls(bowls, events, year), [bowls, events, year]);
   const yearSessions = useMemo(
-    () => filterByRange(practiceSessions, year),
+    () => scopeSessions(practiceSessions, year),
     [practiceSessions, year]
   );
 
