@@ -103,6 +103,9 @@ const LiveGameView = ({ onExit }) => {
   const [resetAlertOpen, setResetAlertOpen] = useState(false);
   const resumeToastShownRef = useRef(false);
   const cancelResetRef = useRef();
+  // Stamped on the first Save attempt and reused on offline retries, so a
+  // game saved late still sorts by when it was finished, not when it synced.
+  const bowledAtRef = useRef(null);
 
   useEffect(() => {
     const draft = loadDraft();
@@ -164,17 +167,20 @@ const LiveGameView = ({ onExit }) => {
     setFrames([]);
     setNotes("");
     setTappedPins([]);
+    bowledAtRef.current = null;
     localStorage.removeItem(DRAFT_KEY);
     setResetAlertOpen(false);
   };
 
   const saveGame = async () => {
     setSaving(true);
+    if (!bowledAtRef.current) bowledAtRef.current = new Date().toISOString();
     try {
       await addBowl(value, {
         id: v4(),
         date: gameDate,
         comparableDate: new Date(gameDate),
+        bowledAt: bowledAtRef.current,
         throwStyle,
         gameType,
         notes,
@@ -182,6 +188,7 @@ const LiveGameView = ({ onExit }) => {
         frames,
       });
       await refetch();
+      bowledAtRef.current = null;
       localStorage.removeItem(DRAFT_KEY);
       toast({
         description: "Game saved!",

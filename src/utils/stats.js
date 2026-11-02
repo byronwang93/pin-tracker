@@ -34,9 +34,19 @@ const RANGE_LABELS = {
 
 export const rangeLabel = (range) => RANGE_LABELS[range] ?? range;
 
-// newest first
+// newest first. Same-day ties go by `bowledAt` (an ISO timestamp stored on
+// newer bowls, never shown) and otherwise by position in the stored array —
+// bowls are appended as they're saved, so later in the array = bowled later.
 export const sortByDate = (bowls = []) =>
-  [...bowls].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  bowls
+    .map((bowl, index) => ({ bowl, index }))
+    .sort((a, b) => {
+      if (a.bowl.date !== b.bowl.date) return a.bowl.date < b.bowl.date ? 1 : -1;
+      if (a.bowl.bowledAt && b.bowl.bowledAt && a.bowl.bowledAt !== b.bowl.bowledAt)
+        return a.bowl.bowledAt < b.bowl.bowledAt ? 1 : -1;
+      return b.index - a.index;
+    })
+    .map(({ bowl }) => bowl);
 
 // highest first
 export const sortByScore = (bowls = []) =>

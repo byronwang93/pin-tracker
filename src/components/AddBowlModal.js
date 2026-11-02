@@ -55,6 +55,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
         score: Number(score),
         date: date,
         comparableDate: new Date(date),
+        bowledAt: new Date().toISOString(),
         throwStyle: throwStyle,
         description: description,
       };
