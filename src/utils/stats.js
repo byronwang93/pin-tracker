@@ -34,6 +34,16 @@ const RANGE_LABELS = {
 
 export const rangeLabel = (range) => RANGE_LABELS[range] ?? range;
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// "2026-10-30" -> "Oct 30 2026". Display only — dates stay ISO in the db.
+// Split the string instead of new Date() so a timezone can't shift the day.
+export const formatDate = (iso) => {
+  const [year, month, day] = (iso ?? "").split("-").map(Number);
+  if (!year || !month || !day) return iso;
+  return `${MONTHS[month - 1]} ${day} ${year}`;
+};
+
 // newest first. Same-day ties go by `bowledAt` (an ISO timestamp stored on
 // newer bowls, never shown) and otherwise by position in the stored array —
 // bowls are appended as they're saved, so later in the array = bowled later.

@@ -11,7 +11,7 @@ import {
   globalGetHighestAverageLeaderboard,
   globalGetHighestGameLeaderboard,
 } from "../firebase/helpers";
-import { throwStyleLabel } from "../utils/stats";
+import { formatDate, throwStyleLabel } from "../utils/stats";
 
 const Leaderboard = ({ year }) => {
   const isDesktop = useBreakpointValue({ base: false, md: true });
@@ -118,7 +118,7 @@ const Leaderboard = ({ year }) => {
                       w={isDesktop ? "350px" : "170px"}
                       fontSize="20px"
                     >
-                      {game.date}
+                      {formatDate(game.date)}
                     </Text>
                   </HStack>
                 );

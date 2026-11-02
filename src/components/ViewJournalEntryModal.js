@@ -14,6 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
+import { formatDate } from "../utils/stats";
 
 // Read-only — tapping a Journal row opens this instead of jumping straight
 // into edit mode. Edit/delete still live on the row itself (Journal.js);
@@ -83,7 +84,7 @@ const ViewJournalEntryModal = ({ entry, isOpen, onClose, onEdit }) => {
                 <HStack justify="space-between" width="100%" align="flex-start">
                   <VStack spacing="2px" alignItems="baseline">
                     <Text fontSize="12px" color="#A0A0A0">
-                      {entry.date}
+                      {formatDate(entry.date)}
                     </Text>
                     <Text fontSize="24px" fontWeight="bold">
                       {entry.title}

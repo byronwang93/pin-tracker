@@ -20,7 +20,7 @@ import React, { useContext, useMemo, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { deleteBowl } from "../firebase/helpers";
 import { BowlsContext } from "../context/BowlsContext";
-import { filterByRange, sortByDate, sortByScore } from "../utils/stats";
+import { filterByRange, formatDate, sortByDate, sortByScore } from "../utils/stats";
 import EditBowlModal from "./EditBowlModal";
 import ViewBowlModal from "./ViewBowlModal";
 
@@ -199,7 +199,7 @@ const Entries = ({ year }) => {
                   }
                   fontSize="20px"
                 >
-                  {bowl.date}
+                  {formatDate(bowl.date)}
                 </Text>
                 <HStack spacing="10px" pr="15px">
                   {(bowl.description || bowl.frames) && (
@@ -215,7 +215,7 @@ const Entries = ({ year }) => {
                   )}
                   <ViewBowlModal
                     score={bowl.score}
-                    date={bowl.date}
+                    date={formatDate(bowl.date)}
                     description={bowl.description}
                     frames={bowl.frames}
                     isOpen={viewModalOpen[bowl.id] || false}

@@ -1,6 +1,6 @@
 import { Box, HStack, Img, Text, VStack } from "@chakra-ui/react";
 import React, { useMemo, useState } from "react";
-import { sessionsForLeave, sortByDate } from "../utils/stats";
+import { formatDate, sessionsForLeave, sortByDate } from "../utils/stats";
 import EditPracticeSessionModal from "./EditPracticeSessionModal";
 
 // Past Spare Shooting sessions, editable/deletable — mirrors the Entries.js
@@ -45,7 +45,7 @@ const SpareSessionHistory = ({ sessions, leaveKeyFilter = null, filterLabel }) =
               borderRadius="7px"
               bgColor={index % 2 === 0 ? "#3C3D36" : "transparent"}
             >
-              <Text color="white">{session.date}</Text>
+              <Text color="white">{formatDate(session.date)}</Text>
               <Text color="white">
                 {displayReps.length} attempts • {pct}% made
               </Text>

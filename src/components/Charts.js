@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { BowlsContext } from "../context/BowlsContext";
-import { filterByRange, sortByDate, throwStyleLabel } from "../utils/stats";
+import { filterByRange, formatDate, sortByDate, throwStyleLabel } from "../utils/stats";
 
 function CustomToolTip({ active, payload }) {
   if (active && payload && payload.length) {
@@ -25,7 +25,7 @@ function CustomToolTip({ active, payload }) {
         borderRadius="7px"
       >
         <Text>{`Score: ${dataPoint.value}`}</Text>
-        <Text>{`Date: ${dataPoint.name}`}</Text>
+        <Text>{`Date: ${formatDate(dataPoint.name)}`}</Text>
         <Text>{`Throw style: ${throwStyleLabel(dataPoint.throwStyle)}`}</Text>
       </Box>
     );
@@ -68,7 +68,7 @@ const Charts = ({ year }) => {
           />
           <CartesianGrid stroke="#ccc" />
           <Tooltip content={<CustomToolTip />} />
-          <XAxis margin="5px" dataKey="name">
+          <XAxis margin="5px" dataKey="name" tickFormatter={formatDate}>
             <Label value="Bowls" offset={-10} position="insideBottom" />
           </XAxis>
           <YAxis

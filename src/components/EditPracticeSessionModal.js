@@ -28,7 +28,7 @@ import {
   deletePracticeSession,
   editPracticeSession,
 } from "../firebase/helpers";
-import { leaveLabel } from "../utils/stats";
+import { formatDate, leaveLabel } from "../utils/stats";
 import PinRack from "./PinRack";
 
 const EditPracticeSessionModal = ({ session, isOpen, onClose }) => {
@@ -131,7 +131,7 @@ const EditPracticeSessionModal = ({ session, isOpen, onClose }) => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bgColor="#3C3D36" maxW="450px">
-          <ModalHeader color="white">Edit Session — {session.date}</ModalHeader>
+          <ModalHeader color="white">Edit Session — {formatDate(session.date)}</ModalHeader>
           <ModalCloseButton color="white" />
           <ModalBody>
             <Box mb="15px">

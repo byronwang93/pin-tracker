@@ -18,7 +18,7 @@ import React, { useContext, useMemo, useRef, useState } from "react";
 import { SignedInContext } from "../App";
 import { BowlsContext } from "../context/BowlsContext";
 import { deleteJournalEntry } from "../firebase/helpers";
-import { sortByDate } from "../utils/stats";
+import { formatDate, sortByDate } from "../utils/stats";
 import {
   CUSTOM_TAG_FILTER,
   filterJournalByTag,
@@ -156,7 +156,7 @@ const Journal = () => {
               >
                 <HStack spacing="10px" flexWrap="wrap">
                   <Text fontSize="12px" color="#A0A0A0">
-                    {entry.date}
+                    {formatDate(entry.date)}
                   </Text>
                   <Text fontSize="16px" fontWeight="bold">
                     {entry.title}
