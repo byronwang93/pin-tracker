@@ -19,17 +19,20 @@ import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
 import { BowlsContext } from "../context/BowlsContext";
 import { addBowl } from "../firebase/helpers";
+import { eventFieldsFor, initialPick, saveLastPick } from "../utils/events";
 import { v4 } from "uuid";
+import EventPicker from "./EventPicker";
 
 const AddBowlModal = ({ isOpen, onClose }) => {
   const { value } = useContext(SignedInContext);
-  const { refetch, defaultThrowStyle } = useContext(BowlsContext);
+  const { refetch, defaultThrowStyle, bowls, events } = useContext(BowlsContext);
   const toast = useToast();
 
   const [score, setScore] = useState("");
   const [throwStyle, setThrowStyle] = useState(defaultThrowStyle);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
+  const [pick, setPick] = useState({ eventId: "", week: null });
 
   // Re-sync to the current default every time the modal opens, since
   // `defaultThrowStyle` may not have loaded from Firestore yet when this
@@ -37,6 +40,12 @@ const AddBowlModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) setThrowStyle(defaultThrowStyle);
   }, [isOpen, defaultThrowStyle]);
+
+  useEffect(() => {
+    if (isOpen) setPick(initialPick(events, bowls));
+    // Only on open — a refetch while it's open shouldn't reset the pick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const [buttonClicked, setButtonClicked] = useState(false);
 
@@ -58,10 +67,12 @@ const AddBowlModal = ({ isOpen, onClose }) => {
         bowledAt: new Date().toISOString(),
         throwStyle: throwStyle,
         description: description,
+        ...eventFieldsFor(bowls, events.find((e) => e.id === pick.eventId), pick.week, date),
       };
 
       try {
         await addBowl(value, data);
+        saveLastPick(pick.eventId);
         await refetch();
 
         setScore("");
@@ -158,6 +169,10 @@ const AddBowlModal = ({ isOpen, onClose }) => {
                       );
                     })}
                   </HStack>
+                </Box>
+
+                <Box width="98.5%">
+                  <EventPicker value={pick} onChange={setPick} label="What was this?" />
                 </Box>
 
                 <Box width="98.5%">

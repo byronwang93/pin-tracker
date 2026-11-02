@@ -17,10 +17,14 @@ import {
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
 import { SignedInContext } from "../App";
+import { BowlsContext } from "../context/BowlsContext";
 import { editBowl } from "../firebase/helpers";
+import { eventFieldsFor } from "../utils/events";
+import EventPicker from "./EventPicker";
 
 const EditBowlModal = ({ bowl, isOpen, onClose }) => {
   const { value } = useContext(SignedInContext);
+  const { bowls, events } = useContext(BowlsContext);
   const toast = useToast();
 
   const {
@@ -36,6 +40,8 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
   const [throwStyle, setThrowStyle] = useState(null);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(null);
+  const originalPick = { eventId: bowl.eventId ?? "", week: bowl.week ?? null };
+  const [pick, setPick] = useState(originalPick);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -43,6 +49,7 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
     setThrowStyle(oldThrowStyle);
     setDate(oldDate);
     setDescription(oldDescription);
+    setPick(originalPick);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -53,10 +60,26 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
 
   const saveBowl = async () => {
     // Spread the original bowl first so fields this form doesn't expose
-    // (Live Game's `frames`/`notes`/`gameType`) survive an edit instead of
-    // being wiped by a full-replace write.
+    // (Live Game's `frames`/`notes`) survive an edit instead of being wiped
+    // by a full-replace write. Event fields are only rebuilt when the event,
+    // week or date changed, so an untouched bowl keeps them exactly.
+    const eventChanged =
+      pick.eventId !== originalPick.eventId || pick.week !== originalPick.week || date !== oldDate;
+    const { eventId, week, leagueDate, round, ...rest } = bowl;
+    const eventFields = eventChanged
+      ? {
+          ...eventFieldsFor(
+            bowls.filter((b) => b.id !== id),
+            events.find((e) => e.id === pick.eventId),
+            pick.week,
+            date
+          ),
+          ...(round && pick.eventId === eventId ? { round } : {}),
+        }
+      : { eventId, week, leagueDate, round };
     let data = {
-      ...bowl,
+      ...rest,
+      ...Object.fromEntries(Object.entries(eventFields).filter(([, v]) => v != null)),
       id: id,
       score: Number(score),
       date: date,
@@ -96,6 +119,7 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
           setThrowStyle(oldThrowStyle);
           setDate(oldDate);
           setDescription(oldDescription);
+          setPick(originalPick);
           onClose();
         }}
         width="100%"
@@ -158,6 +182,10 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
                       );
                     })}
                   </HStack>
+                </Box>
+
+                <Box width="98.5%">
+                  <EventPicker value={pick} onChange={setPick} label="What was this?" includePast />
                 </Box>
 
                 <Box width="98.5%">

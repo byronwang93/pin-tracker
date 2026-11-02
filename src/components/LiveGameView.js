@@ -28,7 +28,7 @@ import {
   totalScore,
   undoLastRoll,
 } from "../utils/bowlingScore";
-import { eventFieldsFor, eventTitle, isActiveEvent, isNoTap, suggestedWeek } from "../utils/events";
+import { eventFieldsFor, eventTitle, initialPick, isNoTap, saveLastPick } from "../utils/events";
 import EventPicker from "./EventPicker";
 import PinRack from "./PinRack";
 
@@ -66,18 +66,6 @@ const DRAFT_KEY = "liveDraft:liveGame";
 const today = () => new Date().toLocaleDateString("en-CA");
 const ALL_PINS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-// The event picked for the last game, so games 2 and 3 of a night start on
-// it. Only reused the same day — the first game of a day starts on Practice.
-const LAST_PICK_KEY = "liveGame:lastEventPick";
-
-const loadLastPick = () => {
-  try {
-    const saved = JSON.parse(localStorage.getItem(LAST_PICK_KEY));
-    return saved?.date === today() ? saved.eventId : "";
-  } catch {
-    return "";
-  }
-};
 
 const loadDraft = () => {
   try {
@@ -104,13 +92,7 @@ const LiveGameView = ({ onExit }) => {
   const [gameDate, setGameDate] = useState(today);
   const [notes, setNotes] = useState("");
   const [throwStyle, setThrowStyle] = useState(defaultThrowStyle);
-  const [pick, setPick] = useState(() => {
-    const event = events.find((e) => e.id === loadLastPick() && isActiveEvent(e));
-    return {
-      eventId: event?.id ?? "",
-      week: event?.kind === "league" ? suggestedWeek(bowls, event) : null,
-    };
-  });
+  const [pick, setPick] = useState(() => initialPick(events, bowls));
   const [frames, setFrames] = useState([]);
   const [tappedPins, setTappedPins] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -213,7 +195,7 @@ const LiveGameView = ({ onExit }) => {
         frames,
         ...eventFieldsFor(bowls, event, pick.week, gameDate),
       });
-      localStorage.setItem(LAST_PICK_KEY, JSON.stringify({ date: today(), eventId: pick.eventId }));
+      saveLastPick(pick.eventId);
       await refetch();
       bowledAtRef.current = null;
       localStorage.removeItem(DRAFT_KEY);

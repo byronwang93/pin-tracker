@@ -144,3 +144,31 @@ export const eventFieldsFor = (bowls = [], event, week, date) => {
   const leagueDate = leagueDateFor(bowls, event, week, date);
   return { eventId: event.id, week, ...(leagueDate ? { leagueDate } : {}) };
 };
+
+// The event picked for the last bowl, so games 2 and 3 of a night start on
+// it. Only reused the same day — the first bowl of a day starts on Practice.
+const LAST_PICK_KEY = "lastEventPick";
+
+export const loadLastPick = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LAST_PICK_KEY));
+    return saved?.date === today() ? saved.eventId : "";
+  } catch {
+    return "";
+  }
+};
+
+export const saveLastPick = (eventId) => {
+  try {
+    localStorage.setItem(LAST_PICK_KEY, JSON.stringify({ date: today(), eventId: eventId ?? "" }));
+  } catch {}
+};
+
+// Starting value for an EventPicker on a new bowl.
+export const initialPick = (events = [], bowls = []) => {
+  const event = events.find((e) => e.id === loadLastPick() && isActiveEvent(e));
+  return {
+    eventId: event?.id ?? "",
+    week: event?.kind === "league" ? suggestedWeek(bowls, event) : null,
+  };
+};
