@@ -132,11 +132,6 @@ const Entries = ({ year }) => {
         <Text fontSize="20px" w={isDesktop ? "108px" : "60px"} color="#A0A0A0">
           score
         </Text>
-        {isDesktop && (
-          <Text fontSize="20px" w="117px" color="#A0A0A0">
-            hand
-          </Text>
-        )}
         <Text fontSize="20px" color="#A0A0A0">
           date
         </Text>
@@ -183,19 +178,16 @@ const Entries = ({ year }) => {
                 <Text w={isDesktop ? "114px" : "60px"} fontSize="20px">
                   {bowl.score}
                 </Text>
-                {isDesktop && (
-                  <Text w="120px" fontSize="20px">
-                    {bowl.throwStyle}
-                  </Text>
-                )}
                 <Text
-                  w={isDesktop ? "130px" : "110px"}
+                  w={isDesktop ? "250px" : "130px"}
+                  // Desktop keeps the edit/delete icons in one column whether
+                  // or not the "view more" icon is there.
                   mr={
-                    bowl.description && isDesktop
-                      ? "80px"
-                      : isDesktop
-                      ? "110px"
-                      : "15px"
+                    !isDesktop
+                      ? "5px"
+                      : bowl.description || bowl.frames
+                      ? "70px"
+                      : "100px"
                   }
                   fontSize="20px"
                 >
