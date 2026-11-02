@@ -35,6 +35,7 @@ export const addUser = async (uid, name, email, photoURL) => {
       practiceSessions: [],
       arsenal: [],
       journalEntries: [],
+      events: [],
       average: null,
       highestGame: null,
       defaultThrowStyle: 1,
@@ -184,6 +185,56 @@ export const deleteArsenalBall = async (id, uid) => {
     await setDoc(docRef, { arsenal: updatedArsenal }, { merge: true });
   } catch (error) {
     console.error("error deleting ball: ", error);
+    throw error;
+  }
+};
+
+// event functions (leagues + tournaments — see utils/events.js)
+export const addEvent = async (uid, data) => {
+  const userData = await getUserData(uid);
+  const events = userData?.events ?? [];
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { events: [...events, data] }, { merge: true });
+  } catch (error) {
+    console.error("error adding event: ", error);
+    throw error;
+  }
+};
+
+export const editEvent = async (id, uid, newData) => {
+  const userData = await getUserData(uid);
+  const events = userData?.events ?? [];
+  const updatedEvents = events.map((event) => (event.id === id ? newData : event));
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { events: updatedEvents }, { merge: true });
+  } catch (error) {
+    console.error("error editing event: ", error);
+    throw error;
+  }
+};
+
+// By default the event's games stay as practice (their event fields are
+// stripped); `deleteGames` removes them too. Both arrays go in one write so
+// a dropped connection can't leave bowls pointing at a deleted event.
+export const deleteEvent = async (id, uid, { deleteGames = false } = {}) => {
+  const userData = await getUserData(uid);
+  const events = (userData?.events ?? []).filter((event) => event.id !== id);
+  const bowls = (userData?.bowls ?? []).flatMap((bowl) => {
+    if (bowl.eventId !== id) return [bowl];
+    if (deleteGames) return [];
+    const { eventId, week, leagueDate, round, ...rest } = bowl;
+    return [rest];
+  });
+
+  const docRef = doc(db, "users", uid);
+  try {
+    await setDoc(docRef, { events, bowls }, { merge: true });
+  } catch (error) {
+    console.error("error deleting event: ", error);
     throw error;
   }
 };

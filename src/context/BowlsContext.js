@@ -8,6 +8,7 @@ export const BowlsContext = React.createContext({
   practiceSessions: [],
   arsenal: [],
   journalEntries: [],
+  events: [],
   loading: false,
   refetch: () => {},
   defaultThrowStyle: 1,

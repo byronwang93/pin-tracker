@@ -62,6 +62,7 @@ const LoggedIn = () => {
   const [practiceSessions, setPracticeSessions] = useState([]);
   const [arsenal, setArsenal] = useState([]);
   const [journalEntries, setJournalEntries] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState("all-time");
 
@@ -113,6 +114,7 @@ const LoggedIn = () => {
     setPracticeSessions(data?.practiceSessions ?? []);
     setArsenal(data?.arsenal ?? []);
     setJournalEntries(data?.journalEntries ?? []);
+    setEvents(data?.events ?? []);
     if (data?.defaultThrowStyle === 1 || data?.defaultThrowStyle === 2) {
       setDefaultThrowStyleState(data.defaultThrowStyle);
     }
@@ -175,6 +177,7 @@ const LoggedIn = () => {
         refetch,
         arsenal,
         journalEntries,
+        events,
         defaultThrowStyle,
         setDefaultThrowStyle,
         backgroundTheme,
