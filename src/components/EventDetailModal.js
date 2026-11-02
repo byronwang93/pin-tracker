@@ -40,6 +40,12 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
       const key = isLeague ? bowl.week ?? "?" : bowl.date;
       (byKey[key] = byKey[key] || []).push(bowl);
     }
+    // Leagues list every week up to the latest; a week with no games was
+    // an absence (its blind scores are never stored as bowls).
+    if (isLeague) {
+      const weeks = Object.keys(byKey).map(Number).filter((week) => !Number.isNaN(week));
+      for (let week = 1; week < Math.max(0, ...weeks); week++) byKey[week] = byKey[week] || [];
+    }
     const keys = Object.keys(byKey).sort((a, b) =>
       isLeague ? Number(b) - Number(a) : a < b ? 1 : -1
     );
@@ -96,15 +102,17 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
               >
                 <Box>
                   <Text>{isLeague ? `Wk ${key}` : formatDate(key)}</Text>
-                  {isLeague && (
+                  {isLeague && games.length > 0 && (
                     <Text fontSize="12px" color="#A0A0A0">
                       {formatDate(games[0].leagueDate || games[0].date)}
                     </Text>
                   )}
                 </Box>
-                <Text color="#A0A0A0">{games.map((bowl) => bowl.score).join("  ")}</Text>
+                <Text color="#A0A0A0">
+                  {games.length ? games.map((bowl) => bowl.score).join("  ") : "Absent"}
+                </Text>
                 <Text minW="40px" textAlign="right">
-                  {games.reduce((sum, bowl) => sum + bowl.score, 0)}
+                  {games.length ? games.reduce((sum, bowl) => sum + bowl.score, 0) : ""}
                 </Text>
               </HStack>
             ))}
