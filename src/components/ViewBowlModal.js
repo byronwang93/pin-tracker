@@ -44,20 +44,83 @@ const FrameMarks = ({ rolls }) => (
   </HStack>
 );
 
-const ViewBowlModal = ({ score, date, description, frames, isOpen, onClose }) => {
+// Frame boxes for a Live Game bowl; tap a frame to see the pins after each
+// ball. Shared with the tournament games modal.
+export const Scorecard = ({ frames }) => {
   const [expandedFrame, setExpandedFrame] = useState(null);
-  const scores = frames ? frameScores(frames) : [];
-
+  const scores = frameScores(frames);
   return (
     <>
-      <Modal
-        isOpen={isOpen}
-        onClose={() => {
-          setExpandedFrame(null);
-          onClose();
-        }}
-        width="100%"
-      >
+      <HStack spacing="6px" pb="8px">
+        {frames.map((frame, index) => {
+          const rolls = frameRollInfo(frame);
+          return (
+            <VStack
+              key={index}
+              flexShrink={0}
+              spacing="2px"
+              border="1px solid"
+              borderColor={expandedFrame === index ? "#FDD468" : "#84876F"}
+              borderRadius="4px"
+              p="4px 6px"
+              minW="42px"
+              cursor="pointer"
+              onClick={() =>
+                setExpandedFrame((prev) => (prev === index ? null : index))
+              }
+            >
+              <Text fontSize="11px" color="#A0A0A0">
+                {index + 1}
+              </Text>
+              {rolls.length ? (
+                <FrameMarks rolls={rolls} />
+              ) : (
+                <Text fontSize="14px">-</Text>
+              )}
+              <Text fontSize="13px" fontWeight="bold">
+                {scores[index] ?? ""}
+              </Text>
+            </VStack>
+          );
+        })}
+        <Box minW="4px" flexShrink={0} />
+      </HStack>
+
+      {expandedFrame !== null && frames[expandedFrame]?.rolls?.length > 0 && (
+        <HStack spacing="15px" pt="10px" flexWrap="wrap">
+          {frameRollInfo(frames[expandedFrame]).map((roll, i) => (
+            <VStack key={i} spacing="4px">
+              <Text fontSize="13px" color="#A0A0A0">
+                Ball {i + 1}
+              </Text>
+              <PinRack
+                size="28px"
+                pinState={Object.fromEntries(
+                  ALL_PINS.map((pin) => [
+                    pin,
+                    roll.standingAfter.includes(pin) ? "default" : "cleared",
+                  ]),
+                )}
+              />
+            </VStack>
+          ))}
+        </HStack>
+      )}
+    </>
+  );
+};
+
+const ViewBowlModal = ({
+  score,
+  date,
+  description,
+  frames,
+  isOpen,
+  onClose,
+}) => {
+  return (
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} width="100%">
         <ModalOverlay />
         <ModalContent>
           <VStack backgroundColor="#3C3D36" alignItems="baseline">
@@ -77,59 +140,12 @@ const ViewBowlModal = ({ score, date, description, frames, isOpen, onClose }) =>
                 {frames && (
                   <Box pt="15px" pb="10px" overflowX="auto">
                     <Text color="#A0A0A0" fontSize="20px" pb="8px">
-                      Scorecard: <Text as="span" fontSize="13px">(tap a frame for pin detail)</Text>
+                      Scorecard:{" "}
+                      <Text as="span" fontSize="13px">
+                        (tap a frame for pin detail)
+                      </Text>
                     </Text>
-                    <HStack spacing="6px" pb="8px">
-                      {frames.map((frame, index) => {
-                        const rolls = frameRollInfo(frame);
-                        return (
-                          <VStack
-                            key={index}
-                            flexShrink={0}
-                            spacing="2px"
-                            border="1px solid"
-                            borderColor={expandedFrame === index ? "#FDD468" : "#84876F"}
-                            borderRadius="4px"
-                            p="4px 6px"
-                            minW="42px"
-                            cursor="pointer"
-                            onClick={() =>
-                              setExpandedFrame((prev) => (prev === index ? null : index))
-                            }
-                          >
-                            <Text fontSize="11px" color="#A0A0A0">
-                              {index + 1}
-                            </Text>
-                            {rolls.length ? <FrameMarks rolls={rolls} /> : <Text fontSize="14px">-</Text>}
-                            <Text fontSize="13px" fontWeight="bold">
-                              {scores[index] ?? ""}
-                            </Text>
-                          </VStack>
-                        );
-                      })}
-                      <Box minW="4px" flexShrink={0} />
-                    </HStack>
-
-                    {expandedFrame !== null && frames[expandedFrame]?.rolls?.length > 0 && (
-                      <HStack spacing="15px" pt="10px" flexWrap="wrap">
-                        {frameRollInfo(frames[expandedFrame]).map((roll, i) => (
-                          <VStack key={i} spacing="4px">
-                            <Text fontSize="13px" color="#A0A0A0">
-                              Ball {i + 1}
-                            </Text>
-                            <PinRack
-                              size="28px"
-                              pinState={Object.fromEntries(
-                                ALL_PINS.map((pin) => [
-                                  pin,
-                                  roll.standingAfter.includes(pin) ? "default" : "cleared",
-                                ]),
-                              )}
-                            />
-                          </VStack>
-                        ))}
-                      </HStack>
-                    )}
+                    <Scorecard frames={frames} />
                   </Box>
                 )}
                 {description && (

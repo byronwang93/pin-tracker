@@ -7,6 +7,7 @@ import Entries from "./Entries";
 import FirstStatsBox from "./FirstStatsBox";
 import SecondStatsBox from "./SecondStatsBox";
 import SpareStatsTab from "./SpareStatsTab";
+import TournamentsTable from "./TournamentsTable";
 
 const Overview = ({ year }) => (
   <>
@@ -15,7 +16,8 @@ const Overview = ({ year }) => (
     <ByTypeBox year={year} />
     <CompStatsBox year={year} />
     <Charts year={year} />
-    <Entries year={year} />
+    {/* All tournaments lists tournaments, not individual games. */}
+    {year === "tournaments" ? <TournamentsTable /> : <Entries year={year} />}
   </>
 );
 
