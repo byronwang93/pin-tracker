@@ -1,7 +1,11 @@
-html,
+/* The dark color lives on html only. With both html and body colored, body
+   paints its own opaque layer above the z-index:-1 background squares. */
+html {
+  background-color: #101313;
+}
+
 body {
   margin: 0;
-  background-color: #101313;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;

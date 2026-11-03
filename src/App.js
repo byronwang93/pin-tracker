@@ -9,15 +9,15 @@ export const SignedInContext = React.createContext();
 
 // Without a custom theme, Chakra's own default global style sets
 // `body { bg: white }`, injected at runtime *after* index.css — same
-// selector/specificity, so it silently wins the cascade and overrides
-// index.css's dark body background. Overriding it here, at the theme
-// level, is the only way to actually win instead of fighting Chakra's
-// own injected styles.
+// selector/specificity, so it silently wins the cascade. Overriding it here,
+// at the theme level, is the only way to actually win. It's transparent, not
+// dark: html carries the #101313 (see index.css), and an opaque body would
+// cover the z-index:-1 background squares.
 const theme = extendTheme({
   styles: {
     global: {
       body: {
-        bg: "#101313",
+        bg: "transparent",
       },
     },
   },
