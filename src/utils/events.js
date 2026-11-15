@@ -118,37 +118,20 @@ export const liveDraftEventId = () => {
   }
 };
 
-// Starting a league game in Live Game marks that league's night as going,
-// so Home shows its card even before game 1 is saved.
-const LEAGUE_NIGHT_KEY = "leagueNight";
-
-export const markLeagueNight = (eventId) => {
-  try {
-    localStorage.setItem(LEAGUE_NIGHT_KEY, JSON.stringify({ date: today(), eventId }));
-  } catch {}
-};
-
-const markedLeagueNight = () => {
-  try {
-    const saved = JSON.parse(localStorage.getItem(LEAGUE_NIGHT_KEY));
-    return saved?.date === today() ? saved.eventId : null;
-  } catch {
-    return null;
-  }
-};
-
-// Active leagues with a night going today: a game saved today, a game
-// started from Live Game today, or a league game still in progress.
+// Active leagues with a night going today: a game saved today, or a league
+// game in progress (rolls entered). Delete or reset those and the card goes.
+// Clears the old "night started" flag so it can't keep a card up.
+try {
+  localStorage.removeItem("leagueNight");
+} catch {}
 export const leagueNightsToday = (events = [], bowls = []) => {
   const on = today();
-  const marked = markedLeagueNight();
   const drafting = liveDraftEventId();
   return events.filter(
     (event) =>
       event.kind === "league" &&
       isActiveEvent(event) &&
-      (event.id === marked ||
-        event.id === drafting ||
+      (event.id === drafting ||
         bowls.some((bowl) => bowl.eventId === event.id && bowl.date === on))
   );
 };

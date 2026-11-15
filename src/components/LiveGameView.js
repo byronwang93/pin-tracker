@@ -34,7 +34,6 @@ import {
   initialPick,
   isNoTap,
   LIVE_DRAFT_KEY,
-  markLeagueNight,
   saveLastPick,
   seriesDate,
 } from "../utils/events";
@@ -140,7 +139,6 @@ const LiveGameView = ({ onExit, startEventId = null }) => {
         .pop();
       setPick({ eventId: startEventId });
       if (lastTonight?.throwStyle) setThrowStyle(lastTonight.throwStyle);
-      markLeagueNight(startEventId);
       setPhase("game");
     }
     setDraftChecked(true);
@@ -355,10 +353,7 @@ const LiveGameView = ({ onExit, startEventId = null }) => {
             bgColor="#FFF3D2"
             border="2px solid #FDD468"
             _hover={{ bgColor: "#E6DBBF" }}
-            onClick={() => {
-              if (event?.kind === "league") markLeagueNight(event.id);
-              setPhase("game");
-            }}
+            onClick={() => setPhase("game")}
           >
             Start Game
           </Button>
