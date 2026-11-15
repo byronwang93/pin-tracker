@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { BowlsContext } from "../context/BowlsContext";
 import { eventBowls, eventMeta, eventSummary, formatLabel, seriesDate } from "../utils/events";
 import { formatDate } from "../utils/stats";
@@ -25,11 +25,36 @@ const Stat = ({ label, value }) => (
   </VStack>
 );
 
+// Clickable column heading; the active one shows its direction.
+const SortHeading = ({ label, active, dir, onClick, align = "left", ...rest }) => (
+  <Text
+    as="button"
+    type="button"
+    onClick={onClick}
+    textAlign={align}
+    color={active ? "#FDD468" : "#A0A0A0"}
+    fontSize="12px"
+    letterSpacing="0.06em"
+    textTransform="uppercase"
+    _hover={{ color: "white" }}
+    {...rest}
+  >
+    {label}
+    {active ? (dir === "asc" ? " ▲" : " ▼") : ""}
+  </Text>
+);
+
 // Read-only page for one league season or tournament: its own numbers and
-// every game grouped by league night or tournament day.
+// every game grouped by league night or tournament day. League weeks are
+// numbered by the nights actually bowled (1, 2, 3…), so skipped weeks
+// leave no gaps.
 const EventDetailModal = ({ event, isOpen, onClose }) => {
   const { bowls } = useContext(BowlsContext);
   const isLeague = event?.kind === "league";
+  // Sort by "when" (week / date) or "total" (series), newest first.
+  const [sort, setSort] = useState({ by: "when", dir: "desc" });
+  const sortBy = (by) =>
+    setSort((prev) => (prev.by === by ? { by, dir: prev.dir === "asc" ? "desc" : "asc" } : { by, dir: "desc" }));
 
   const { summary, groups } = useMemo(() => {
     if (!event) return { summary: null, groups: [] };
@@ -40,9 +65,22 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
       const key = seriesDate(bowl);
       (byKey[key] = byKey[key] || []).push(bowl);
     }
-    const keys = Object.keys(byKey).sort((a, b) => (a < b ? 1 : -1));
-    return { summary: eventSummary(games), groups: keys.map((key) => [key, byKey[key]]) };
+    const rows = Object.keys(byKey)
+      .sort()
+      .map((date, index) => ({
+        date,
+        number: index + 1,
+        games: byKey[date],
+        total: byKey[date].reduce((sum, bowl) => sum + bowl.score, 0),
+      }));
+    return { summary: eventSummary(games), groups: rows };
   }, [bowls, event]);
+
+  const rows = useMemo(() => {
+    const sign = sort.dir === "asc" ? 1 : -1;
+    const key = (row) => (sort.by === "total" ? row.total : row.number);
+    return [...groups].sort((a, b) => sign * (key(a) - key(b)) || b.number - a.number);
+  }, [groups, sort]);
 
   if (!event) return null;
 
@@ -82,24 +120,56 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
             </Text>
           )}
 
-          <VStack align="stretch" spacing="6px">
-            {groups.map(([key, games], index) => (
+          <VStack align="stretch" spacing="4px">
+            {rows.length > 0 && (
+              <HStack px="10px" pb="2px" spacing="10px">
+                <SortHeading
+                  label={isLeague ? "Week" : "Date"}
+                  active={sort.by === "when"}
+                  dir={sort.dir}
+                  onClick={() => sortBy("when")}
+                  w={isLeague ? "90px" : "110px"}
+                />
+                <Text flex="1" color="#A0A0A0" fontSize="12px" letterSpacing="0.06em" textTransform="uppercase">
+                  Scores
+                </Text>
+                <SortHeading
+                  label={isLeague ? "Series" : "Total"}
+                  active={sort.by === "total"}
+                  dir={sort.dir}
+                  onClick={() => sortBy("total")}
+                  align="right"
+                  minW="60px"
+                />
+              </HStack>
+            )}
+            {rows.map(({ date, number, games, total }, index) => (
               <HStack
-                key={key}
-                justify="space-between"
+                key={date}
                 p="8px 10px"
+                spacing="10px"
                 borderRadius="7px"
                 bgColor={index % 2 === 0 ? "#2E2F29" : "transparent"}
                 fontSize="15px"
+                sx={{ fontVariantNumeric: "tabular-nums" }}
               >
-                <Text>{formatDate(key)}</Text>
-                <Text color="#A0A0A0">{games.map((bowl) => bowl.score).join("  ")}</Text>
-                <Text minW="40px" textAlign="right">
-                  {games.reduce((sum, bowl) => sum + bowl.score, 0)}
+                <Box w={isLeague ? "90px" : "110px"} flexShrink={0}>
+                  <Text>{isLeague ? `Wk ${number}` : formatDate(date)}</Text>
+                  {isLeague && (
+                    <Text fontSize="12px" color="#A0A0A0">
+                      {formatDate(date)}
+                    </Text>
+                  )}
+                </Box>
+                <Text flex="1" color="#A0A0A0">
+                  {games.map((bowl) => bowl.score).join("  ")}
+                </Text>
+                <Text minW="60px" textAlign="right" color={total === summary.highSeries && games.length === 3 ? "#FDD468" : "white"}>
+                  {total}
                 </Text>
               </HStack>
             ))}
-            {groups.length === 0 && <Text color="#A0A0A0">No games yet.</Text>}
+            {rows.length === 0 && <Text color="#A0A0A0">No games yet.</Text>}
           </VStack>
 
           {event.notes && (

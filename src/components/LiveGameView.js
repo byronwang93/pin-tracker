@@ -28,7 +28,16 @@ import {
   totalScore,
   undoLastRoll,
 } from "../utils/bowlingScore";
-import { eventFieldsFor, eventTitle, initialPick, isNoTap, saveLastPick, seriesDate } from "../utils/events";
+import {
+  eventFieldsFor,
+  eventTitle,
+  initialPick,
+  isNoTap,
+  LIVE_DRAFT_KEY,
+  markLeagueNight,
+  saveLastPick,
+  seriesDate,
+} from "../utils/events";
 import EventPicker from "./EventPicker";
 import PinRack from "./PinRack";
 
@@ -62,7 +71,7 @@ const FrameMarks = ({ rolls }) => (
   </HStack>
 );
 
-const DRAFT_KEY = "liveDraft:liveGame";
+const DRAFT_KEY = LIVE_DRAFT_KEY;
 const today = () => new Date().toLocaleDateString("en-CA");
 const ALL_PINS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -82,7 +91,10 @@ const hasAnyRoll = (frames) => frames.some((frame) => frame.rolls.length > 0);
 // offline-first shape: everything is buffered in local state + localStorage
 // (mirrored after every roll), and only "Save Game" writes to Firestore —
 // a killed tab or dead alley wifi mid-game never loses a roll.
-const LiveGameView = ({ onExit }) => {
+// `startEventId` skips setup and starts a game for that league (the league
+// card's "Bowl game N"). `onExit(leagueId)` gets the league's id when
+// leaving a league game, so the app returns to that league's night view.
+const LiveGameView = ({ onExit, startEventId = null }) => {
   const { value } = useContext(SignedInContext);
   const { refetch, defaultThrowStyle, bowls, events } = useContext(BowlsContext);
   const toast = useToast();
@@ -121,6 +133,15 @@ const LiveGameView = ({ onExit }) => {
           isClosable: true,
         });
       }
+    } else if (startEventId) {
+      // Same hand as the last game this league tonight.
+      const lastTonight = bowls
+        .filter((bowl) => bowl.eventId === startEventId && bowl.date === today())
+        .pop();
+      setPick({ eventId: startEventId });
+      if (lastTonight?.throwStyle) setThrowStyle(lastTonight.throwStyle);
+      markLeagueNight(startEventId);
+      setPhase("game");
     }
     setDraftChecked(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -202,7 +223,7 @@ const LiveGameView = ({ onExit }) => {
         duration: 3000,
         isClosable: true,
       });
-      onExit();
+      onExit(event?.kind === "league" ? event.id : null);
     } catch (error) {
       toast({
         description:
@@ -233,7 +254,11 @@ const LiveGameView = ({ onExit }) => {
   return (
     <VStack width="100%" spacing="20px" pt="10px" pb="40px">
       <HStack width="100%" justify="space-between" px="20px">
-        <Button variant="link" color="white" onClick={onExit}>
+        <Button
+          variant="link"
+          color="white"
+          onClick={() => onExit(phase === "game" && event?.kind === "league" ? event.id : null)}
+        >
           ← Exit
         </Button>
         <Heading size="md" color="white">
@@ -330,7 +355,10 @@ const LiveGameView = ({ onExit }) => {
             bgColor="#FFF3D2"
             border="2px solid #FDD468"
             _hover={{ bgColor: "#E6DBBF" }}
-            onClick={() => setPhase("game")}
+            onClick={() => {
+              if (event?.kind === "league") markLeagueNight(event.id);
+              setPhase("game");
+            }}
           >
             Start Game
           </Button>

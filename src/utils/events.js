@@ -89,14 +89,14 @@ export const eventMeta = (event, bowls = []) => {
   const games = eventBowls(bowls, event.id);
   const book = games.length ? ` · book ${Math.floor(eventSummary(games).average)}` : "";
   if (event.kind === "league") {
-    const nights = new Set(games.map(seriesDate)).size;
-    const nightCount = nights ? ` · ${nights} night${nights === 1 ? "" : "s"}` : "";
+    // Weeks are counted from the nights actually bowled.
+    const weeks = new Set(games.map(seriesDate)).size;
     if (event.archived) {
       const ended = event.endDate ? ` · ended ${formatDate(event.endDate)}` : "";
-      return `${nights} night${nights === 1 ? "" : "s"}${ended}${book}`;
+      return `${weeks} week${weeks === 1 ? "" : "s"}${ended}${book}`;
     }
     const night = event.weekday != null ? `${WEEKDAYS[event.weekday]}s · ` : "";
-    return `${night}${event.gamesPerNight || 3} games${nightCount}${book}`;
+    return `${night}${event.gamesPerNight || 3} games${weeks ? ` · wk ${weeks}` : ""}${book}`;
   }
   const upcoming = event.startDate > today() ? " · upcoming" : "";
   const count = games.length ? ` · ${games.length} game${games.length === 1 ? "" : "s"}` : "";
@@ -105,6 +105,77 @@ export const eventMeta = (event, bowls = []) => {
 
 // Fields to store on a bowl for the picked event ({} = practice).
 export const eventFieldsFor = (event) => (event ? { eventId: event.id } : {});
+
+// --- League night ---
+// Live Game's in-progress game, mirrored to localStorage after every roll.
+export const LIVE_DRAFT_KEY = "liveDraft:liveGame";
+
+export const liveDraftEventId = () => {
+  try {
+    return JSON.parse(localStorage.getItem(LIVE_DRAFT_KEY))?.pick?.eventId || null;
+  } catch {
+    return null;
+  }
+};
+
+// Starting a league game in Live Game marks that league's night as going,
+// so Home shows its card even before game 1 is saved.
+const LEAGUE_NIGHT_KEY = "leagueNight";
+
+export const markLeagueNight = (eventId) => {
+  try {
+    localStorage.setItem(LEAGUE_NIGHT_KEY, JSON.stringify({ date: today(), eventId }));
+  } catch {}
+};
+
+const markedLeagueNight = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LEAGUE_NIGHT_KEY));
+    return saved?.date === today() ? saved.eventId : null;
+  } catch {
+    return null;
+  }
+};
+
+// Active leagues with a night going today: a game saved today, a game
+// started from Live Game today, or a league game still in progress.
+export const leagueNightsToday = (events = [], bowls = []) => {
+  const on = today();
+  const marked = markedLeagueNight();
+  const drafting = liveDraftEventId();
+  return events.filter(
+    (event) =>
+      event.kind === "league" &&
+      isActiveEvent(event) &&
+      (event.id === marked ||
+        event.id === drafting ||
+        bowls.some((bowl) => bowl.eventId === event.id && bowl.date === on))
+  );
+};
+
+// Tonight's series for a league, against the season before tonight.
+export const leagueNightStats = (event, bowls = [], on = today()) => {
+  const season = eventBowls(bowls, event.id);
+  const tonight = season.filter((bowl) => bowl.date === on);
+  const before = season.filter((bowl) => bowl.date !== on);
+  const total = tonight.reduce((sum, bowl) => sum + bowl.score, 0);
+  const book = before.length
+    ? Math.floor(before.reduce((sum, bowl) => sum + bowl.score, 0) / before.length)
+    : null;
+  const bestBefore = highSeries(before)?.total ?? null;
+  const gamesPerNight = event.gamesPerNight || 3;
+  const done = tonight.length >= gamesPerNight;
+  return {
+    tonight,
+    total,
+    gamesPerNight,
+    done,
+    vsBook: book != null && tonight.length ? total - book * tonight.length : null,
+    tonightAvg: tonight.length ? Math.floor(total / tonight.length) : null,
+    bestSeries: highSeries(season)?.total ?? null,
+    newBest: done && tonight.length === 3 && (bestBefore == null || total > bestBefore),
+  };
+};
 
 // The event picked for the last bowl, so games 2 and 3 of a night start on
 // it. Only reused the same day — the first bowl of a day starts on Practice.

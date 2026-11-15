@@ -24,7 +24,7 @@ import {
   updateDefaultThrowStyle,
   updateHideNonDominantHand,
 } from "../firebase/helpers";
-import { eventTitle, isDateScope } from "../utils/events";
+import { eventTitle, isDateScope, leagueNightsToday } from "../utils/events";
 import { getYearValues, rangeLabel } from "../utils/stats";
 import { BowlsContext } from "../context/BowlsContext";
 import AddBowlModal from "./AddBowlModal";
@@ -33,6 +33,7 @@ import Leaderboard from "./Leaderboard";
 import Profile from "./Profile";
 import SpareShootingView from "./SpareShootingView";
 import LiveGameView from "./LiveGameView";
+import LeagueNightCard, { LeagueNightView } from "./LeagueNightCard";
 import SettingsModal from "./SettingsModal";
 
 // Keeps the current top-level tab in the URL (?tab=stats|leaderboard|profile)
@@ -69,6 +70,15 @@ const LoggedIn = () => {
 
   const [toggle, setToggle] = useState(getInitialToggle);
   const [view, setView] = useState("home");
+  // Live Game can start straight into a league game (the league card's
+  // "Bowl game N"), and returns to that league's night view after a save.
+  const [liveStartEventId, setLiveStartEventId] = useState(null);
+  const [leagueNightId, setLeagueNightId] = useState(null);
+
+  const startLiveGame = (eventId = null) => {
+    setLiveStartEventId(eventId);
+    setView("liveGame");
+  };
   // Default hand for new entries (Upload Bowl / Live Game setup). Persisted
   // to the profile so it follows you across devices.
   const [defaultThrowStyle, setDefaultThrowStyleState] = useState(1);
@@ -204,7 +214,19 @@ const LoggedIn = () => {
     {view === "spareShooting" ? (
       <SpareShootingView onExit={() => setView("home")} />
     ) : view === "liveGame" ? (
-      <LiveGameView onExit={() => setView("home")} />
+      <LiveGameView
+        startEventId={liveStartEventId}
+        onExit={(leagueId) => {
+          setLeagueNightId(leagueId ?? null);
+          setView(leagueId ? "leagueNight" : "home");
+        }}
+      />
+    ) : view === "leagueNight" && events.some((event) => event.id === leagueNightId) ? (
+      <LeagueNightView
+        event={events.find((event) => event.id === leagueNightId)}
+        onBowl={startLiveGame}
+        onExit={() => setView("home")}
+      />
     ) : (
     <Flex
       justify="space-between"
@@ -319,7 +341,7 @@ const LoggedIn = () => {
               Upload Bowl
             </Button>
             <Button
-              onClick={() => setView("liveGame")}
+              onClick={() => startLiveGame()}
               bgColor="#FFF3D2"
               border="2px solid #FDD468"
               _hover={{
@@ -346,6 +368,11 @@ const LoggedIn = () => {
               </Text>{" "}
               Spare Shooting
             </Button>
+          </VStack>
+          <VStack spacing="12px" pt="20px" w={{ base: "90vw", sm: "420px" }} mx="auto">
+            {leagueNightsToday(events, bowls).map((event) => (
+              <LeagueNightCard key={event.id} event={event} onBowl={startLiveGame} />
+            ))}
           </VStack>
           <AddBowlModal isOpen={isOpen} onClose={onClose} />
         </Box>
