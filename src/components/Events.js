@@ -27,6 +27,7 @@ import { deleteEvent } from "../firebase/helpers";
 import { eventBowls, eventMeta, isActiveEvent } from "../utils/events";
 import EventDetailModal from "./EventDetailModal";
 import EventModal from "./EventModal";
+import { CONTENT_MAX_W, CONTENT_W } from "./StatBox";
 
 const newestFirst = (a, b) => ((a.startDate ?? "") < (b.startDate ?? "") ? 1 : -1);
 
@@ -192,7 +193,7 @@ const Events = () => {
   const deleteCount = deleteTarget ? eventBowls(bowls, deleteTarget.id).length : 0;
 
   return (
-    <Box w="100%" maxW="700px" px={{ base: "20px", md: "0" }}>
+    <Box w={CONTENT_W} maxW={CONTENT_MAX_W} mx="auto">
       <HStack justify="space-between" pb="15px">
         <Text fontSize="32px" textAlign="left">
           Leagues & Tournaments

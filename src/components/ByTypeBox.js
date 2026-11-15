@@ -1,8 +1,9 @@
-import { Box, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import React, { useContext, useMemo } from "react";
 import { BowlsContext } from "../context/BowlsContext";
 import { isDateScope, scopeBowls } from "../utils/events";
 import { EventBadge } from "./EventBadge";
+import { StatBox } from "./StatBox";
 
 // Practice vs League vs Tourney for a date range. Only on date scopes —
 // a league or tournament scope is already a single type.
@@ -32,47 +33,33 @@ const ByTypeBox = ({ year }) => {
 
   const badgeEvent = { practice: null, league: { kind: "league" }, tournament: { kind: "tournament" } };
 
+  const th = { px: "8px", color: "#A0A0A0", textTransform: "none", fontSize: "14px", fontWeight: "normal" };
+
   return (
-    <Box
-      mb="30px"
-      maxW="570px"
-      w={{ base: "300px", md: "70%" }}
-      p="15px"
-      backgroundColor="#3C3D36"
-      borderRadius="10px"
-    >
-      <Text fontSize="18px" color="#A0A0A0" textAlign="left" pb="6px">
-        By type
-      </Text>
-      <Table size="sm" variant="unstyled">
+    <StatBox title="By type">
+      <Table size="sm" variant="unstyled" sx={{ fontVariantNumeric: "tabular-nums" }}>
         <Thead>
           <Tr>
-            <Th px="4px" />
-            <Th px="4px" color="#A0A0A0" textTransform="none" fontSize="14px" fontWeight="normal">
-              Games
-            </Th>
-            <Th px="4px" color="#A0A0A0" textTransform="none" fontSize="14px" fontWeight="normal">
-              Avg
-            </Th>
-            <Th px="4px" color="#A0A0A0" textTransform="none" fontSize="14px" fontWeight="normal">
-              High
-            </Th>
+            <Th {...th}>Type</Th>
+            <Th {...th} isNumeric>Games</Th>
+            <Th {...th} isNumeric>Avg</Th>
+            <Th {...th} isNumeric>High</Th>
           </Tr>
         </Thead>
         <Tbody>
-          {rows.map((row) => (
-            <Tr key={row.kind} fontSize="17px">
-              <Td px="4px">
+          {rows.map((row, index) => (
+            <Tr key={row.kind} fontSize="17px" bgColor={index % 2 === 0 ? "#2E2F29" : "transparent"}>
+              <Td px="8px" borderLeftRadius="7px">
                 <EventBadge bowl={{}} event={badgeEvent[row.kind]} plain />
               </Td>
-              <Td px="4px">{row.games}</Td>
-              <Td px="4px">{row.average}</Td>
-              <Td px="4px">{row.high}</Td>
+              <Td px="8px" isNumeric>{row.games}</Td>
+              <Td px="8px" isNumeric>{row.average}</Td>
+              <Td px="8px" isNumeric borderRightRadius="7px">{row.high}</Td>
             </Tr>
           ))}
         </Tbody>
       </Table>
-    </Box>
+    </StatBox>
   );
 };
 

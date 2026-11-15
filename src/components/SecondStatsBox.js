@@ -1,4 +1,3 @@
-import { Box, Text } from "@chakra-ui/react";
 import React, { useContext, useMemo } from "react";
 import { BowlsContext } from "../context/BowlsContext";
 import {
@@ -6,6 +5,7 @@ import {
   last10Average as last10Avg,
 } from "../utils/stats";
 import { scopeBowls } from "../utils/events";
+import { StatBox, StatGrid, StatTile } from "./StatBox";
 
 const SecondStatsBox = ({ year }) => {
   const { bowls, events, defaultThrowStyle, hideNonDominantHand } = useContext(BowlsContext);
@@ -36,146 +36,25 @@ const SecondStatsBox = ({ year }) => {
   const showOne = !hideNonDominantHand || defaultThrowStyle === 1;
   const showTwo = !hideNonDominantHand || defaultThrowStyle === 2;
 
+  const shown = (value) => (value !== 0 ? value : null);
+  // 1H / 2H tiles only when both hands are shown; otherwise the plain
+  // average already is the one hand.
+  const both = showOne && showTwo;
+  const tiles = [
+    <StatTile key="avg" label={label} value={shown(average)} />,
+    both && <StatTile key="avg1" label={`${label} (1H)`} value={shown(oneAverage)} />,
+    both && <StatTile key="avg2" label={`${label} (2H)`} value={shown(twoAverage)} />,
+    !both && <StatTile key="avgh" label={`${label} (${showOne ? "1H" : "2H"})`} value={shown(showOne ? oneAverage : twoAverage)} />,
+    <StatTile key="l10" label="Last 10" value={shown(last10Average)} />,
+    both && <StatTile key="l101" label="Last 10 (1H)" value={shown(last10OneAverage)} />,
+    both && <StatTile key="l102" label="Last 10 (2H)" value={shown(last10TwoAverage)} />,
+    !both && <StatTile key="l10h" label={`Last 10 (${showOne ? "1H" : "2H"})`} value={shown(showOne ? last10OneAverage : last10TwoAverage)} />,
+  ].filter(Boolean);
+
   return (
-    <Box
-      mb="30px"
-      alignItems={{ base: "center", md: "flex-start" }}
-      display="flex"
-      flexDirection="column"
-      maxW="570px"
-      w={{ base: "230px", md: "70%" }}
-      pt="15px"
-      pb="15px"
-      justifyContent="center"
-      backgroundColor="#3C3D36"
-      borderRadius="10px"
-    >
-      <Text alignSelf="center" pb="5px" fontSize="30px" color="#A0A0A0">
-        Averages
-      </Text>
-
-      <Box
-        w="100%"
-        alignItems={{ base: "center", md: "flex-start" }}
-        display="flex"
-        flexDirection={{ base: "column", md: "row" }}
-        maxW="570px"
-        pt="15px"
-        pb="15px"
-        justifyContent="center"
-        backgroundColor="#3C3D36"
-        borderRadius="10px"
-        pl={{ base: "40px", md: "0px" }}
-      >
-        <Box
-          alignSelf="baseline"
-          textAlign="left"
-          width="150px"
-          display="flex"
-          flexDirection="column"
-        >
-          <Text fontSize="18px" color="#A0A0A0">
-            {label}
-          </Text>
-          <Text p="5px 0px 13px 0px" fontSize="30px">
-            {average !== 0 ? average : "--"}
-          </Text>
-        </Box>
-        {showOne && (
-          <Box
-            alignSelf="baseline"
-            textAlign="left"
-            width="150px"
-            display="flex"
-            flexDirection="column"
-          >
-            <Text fontSize="18px" color="#A0A0A0">
-              {label} (one-handed)
-            </Text>
-            <Text p="5px 0px 13px 0px" fontSize="30px">
-              {oneAverage !== 0 ? oneAverage : "--"}
-            </Text>
-          </Box>
-        )}
-        {showTwo && (
-          <Box
-            alignSelf="baseline"
-            w="150px"
-            textAlign="left"
-            display="flex"
-            flexDirection="column"
-          >
-            <Text fontSize="18px" color="#A0A0A0">
-              {label} (two-handed)
-            </Text>
-            <Text p="5px 0px 1px 0px" fontSize="30px">
-              {twoAverage !== 0 ? twoAverage : "--"}
-            </Text>
-          </Box>
-        )}
-      </Box>
-
-      <Box
-        w="100%"
-        alignItems={{ base: "center", md: "flex-start" }}
-        display="flex"
-        flexDirection={{ base: "column", md: "row" }}
-        maxW="570px"
-        pt="15px"
-        pb="15px"
-        justifyContent="center"
-        backgroundColor="#3C3D36"
-        borderRadius="10px"
-        pl={{ base: "40px", md: "0px" }}
-      >
-        <Box
-          alignSelf="baseline"
-          textAlign="left"
-          width="150px"
-          display="flex"
-          flexDirection="column"
-        >
-          <Text fontSize="18px" color="#A0A0A0">
-            Last 10 Games
-          </Text>
-          <Text p="5px 0px 13px 0px" fontSize="30px">
-            {last10Average !== 0 ? last10Average : "--"}
-          </Text>
-        </Box>
-        {showOne && (
-          <Box
-            alignSelf="baseline"
-            textAlign="left"
-            maxW="150px"
-            display="flex"
-            flexDirection="column"
-          >
-            <Text fontSize="18px" color="#A0A0A0">
-              Last 10 Games (one-handed)
-            </Text>
-            <Text p="5px 0px 13px 0px" fontSize="30px">
-              {last10OneAverage !== 0 ? last10OneAverage : "--"}
-            </Text>
-          </Box>
-        )}
-        {showTwo && (
-          <Box
-            alignSelf="baseline"
-            maxW="150px"
-            textAlign="left"
-            display="flex"
-            flexDirection="column"
-          >
-            <Text fontSize="18px" color="#A0A0A0">
-              Last 10 Games (two-handed)
-            </Text>
-            <Text p="5px 0px 1px 0px" fontSize="30px">
-              {last10TwoAverage !== 0 ? last10TwoAverage : "--"}
-            </Text>
-          </Box>
-        )}
-      </Box>
-    </Box>
+    <StatBox title="Averages">
+      <StatGrid columns={tiles.length === 4 ? 4 : 3}>{tiles}</StatGrid>
+    </StatBox>
   );
 };
 

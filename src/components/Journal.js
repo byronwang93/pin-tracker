@@ -26,6 +26,7 @@ import {
 } from "../utils/profile";
 import JournalEntryModal from "./JournalEntryModal";
 import ViewJournalEntryModal from "./ViewJournalEntryModal";
+import { CONTENT_MAX_W, CONTENT_W } from "./StatBox";
 
 const FILTER_PILLS = [...JOURNAL_TAGS, CUSTOM_TAG_FILTER];
 const pillLabel = (tag) => (tag === CUSTOM_TAG_FILTER ? "Custom" : tag);
@@ -89,7 +90,7 @@ const Journal = () => {
   };
 
   return (
-    <Box w="100%" maxW="700px" px={{ base: "20px", md: "0" }}>
+    <Box w={CONTENT_W} maxW={CONTENT_MAX_W} mx="auto">
       <HStack justify="space-between" pb="15px">
         <Text fontSize="32px" textAlign="left">
           Journal

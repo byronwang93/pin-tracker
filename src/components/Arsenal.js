@@ -21,6 +21,7 @@ import { BowlsContext } from "../context/BowlsContext";
 import { deleteArsenalBall, deleteBallImage } from "../firebase/helpers";
 import { closestSpec, coreLabel, coverstockLabel, ROLE_COLORS, roleLabel } from "../utils/profile";
 import BallModal from "./BallModal";
+import { CONTENT_MAX_W, CONTENT_W } from "./StatBox";
 
 const Arsenal = () => {
   const { value } = useContext(SignedInContext);
@@ -70,7 +71,7 @@ const Arsenal = () => {
   };
 
   return (
-    <Box w="100%" maxW="700px" px={{ base: "20px", md: "0" }}>
+    <Box w={CONTENT_W} maxW={CONTENT_MAX_W} mx="auto">
       <HStack justify="space-between" pb="15px">
         <Text fontSize="32px" textAlign="left">
           Arsenal
@@ -91,7 +92,7 @@ const Arsenal = () => {
       {arsenal.length === 0 ? (
         <Text color="#A0A0A0">No balls in your bag yet.</Text>
       ) : (
-        <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing="14px">
+        <SimpleGrid minChildWidth="220px" spacing="14px">
           {arsenal.map((ball) => {
             const colors = ROLE_COLORS[ball.role];
             const spec = closestSpec(ball.specsByWeight, ball.weight);
@@ -104,10 +105,9 @@ const Arsenal = () => {
                 spacing="10px"
                 align="stretch"
               >
-                <HStack justify="space-between" align="flex-start">
-                  <HStack align="flex-start" spacing="10px">
+                <HStack align="center" spacing="12px">
                     {ball.imageUrl && (
-                      <Img src={ball.imageUrl} alt="" boxSize="44px" objectFit="contain" borderRadius="4px" />
+                      <Img src={ball.imageUrl} alt="" boxSize="52px" flexShrink={0} objectFit="contain" borderRadius="4px" />
                     )}
                     <VStack align="flex-start" spacing="4px">
                       <Text fontSize="17px" fontWeight="bold">
@@ -129,23 +129,6 @@ const Arsenal = () => {
                         </Text>
                       )}
                     </VStack>
-                  </HStack>
-                  <HStack spacing="8px">
-                    <Img
-                      onClick={() => openEdit(ball)}
-                      _hover={{ cursor: "pointer", boxSize: 6 }}
-                      boxSize={5}
-                      src={`${process.env.PUBLIC_URL}/edit-icon.svg`}
-                      alt="edit ball"
-                    />
-                    <Img
-                      onClick={() => setDeleteAlertId(ball.id)}
-                      _hover={{ cursor: "pointer", boxSize: 6 }}
-                      boxSize={5}
-                      src={`${process.env.PUBLIC_URL}/trash-icon.svg`}
-                      alt="delete ball"
-                    />
-                  </HStack>
                 </HStack>
 
                 <VStack align="flex-start" spacing="2px" fontSize="13px">
@@ -161,16 +144,29 @@ const Arsenal = () => {
                   )}
                 </VStack>
 
-                {ball.notes && (
-                  <Text
-                    fontSize="13px"
-                    color="#A0A0A0"
-                    borderTop="1px solid rgba(255,255,255,0.08)"
-                    pt="8px"
-                  >
+                {/* Notes and the Edit / Delete actions share the card's footer,
+                    so the icons never crowd the ball name. */}
+                <HStack
+                  mt="auto"
+                  justify="space-between"
+                  align="flex-start"
+                  spacing="10px"
+                  borderTop="1px solid rgba(255,255,255,0.08)"
+                  pt="8px"
+                  fontSize="13px"
+                >
+                  <Text color="#A0A0A0" minW="0">
                     {ball.notes}
                   </Text>
-                )}
+                  <HStack spacing="14px" flexShrink={0}>
+                    <Text as="button" type="button" color="white" _hover={{ color: "#FDD468" }} onClick={() => openEdit(ball)}>
+                      Edit
+                    </Text>
+                    <Text as="button" type="button" color="#D97A6C" _hover={{ color: "#F09A8C" }} onClick={() => setDeleteAlertId(ball.id)}>
+                      Delete
+                    </Text>
+                  </HStack>
+                </HStack>
 
                 <AlertDialog
                   isOpen={deleteAlertId === ball.id}

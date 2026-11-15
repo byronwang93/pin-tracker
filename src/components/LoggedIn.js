@@ -281,11 +281,13 @@ const LoggedIn = () => {
           pr={{ base: "10px", md: "40px" }}
           w="30%"
           justify="flex-end"
+          alignItems={{ base: "stretch", sm: "flex-end", md: "center" }}
           flexDirection={{ base: "column", md: "row" }}
           gap="10px"
         >
           <Button
             size={{ base: "sm", md: "md" }}
+            w={{ base: "auto", sm: "120px" }}
             bgColor="#84876F"
             color="white"
             _hover={{ bgColor: "#606351" }}

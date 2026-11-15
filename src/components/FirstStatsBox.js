@@ -1,8 +1,8 @@
-import { Box, Text } from "@chakra-ui/react";
 import React, { useContext, useMemo } from "react";
 import { BowlsContext } from "../context/BowlsContext";
 import { highSeries, scopeBowls } from "../utils/events";
 import { gamesBowled, highestGame } from "../utils/stats";
+import { StatBox, StatGrid, StatTile } from "./StatBox";
 
 const FirstStatsBox = ({ year }) => {
   const { bowls, events, defaultThrowStyle, hideNonDominantHand } = useContext(BowlsContext);
@@ -21,83 +21,21 @@ const FirstStatsBox = ({ year }) => {
   const showOne = !hideNonDominantHand || defaultThrowStyle === 1;
   const showTwo = !hideNonDominantHand || defaultThrowStyle === 2;
 
+  const tiles = [
+    <StatTile key="games" label="Games bowled" value={totalGames} />,
+    showOne && (
+      <StatTile key="one" label={`Highest game${showTwo ? " (1H)" : ""}`} value={highestOne} />
+    ),
+    showTwo && (
+      <StatTile key="two" label={`Highest game${showOne ? " (2H)" : ""}`} value={highestTwo} />
+    ),
+    <StatTile key="series" label="High series" value={bestSeries} />,
+  ].filter(Boolean);
+
   return (
-    <Box
-      mb="30px"
-      pl={{ base: "40px", md: "0px" }}
-      alignItems={{ base: "center", md: "flex-start" }}
-      display="flex"
-      flexDirection={{ base: "column", md: "row" }}
-      maxW="570px"
-      w={{ base: "230px", md: "70%" }}
-      pt="15px"
-      pb="15px"
-      justifyContent="center"
-      backgroundColor="#3C3D36"
-      borderRadius="10px"
-    >
-      <Box
-        alignSelf="baseline"
-        textAlign="left"
-        width="150px"
-        display="flex"
-        flexDirection="column"
-      >
-        <Text fontSize="18px" color="#A0A0A0">
-          Games Bowled
-        </Text>
-        <Text p="5px 0px 13px 0px" fontSize="30px">
-          {totalGames !== null ? totalGames : "--"}
-        </Text>
-      </Box>
-      {showOne && (
-        <Box
-          alignSelf="baseline"
-          textAlign="left"
-          maxW="150px"
-          display="flex"
-          flexDirection="column"
-        >
-          <Text fontSize="18px" color="#A0A0A0">
-            Highest Game{showTwo ? " (one-handed)" : ""}
-          </Text>
-          <Text p="5px 0px 13px 0px" fontSize="30px">
-            {highestOne !== null ? highestOne : "--"}
-          </Text>
-        </Box>
-      )}
-      {showTwo && (
-        <Box
-          alignSelf="baseline"
-          maxW="150px"
-          textAlign="left"
-          display="flex"
-          flexDirection="column"
-        >
-          <Text fontSize="18px" color="#A0A0A0">
-            Highest Game{showOne ? " (two-handed)" : ""}
-          </Text>
-          <Text p="5px 0px 1px 0px" fontSize="30px">
-            {highestTwo !== null ? highestTwo : "--"}
-          </Text>
-        </Box>
-      )}
-      <Box
-        alignSelf="baseline"
-        maxW="150px"
-        textAlign="left"
-        display="flex"
-        flexDirection="column"
-        pl={{ base: "0px", md: "20px" }}
-      >
-        <Text fontSize="18px" color="#A0A0A0">
-          High Series
-        </Text>
-        <Text p="5px 0px 1px 0px" fontSize="30px">
-          {bestSeries !== null ? bestSeries : "--"}
-        </Text>
-      </Box>
-    </Box>
+    <StatBox>
+      <StatGrid columns={tiles.length}>{tiles}</StatGrid>
+    </StatBox>
   );
 };
 
