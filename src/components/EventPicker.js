@@ -12,17 +12,17 @@ import {
 } from "@chakra-ui/react";
 import React, { useContext, useMemo, useState } from "react";
 import { BowlsContext } from "../context/BowlsContext";
-import { eventTitle, isActiveEvent, isNoTap, suggestedWeek } from "../utils/events";
+import { eventTitle, isActiveEvent, isNoTap } from "../utils/events";
 import EventModal from "./EventModal";
 
 const byStartDesc = (a, b) => ((a.startDate ?? "") < (b.startDate ?? "") ? 1 : -1);
 
-// "What is this?" — Practice, a league or a tournament, plus the league week.
+// "What is this?" — Practice, a league or a tournament.
 // Never picks by weekday or date: the caller decides the starting value.
 // `includePast` adds ended events (for fixing an old bowl); Live Game only
-// lists active ones. `value` is { eventId, week }; "" eventId = practice.
+// lists active ones. `value` is { eventId }; "" eventId = practice.
 const EventPicker = ({ value, onChange, label = "What is this?", includePast = false, allowNew = true }) => {
-  const { events, bowls } = useContext(BowlsContext);
+  const { events } = useContext(BowlsContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [newKind, setNewKind] = useState("league");
 
@@ -41,13 +41,7 @@ const EventPicker = ({ value, onChange, label = "What is this?", includePast = f
 
   const selected = events.find((event) => event.id === value.eventId);
 
-  const pick = (eventId) => {
-    const event = events.find((e) => e.id === eventId);
-    onChange({
-      eventId,
-      week: event?.kind === "league" ? suggestedWeek(bowls, event) : null,
-    });
-  };
+  const pick = (eventId) => onChange({ eventId });
 
   const openNew = (kind) => {
     setNewKind(kind);
@@ -106,58 +100,12 @@ const EventPicker = ({ value, onChange, label = "What is this?", includePast = f
         </Text>
       )}
 
-      {selected?.kind === "league" && (
-        <Box pt="10px">
-          <Text color="#A0A0A0" fontSize={{ base: "15px", md: "14px" }}>
-            League week
-          </Text>
-          <HStack spacing="10px">
-            <HStack spacing="0" border="1px solid" borderColor="#5C5D53" borderRadius="6px">
-              <Button
-                size="sm"
-                variant="ghost"
-                color="white"
-                _hover={{ bgColor: "#606351" }}
-                isDisabled={(value.week ?? 1) <= 1}
-                onClick={() => onChange({ ...value, week: (value.week ?? 1) - 1 })}
-              >
-                −
-              </Button>
-              <Text minW="56px" textAlign="center">
-                Wk {value.week ?? 1}
-              </Text>
-              <Button
-                size="sm"
-                variant="ghost"
-                color="white"
-                _hover={{ bgColor: "#606351" }}
-                onClick={() => onChange({ ...value, week: (value.week ?? 1) + 1 })}
-              >
-                +
-              </Button>
-            </HStack>
-            {value.week !== suggestedWeek(bowls, selected) && (
-              <Text fontSize="13px" color="#A0A0A0">
-                Next up is wk {suggestedWeek(bowls, selected)}
-              </Text>
-            )}
-          </HStack>
-          <Text fontSize="13px" color="#A0A0A0" pt="4px">
-            Change it for a pre-bowl or roll-off. The game keeps its real date.
-          </Text>
-        </Box>
-      )}
 
       <EventModal
         kind={newKind}
         isOpen={isOpen}
         onClose={onClose}
-        onSaved={(event) =>
-          onChange({
-            eventId: event.id,
-            week: event.kind === "league" ? suggestedWeek(bowls, event) : null,
-          })
-        }
+        onSaved={(event) => onChange({ eventId: event.id })}
       />
     </Box>
   );

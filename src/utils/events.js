@@ -2,8 +2,9 @@ import { filterByRange, formatDate } from "./stats";
 
 // Leagues and tournaments ("events") live in users/{uid}.events[]. A bowl
 // belongs to at most one event via `eventId`; no eventId means practice.
-// League bowls also carry `week`, and `leagueDate` when they were bowled on
-// a different day than league night (pre-bowl / roll-off).
+// Older league bowls may also carry `week` and `leagueDate` (the league night
+// a pre-bowl / roll-off counted for). Nothing asks for a week any more: a
+// league series is the games bowled for that league on one night.
 
 export const EVENT_FORMATS = [
   { value: "standard", label: "Standard" },
@@ -38,14 +39,18 @@ export const isNoTap = (event) => event?.format === "ninePinNoTap";
 export const eventBowls = (bowls = [], eventId) =>
   bowls.filter((bowl) => bowl.eventId === eventId);
 
-// A series is one league week, or one tournament day — and only when it was
+// The night a game counts for: its stored league night if an old pre-bowl /
+// roll-off has one, otherwise the day it was bowled.
+export const seriesDate = (bowl) => bowl.leagueDate || bowl.date;
+
+// A series is one league night, or one tournament day — and only when it was
 // exactly 3 games. Longer tournament blocks (4-game, 8-game days) and
 // practice never make a series.
 export const seriesList = (bowls = []) => {
   const groups = {};
   for (const bowl of bowls) {
     if (!bowl.eventId) continue;
-    const key = bowl.week != null ? `${bowl.eventId}|w${bowl.week}` : `${bowl.eventId}|${bowl.date}`;
+    const key = `${bowl.eventId}|${seriesDate(bowl)}`;
     (groups[key] = groups[key] || []).push(bowl);
   }
   return Object.values(groups)
@@ -54,8 +59,7 @@ export const seriesList = (bowls = []) => {
       total: games.reduce((sum, bowl) => sum + bowl.score, 0),
       games,
       eventId: games[0].eventId,
-      week: games[0].week ?? null,
-      date: games[0].leagueDate || games[0].date,
+      date: seriesDate(games[0]),
     }));
 };
 
@@ -74,17 +78,6 @@ export const eventSummary = (bowls = []) => {
   };
 };
 
-// Next league week to suggest: the last week with games if it isn't full
-// yet, otherwise the one after. So rolling off two weeks in one sitting
-// fills wk N then moves to wk N+1 on its own.
-export const suggestedWeek = (bowls = [], event) => {
-  const leagueBowls = eventBowls(bowls, event.id).filter((bowl) => bowl.week != null);
-  if (leagueBowls.length === 0) return 1;
-  const lastWeek = Math.max(...leagueBowls.map((bowl) => bowl.week));
-  const inLastWeek = leagueBowls.filter((bowl) => bowl.week === lastWeek).length;
-  return inLastWeek < (event.gamesPerNight || 3) ? lastWeek : lastWeek + 1;
-};
-
 const dateRange = (start, end) => {
   if (!start) return "";
   if (!end || end === start) return formatDate(start);
@@ -96,54 +89,22 @@ export const eventMeta = (event, bowls = []) => {
   const games = eventBowls(bowls, event.id);
   const book = games.length ? ` · book ${Math.floor(eventSummary(games).average)}` : "";
   if (event.kind === "league") {
-    const weeks = new Set(games.map((bowl) => bowl.week).filter((week) => week != null));
+    const nights = new Set(games.map(seriesDate)).size;
+    const nightCount = nights ? ` · ${nights} night${nights === 1 ? "" : "s"}` : "";
     if (event.archived) {
       const ended = event.endDate ? ` · ended ${formatDate(event.endDate)}` : "";
-      return `${weeks.size} weeks${ended}${book}`;
+      return `${nights} night${nights === 1 ? "" : "s"}${ended}${book}`;
     }
     const night = event.weekday != null ? `${WEEKDAYS[event.weekday]}s · ` : "";
-    const lastWeek = weeks.size ? ` · wk ${Math.max(...weeks)}` : "";
-    return `${night}${event.gamesPerNight || 3} games${lastWeek}${book}`;
+    return `${night}${event.gamesPerNight || 3} games${nightCount}${book}`;
   }
   const upcoming = event.startDate > today() ? " · upcoming" : "";
   const count = games.length ? ` · ${games.length} game${games.length === 1 ? "" : "s"}` : "";
   return `${dateRange(event.startDate, event.endDate)} · ${formatLabel(event.format).toLowerCase()}${count}${upcoming}`;
 };
 
-const addDays = (iso, days) => {
-  const [year, month, day] = iso.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day + days));
-  return date.toISOString().slice(0, 10);
-};
-
-const weekdayOf = (iso) => {
-  const [year, month, day] = iso.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
-};
-
-// The league night a game belongs to, when it was bowled on another day
-// (pre-bowl / roll-off) — null when bowled on league night or unknowable.
-// Projects from the nearest week we already know the league-night date of.
-export const leagueDateFor = (bowls = [], event, week, date) => {
-  if (event?.kind !== "league" || event.weekday == null || !date || week == null) return null;
-  if (weekdayOf(date) === event.weekday) return null;
-  const known = eventBowls(bowls, event.id)
-    .filter((bowl) => bowl.week != null)
-    .map((bowl) => ({ week: bowl.week, night: bowl.leagueDate || bowl.date }))
-    .filter(({ night }) => weekdayOf(night) === event.weekday)
-    .sort((a, b) => Math.abs(a.week - week) - Math.abs(b.week - week))[0];
-  if (known) return addDays(known.night, (week - known.week) * 7);
-  // No reference yet: the next league night on or after the game.
-  return addDays(date, (event.weekday - weekdayOf(date) + 7) % 7);
-};
-
 // Fields to store on a bowl for the picked event ({} = practice).
-export const eventFieldsFor = (bowls = [], event, week, date) => {
-  if (!event) return {};
-  if (event.kind !== "league") return { eventId: event.id };
-  const leagueDate = leagueDateFor(bowls, event, week, date);
-  return { eventId: event.id, week, ...(leagueDate ? { leagueDate } : {}) };
-};
+export const eventFieldsFor = (event) => (event ? { eventId: event.id } : {});
 
 // The event picked for the last bowl, so games 2 and 3 of a night start on
 // it. Only reused the same day — the first bowl of a day starts on Practice.
@@ -165,12 +126,9 @@ export const saveLastPick = (eventId) => {
 };
 
 // Starting value for an EventPicker on a new bowl.
-export const initialPick = (events = [], bowls = []) => {
+export const initialPick = (events = []) => {
   const event = events.find((e) => e.id === loadLastPick() && isActiveEvent(e));
-  return {
-    eventId: event?.id ?? "",
-    week: event?.kind === "league" ? suggestedWeek(bowls, event) : null,
-  };
+  return { eventId: event?.id ?? "" };
 };
 
 // --- Stats scope (the dropdown above Stats) ---

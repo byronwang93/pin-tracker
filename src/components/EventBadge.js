@@ -8,7 +8,7 @@ const BADGE_COLORS = {
   tournament: { color: "#F0B48A", bg: "rgba(240,180,138,0.1)" },
 };
 
-// Same badges as the By type box: Practice, League · Wk N, Tourney.
+// Same badges as the By type box: Practice, League, Tourney.
 // Hover shows the event's full name.
 export const EventBadge = ({ bowl, event, plain = false }) => {
   const kind = event ? (event.kind === "league" ? "league" : "tournament") : "practice";
@@ -17,9 +17,7 @@ export const EventBadge = ({ bowl, event, plain = false }) => {
     kind === "practice"
       ? "Practice"
       : kind === "league"
-      ? plain
-        ? "League"
-        : `League · Wk ${bowl.week ?? "?"}`
+      ? "League"
       : "Tourney";
   const title = event && !plain
     ? `${event.name}${event.kind === "league" && event.season ? ` ${event.season}` : ""}`
@@ -62,7 +60,7 @@ export const OffNightInfo = ({ bowl }) => {
   const verb = bowl.date < bowl.leagueDate ? "Pre-bowled" : "Rolled off";
   return (
     <Tooltip
-      label={`${verb} for Wk ${bowl.week} (${formatDate(bowl.leagueDate)})`}
+      label={`${verb} for league night ${formatDate(bowl.leagueDate)}`}
       isOpen={open}
       hasArrow
     >

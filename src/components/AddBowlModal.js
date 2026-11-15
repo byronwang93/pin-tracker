@@ -25,14 +25,14 @@ import EventPicker from "./EventPicker";
 
 const AddBowlModal = ({ isOpen, onClose }) => {
   const { value } = useContext(SignedInContext);
-  const { refetch, defaultThrowStyle, bowls, events } = useContext(BowlsContext);
+  const { refetch, defaultThrowStyle, events } = useContext(BowlsContext);
   const toast = useToast();
 
   const [score, setScore] = useState("");
   const [throwStyle, setThrowStyle] = useState(defaultThrowStyle);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
-  const [pick, setPick] = useState({ eventId: "", week: null });
+  const [pick, setPick] = useState({ eventId: "" });
 
   // Re-sync to the current default every time the modal opens, since
   // `defaultThrowStyle` may not have loaded from Firestore yet when this
@@ -42,7 +42,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
   }, [isOpen, defaultThrowStyle]);
 
   useEffect(() => {
-    if (isOpen) setPick(initialPick(events, bowls));
+    if (isOpen) setPick(initialPick(events));
     // Only on open — a refetch while it's open shouldn't reset the pick.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -67,7 +67,7 @@ const AddBowlModal = ({ isOpen, onClose }) => {
         bowledAt: new Date().toISOString(),
         throwStyle: throwStyle,
         description: description,
-        ...eventFieldsFor(bowls, events.find((e) => e.id === pick.eventId), pick.week, date),
+        ...eventFieldsFor(events.find((e) => e.id === pick.eventId)),
       };
 
       try {

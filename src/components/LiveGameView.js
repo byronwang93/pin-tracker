@@ -28,7 +28,7 @@ import {
   totalScore,
   undoLastRoll,
 } from "../utils/bowlingScore";
-import { eventFieldsFor, eventTitle, initialPick, isNoTap, saveLastPick } from "../utils/events";
+import { eventFieldsFor, eventTitle, initialPick, isNoTap, saveLastPick, seriesDate } from "../utils/events";
 import EventPicker from "./EventPicker";
 import PinRack from "./PinRack";
 
@@ -92,7 +92,7 @@ const LiveGameView = ({ onExit }) => {
   const [gameDate, setGameDate] = useState(today);
   const [notes, setNotes] = useState("");
   const [throwStyle, setThrowStyle] = useState(defaultThrowStyle);
-  const [pick, setPick] = useState(() => initialPick(events, bowls));
+  const [pick, setPick] = useState(() => initialPick(events));
   const [frames, setFrames] = useState([]);
   const [tappedPins, setTappedPins] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -109,7 +109,7 @@ const LiveGameView = ({ onExit }) => {
       setGameDate(draft.date);
       setNotes(draft.notes ?? "");
       setThrowStyle(draft.throwStyle ?? defaultThrowStyle);
-      setPick(draft.pick ?? { eventId: "", week: null });
+      setPick({ eventId: draft.pick?.eventId ?? "" });
       setFrames(draft.frames ?? []);
       setPhase("game");
       if (!resumeToastShownRef.current) {
@@ -143,13 +143,10 @@ const LiveGameView = ({ onExit }) => {
   const gameState = getGameState(frames);
   const scores = frameScores(frames);
   const event = events.find((e) => e.id === pick.eventId);
-  // Games already saved in this league week / tournament day, for the
-  // "game 2 · series so far" line.
+  // Games already saved for this event today (one league night or
+  // tournament day), for the "game 2 · series so far" line.
   const earlierGames = event
-    ? bowls.filter((bowl) =>
-        bowl.eventId === event.id &&
-        (event.kind === "league" ? bowl.week === pick.week : bowl.date === gameDate)
-      )
+    ? bowls.filter((bowl) => bowl.eventId === event.id && seriesDate(bowl) === gameDate)
     : [];
 
   const togglePin = (pin) => {
@@ -193,7 +190,7 @@ const LiveGameView = ({ onExit }) => {
         notes,
         score: totalScore(frames),
         frames,
-        ...eventFieldsFor(bowls, event, pick.week, gameDate),
+        ...eventFieldsFor(event),
       });
       saveLastPick(pick.eventId);
       await refetch();
@@ -345,7 +342,7 @@ const LiveGameView = ({ onExit }) => {
           {event && (
             <VStack spacing="0px">
               <Text color="#A0A0A0" fontSize="13px">
-                {event.kind === "league" ? `Wk ${pick.week} · ` : ""}Game {earlierGames.length + 1}
+                Game {earlierGames.length + 1}
                 {earlierGames.length > 0 &&
                   ` · ${earlierGames.reduce((sum, bowl) => sum + bowl.score, 0)} so far`}
               </Text>

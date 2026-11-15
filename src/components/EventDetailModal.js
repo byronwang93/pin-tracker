@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useContext, useMemo } from "react";
 import { BowlsContext } from "../context/BowlsContext";
-import { eventBowls, eventMeta, eventSummary, formatLabel } from "../utils/events";
+import { eventBowls, eventMeta, eventSummary, formatLabel, seriesDate } from "../utils/events";
 import { formatDate } from "../utils/stats";
 
 const Stat = ({ label, value }) => (
@@ -26,7 +26,7 @@ const Stat = ({ label, value }) => (
 );
 
 // Read-only page for one league season or tournament: its own numbers and
-// every game grouped by league week or tournament day.
+// every game grouped by league night or tournament day.
 const EventDetailModal = ({ event, isOpen, onClose }) => {
   const { bowls } = useContext(BowlsContext);
   const isLeague = event?.kind === "league";
@@ -37,20 +37,12 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
     const games = eventBowls(bowls, event.id);
     const byKey = {};
     for (const bowl of games) {
-      const key = isLeague ? bowl.week ?? "?" : bowl.date;
+      const key = seriesDate(bowl);
       (byKey[key] = byKey[key] || []).push(bowl);
     }
-    // Leagues list every week up to the latest; a week with no games was
-    // an absence (its blind scores are never stored as bowls).
-    if (isLeague) {
-      const weeks = Object.keys(byKey).map(Number).filter((week) => !Number.isNaN(week));
-      for (let week = 1; week < Math.max(0, ...weeks); week++) byKey[week] = byKey[week] || [];
-    }
-    const keys = Object.keys(byKey).sort((a, b) =>
-      isLeague ? Number(b) - Number(a) : a < b ? 1 : -1
-    );
+    const keys = Object.keys(byKey).sort((a, b) => (a < b ? 1 : -1));
     return { summary: eventSummary(games), groups: keys.map((key) => [key, byKey[key]]) };
-  }, [bowls, event, isLeague]);
+  }, [bowls, event]);
 
   if (!event) return null;
 
@@ -100,19 +92,10 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
                 bgColor={index % 2 === 0 ? "#2E2F29" : "transparent"}
                 fontSize="15px"
               >
-                <Box>
-                  <Text>{isLeague ? `Wk ${key}` : formatDate(key)}</Text>
-                  {isLeague && games.length > 0 && (
-                    <Text fontSize="12px" color="#A0A0A0">
-                      {formatDate(games[0].leagueDate || games[0].date)}
-                    </Text>
-                  )}
-                </Box>
-                <Text color="#A0A0A0">
-                  {games.length ? games.map((bowl) => bowl.score).join("  ") : "Absent"}
-                </Text>
+                <Text>{formatDate(key)}</Text>
+                <Text color="#A0A0A0">{games.map((bowl) => bowl.score).join("  ")}</Text>
                 <Text minW="40px" textAlign="right">
-                  {games.length ? games.reduce((sum, bowl) => sum + bowl.score, 0) : ""}
+                  {games.reduce((sum, bowl) => sum + bowl.score, 0)}
                 </Text>
               </HStack>
             ))}

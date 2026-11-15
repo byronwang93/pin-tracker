@@ -24,7 +24,7 @@ import EventPicker from "./EventPicker";
 
 const EditBowlModal = ({ bowl, isOpen, onClose }) => {
   const { value } = useContext(SignedInContext);
-  const { bowls, events } = useContext(BowlsContext);
+  const { events } = useContext(BowlsContext);
   const toast = useToast();
 
   const {
@@ -40,7 +40,7 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
   const [throwStyle, setThrowStyle] = useState(null);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(null);
-  const originalPick = { eventId: bowl.eventId ?? "", week: bowl.week ?? null };
+  const originalPick = { eventId: bowl.eventId ?? "" };
   const [pick, setPick] = useState(originalPick);
   const [saving, setSaving] = useState(false);
 
@@ -61,19 +61,14 @@ const EditBowlModal = ({ bowl, isOpen, onClose }) => {
   const saveBowl = async () => {
     // Spread the original bowl first so fields this form doesn't expose
     // (Live Game's `frames`/`notes`) survive an edit instead of being wiped
-    // by a full-replace write. Event fields are only rebuilt when the event,
-    // week or date changed, so an untouched bowl keeps them exactly.
-    const eventChanged =
-      pick.eventId !== originalPick.eventId || pick.week !== originalPick.week || date !== oldDate;
+    // by a full-replace write. Event fields are only rebuilt when the event
+    // or date changed, so an untouched bowl keeps them exactly (an old
+    // bowl's week / league night drops once it's moved).
+    const eventChanged = pick.eventId !== originalPick.eventId || date !== oldDate;
     const { eventId, week, leagueDate, round, ...rest } = bowl;
     const eventFields = eventChanged
       ? {
-          ...eventFieldsFor(
-            bowls.filter((b) => b.id !== id),
-            events.find((e) => e.id === pick.eventId),
-            pick.week,
-            date
-          ),
+          ...eventFieldsFor(events.find((e) => e.id === pick.eventId)),
           ...(round && pick.eventId === eventId ? { round } : {}),
         }
       : { eventId, week, leagueDate, round };
